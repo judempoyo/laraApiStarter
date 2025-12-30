@@ -24,7 +24,7 @@ class RegisterUserAction
             $user->sendEmailVerificationNotification();
         }
 
-        $token = $user->createToken('auth_token')->accessToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
 
         return [

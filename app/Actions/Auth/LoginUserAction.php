@@ -25,7 +25,7 @@ class LoginUserAction
         $this->logActivity('auth.login', "User logged in.", $user->id);
 
 
-        $token = $user->createToken('auth_token')->accessToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
             'user' => $user,
