@@ -18,6 +18,7 @@ class RegisterUserAction
             'name' => $dto->name,
             'email' => $dto->email,
             'password' => $hashed,
+            'password_updated_at' => now(),
         ]);
 
         $this->logActivity('auth.register', "User {$user->email} registered.", $user->id);
