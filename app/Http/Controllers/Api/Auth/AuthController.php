@@ -48,12 +48,12 @@ class AuthController extends Controller
     /**
      * Logout user (revoke the token).
      */
-    public function logout(Request $request): JsonResponse
-    {
-        $request->user()->token()->revoke();
+public function logout(Request $request): JsonResponse
+{
+    $request->user()->currentAccessToken()->delete();
 
-        return ApiResponse::success(null, 'Logged out successfully.');
-    }
+    return ApiResponse::success(null, 'Logged out successfully.');
+}
 
     /**
      * Get the authenticated user.
