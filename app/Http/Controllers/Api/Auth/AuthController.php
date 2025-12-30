@@ -30,6 +30,8 @@ class AuthController extends Controller
         return ApiResponse::success([
             'user' => UserResource::make($result['user']),
             'token' => $result['token'],
+            'token_type' => $result['token_type'],
+            'expires_at' => $result['expires_at'],
         ], 'User registered successfully. Please verify your email.', 201);
     }
 
@@ -43,6 +45,8 @@ class AuthController extends Controller
         return ApiResponse::success([
             'user' => UserResource::make($result['user']),
             'token' => $result['token'],
+            'token_type' => $result['token_type'],
+            'expires_at' => $result['expires_at'],
         ], 'Login successful.');
     }
 
@@ -100,14 +104,22 @@ public function logout(Request $request): JsonResponse
     public function refresh(Request $request)
     {
         $user = $request->user();
+
+        // Revoke the current token
         $user->currentAccessToken()->delete();
 
-        $newToken = $user->createToken('auth_token', ['api'])->plainTextToken;
+        // Create a new token
+        $tokenInstance = $user->createToken('auth_token');
+        $newToken = $tokenInstance->plainTextToken;
+
+        $expiration = config('sanctum.expiration');
+        $expiresAt = $expiration ? now()->addMinutes($expiration)->toIso8601String() : null;
 
         return ApiResponse::success([
             'user' => UserResource::make($user),
             'token' => $newToken,
             'token_type' => 'Bearer',
+            'expires_at' => $expiresAt,
         ], 'Successfully refreshed token.');
     }
 }
