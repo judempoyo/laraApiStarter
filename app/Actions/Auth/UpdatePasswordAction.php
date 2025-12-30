@@ -22,6 +22,7 @@ class UpdatePasswordAction
 
         $user->update([
             'password' => Hash::make($dto->newPassword),
+            'password_updated_at' => now(),
         ]);
 
         $this->logActivity('auth.password.updated', "User password updated.", $user->id);
