@@ -12,20 +12,20 @@ class RegisterUserAction
 
     public function execute(RegisterDTO $dto): array
     {
+        $hashed = Hash::make($dto->password);
+
         $user = User::create([
             'name' => $dto->name,
             'email' => $dto->email,
-            'password' => Hash::make($dto->password),
+            'password' => $hashed,
         ]);
 
         $this->logActivity('auth.register', "User {$user->email} registered.", $user->id);
 
-         if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail) {
-            $user->sendEmailVerificationNotification();
-        }
+        dispatch(fn () => $user->sendEmailVerificationNotification())
+            ->afterResponse();
 
         $token = $user->createToken('auth_token')->plainTextToken;
-
 
         return [
             'user' => $user,

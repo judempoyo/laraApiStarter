@@ -22,8 +22,10 @@ class AuthController extends Controller
      */
     public function register(RegisterRequest $request, RegisterUserAction $action): JsonResponse
     {
-        $dto = RegisterDTO::fromRequest($request->validated());
-        $result = $action->execute($dto);
+         $result = $action->execute(
+        RegisterDTO::fromRequest($request->validated())
+    );
+
 
         return ApiResponse::success([
             'user' => UserResource::make($result['user']),
@@ -36,8 +38,7 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request, LoginUserAction $action): JsonResponse
     {
-        $dto = LoginDTO::fromRequest($request->validated());
-        $result = $action->execute($dto);
+        $result = $action->execute(LoginDTO::fromRequest($request->validated()));
 
         return ApiResponse::success([
             'user' => UserResource::make($result['user']),
