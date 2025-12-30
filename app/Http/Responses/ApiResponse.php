@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses;
 
+use App\Enums\ErrorCode;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\AbstractPaginator;
 
@@ -13,6 +14,7 @@ class ApiResponse
     public static function success($data = null, ?string $message = null, int $code = 200, array $meta = []): JsonResponse
     {
         $response = [
+            'code' => $code,
             'success' => true,
             'data' => $data,
             'error' => null,
@@ -32,18 +34,19 @@ class ApiResponse
     /**
      * Send an error response.
      */
-    public static function error(string $error_message = 'Error message', string $message = 'Message', int $code = 400): JsonResponse
-    {
-        return response()->json([
-            'success' => false,
-            'error' => [
-                'code' => $code,
-                'message' => $error_message,
-            ],
-            'message' => $message,
-            'data' => null,
-        ], $code);
-    }
+public static function error(ErrorCode|string $error_code, ?string $error_message = null, int $code = 400, ?string $message = null): JsonResponse
+{
+    return response()->json([
+        'code' => $code,
+        'success' => false,
+        'error' => [
+            'code' => $error_code instanceof ErrorCode ? $error_code->value : $error_code,
+            'message' => $error_message ?? $error_code,
+        ],
+        'message' => $message,
+        'data' => null,
+    ], $code);
+}
 
     /**
      * Send a paginated response.
