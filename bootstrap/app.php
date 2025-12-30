@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ErrorCode;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
@@ -22,7 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
          $exceptions->render(function (AuthenticationException $e, $request) {
         if ($request->expectsJson()) {
-            return ApiResponse::error('Unauthenticated.', 401);
+            return ApiResponse::error(ErrorCode::UNAUTHENTICATED,'Unauthenticated.', 401,'You are not authentificated');
         }
     });
     })->create();

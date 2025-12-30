@@ -6,6 +6,7 @@ use App\Actions\Auth\LoginUserAction;
 use App\Actions\Auth\RegisterUserAction;
 use App\DTOs\Auth\LoginDTO;
 use App\DTOs\Auth\RegisterDTO;
+use App\Enums\ErrorCode;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
@@ -70,7 +71,7 @@ class AuthController extends Controller
         $user = \App\Models\User::findOrFail($id);
 
         if (! hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
-            return ApiResponse::error('Invalid verification link.', 403);
+            return ApiResponse::error(ErrorCode::INVALID_VALIDATION_LINK,'Invalid verification link.', 403,'You send an invalid verification link');
         }
 
         if ($user->hasVerifiedEmail()) {
@@ -87,7 +88,7 @@ class AuthController extends Controller
         $user = $request->user();
 
         if ($user->hasVerifiedEmail()) {
-            return ApiResponse::error('Email already verified.', null, 400);
+            return ApiResponse::error(ErrorCode::EMAIL_ALREADY_VERIFIED,'Email already verified.', 400,'Your email already verified');
         }
 
         $user->sendEmailVerificationNotification();
