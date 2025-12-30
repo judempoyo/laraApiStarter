@@ -28,6 +28,9 @@ return [
 
     'env' => env('APP_ENV', 'production'),
 
+     /* Api version */
+    'api_version' => env('API_VERSION','V1'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode
@@ -122,5 +125,8 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+
+   
+
 
 ];
