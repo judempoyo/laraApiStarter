@@ -1,59 +1,123 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚀 LaraApiStarter - Professional Laravel 12 API Architecture
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+[![Laravel 12+](https://img.shields.io/badge/Laravel-12.x-red.svg)](https://laravel.com)
+[![PHP 8.2+](https://img.shields.io/badge/PHP-8.2+-blue.svg)](https://php.net)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## About Laravel
+**LaraApiStarter** is a robust, production-ready starting point for building scalable and secure REST APIs with Laravel 12. It moves away from bloated controllers by implementing a clean **Action & DTO** architecture, focused on security, performance, and developer experience.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+[Français 🇫🇷](./README.fr.md) | [Documentation API](./API_DOCUMENTATION.md)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🔥 Key Features
 
-## Learning Laravel
+- **🏗️ Clean Architecture**: Uses **Actions** for business logic and **DTOs** (Data Transfer Objects) for typed data handling.
+- **🔐 Secure Authentication**: Powered by **Laravel Sanctum**. Includes:
+    - Login / Register / Logout (Single & Multi-device).
+    - **Refresh Token** logic with expiration metadata.
+    - **Queued** Email Verification & Password Reset (Ultra-fast responses).
+- **🛡️ Security First**:
+    - Custom **Security Headers** (CSP, XSS, Frame-options, etc.).
+    - Robust **Rate Limiting** (configured for Auth and General API).
+    - Hardened Password validation.
+- **📑 Activity Logging**: Automated **Audit Logs** to track all security-sensitive actions (profile updates, password changes, logins).
+- **🚀 Performance Optimized**:
+    - Asynchronous notifications (Queued).
+    - Database indices for audit logs and common queries.
+    - Automated Sanctum token pruning.
+- **💎 Response Standardization**: Consistent JSON structure using a dedicated `ApiResponse` class and `ErrorCode` Enums.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Tech Stack
 
-## Laravel Sponsors
+- **Framework**: Laravel 12
+- **Auth**: Laravel Sanctum
+- **Architecture**: Action-DTO Pattern
+- **Logs**: Native Database Audit Service
+- **Optimization**: Laravel Boost
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## 🚀 Getting Started
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Prerequisites
+- PHP 8.2+
+- Composer
+- MySQL/PostgreSQL/SQLite
 
-## Contributing
+### Installation
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/lara-api-starter.git
+   cd lara-api-starter
+   ```
 
-## Code of Conduct
+2. **Install dependencies**
+   ```bash
+   composer install
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3. **Environment Setup**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-## Security Vulnerabilities
+4. **Run Migrations**
+   ```bash
+   php artisan migrate
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+5. **Start the server**
+   ```bash
+   php artisan serve
+   ```
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 📁 Project Structure
+
+```text
+app/
+├── Actions/        # Business logic (Atomic actions)
+├── DTOs/           # Typed data transfer objects
+├── Enums/          # ErrorCodes and other Constants
+├── Http/
+│   ├── Requests/   # Form Requests (Validation)
+│   ├── Responses/  # Standardized ApiResponse handler
+│   └── Resources/  # Eloquent Resources (JSON serialization)
+├── Traits/         # LogsActivity and other reusable traits
+└── Notifications/  # Queued emails and alerts
+```
+
+---
+
+## 🔒 Security Best Practices
+
+This starter kit includes a `SecurityHeadersMiddleware` that automatically injects:
+- `Content-Security-Policy`
+- `X-Frame-Options: DENY`
+- `X-Content-Type-Options: nosniff`
+- `Strict-Transport-Security`
+
+Rate limiting is applied in `AppServiceProvider`:
+- **Auth**: 5 attempts / minute per IP.
+- **Global API**: 60 requests / minute.
+
+---
+
+## 🧪 Testing
+
+Run the feature tests to ensure everything is working:
+```bash
+php artisan test
+```
+
+---
+
+## 📄 License
+
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
