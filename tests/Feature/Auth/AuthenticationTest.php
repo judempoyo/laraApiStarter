@@ -26,6 +26,8 @@ class AuthenticationTest extends TestCase
                 'data' => [
                     'user' => ['id', 'name', 'email'],
                     'token',
+                    'token_type',
+                    'expires_at',
                 ],
             ]);
 
@@ -48,6 +50,8 @@ class AuthenticationTest extends TestCase
                 'success',
                 'data' => [
                     'token',
+                    'token_type',
+                    'expires_at',
                 ],
             ]);
     }

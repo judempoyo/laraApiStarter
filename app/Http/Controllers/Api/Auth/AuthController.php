@@ -4,12 +4,16 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Actions\Auth\LoginUserAction;
 use App\Actions\Auth\RegisterUserAction;
+use App\Actions\Auth\ResetPasswordAction;
+use App\Actions\Auth\SendPasswordResetLinkAction;
 use App\DTOs\Auth\LoginDTO;
 use App\DTOs\Auth\RegisterDTO;
 use App\Enums\ErrorCode;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -17,6 +21,8 @@ use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
+    use \App\Traits\LogsActivity;
+
     /**
      * Register a new user.
      */
@@ -30,6 +36,8 @@ class AuthController extends Controller
         return ApiResponse::success([
             'user' => UserResource::make($result['user']),
             'token' => $result['token'],
+            'token_type' => $result['token_type'],
+            'expires_at' => $result['expires_at'],
         ], 'User registered successfully. Please verify your email.', 201);
     }
 
@@ -43,6 +51,8 @@ class AuthController extends Controller
         return ApiResponse::success([
             'user' => UserResource::make($result['user']),
             'token' => $result['token'],
+            'token_type' => $result['token_type'],
+            'expires_at' => $result['expires_at'],
         ], 'Login successful.');
     }
 
@@ -51,10 +61,26 @@ class AuthController extends Controller
      */
 public function logout(Request $request): JsonResponse
 {
-    $request->user()->currentAccessToken()->delete();
+    $user = $request->user();
+    $user->currentAccessToken()->delete();
+
+    $this->logActivity('auth.logout', "User logged out.", $user->id);
 
     return ApiResponse::success(null, 'Logged out successfully.');
 }
+
+    /**
+     * Logout user from all devices (revoke all tokens).
+     */
+    public function logoutAll(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->tokens()->delete();
+
+        $this->logActivity('auth.logout_all', "User logged out from all devices.", $user->id);
+
+        return ApiResponse::success(null, 'Logged out from all devices successfully.');
+    }
 
     /**
      * Get the authenticated user.
@@ -100,14 +126,42 @@ public function logout(Request $request): JsonResponse
     public function refresh(Request $request)
     {
         $user = $request->user();
+
+        // Revoke the current token
         $user->currentAccessToken()->delete();
 
-        $newToken = $user->createToken('auth_token', ['api'])->plainTextToken;
+        // Create a new token
+        $tokenInstance = $user->createToken('auth_token');
+        $newToken = $tokenInstance->plainTextToken;
+
+        $expiration = config('sanctum.expiration');
+        $expiresAt = $expiration ? now()->addMinutes($expiration)->toIso8601String() : null;
 
         return ApiResponse::success([
             'user' => UserResource::make($user),
             'token' => $newToken,
             'token_type' => 'Bearer',
+            'expires_at' => $expiresAt,
         ], 'Successfully refreshed token.');
+    }
+
+    /**
+     * Send password reset link.
+     */
+    public function forgotPassword(ForgotPasswordRequest $request, SendPasswordResetLinkAction $action): JsonResponse
+    {
+        $status = $action->execute($request->validated());
+
+        return ApiResponse::success(null, __($status));
+    }
+
+    /**
+     * Reset password.
+     */
+    public function resetPassword(ResetPasswordRequest $request, ResetPasswordAction $action): JsonResponse
+    {
+        $status = $action->execute($request->validated());
+
+        return ApiResponse::success(null, __($status));
     }
 }

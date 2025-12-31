@@ -19,8 +19,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-         if (app()->environment('local')) {
-        \DB::enableQueryLog();
+        if (app()->environment('local')) {
+            \DB::enableQueryLog();
+        }
+
+        $this->configureRateLimiting();
     }
+
+    /**
+     * Configure the rate limiters for the application.
+     */
+    protected function configureRateLimiting(): void
+    {
+        \Illuminate\Support\Facades\RateLimiter::for('api', function (\Illuminate\Http\Request $request) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
+
+        \Illuminate\Support\Facades\RateLimiter::for('auth', function (\Illuminate\Http\Request $request) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(5)->by($request->ip());
+        });
     }
 }
