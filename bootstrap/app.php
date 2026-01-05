@@ -22,6 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ])->append([
             \App\Http\Middleware\ForceJsonResponse::class,
             \App\Http\Middleware\SecurityHeadersMiddleware::class,
+        ])->encryptCookies(except: [
+            'scramble_access_key',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
