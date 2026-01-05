@@ -23,6 +23,8 @@ class RegisterUserAction
 
         $this->logActivity('auth.register', "User {$user->email} registered.", $user->id);
 
+        $user->load(['roles', 'permissions']);
+
         $user->sendEmailVerificationNotification();
 
         $tokenInstance = $user->createToken('auth_token');
