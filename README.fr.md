@@ -18,6 +18,7 @@
     - Logique de **Refresh Token** avec métadonnées d'expiration.
     - Vérification d'email et réinitialisation de mot de passe **asynchrones** (Files d'attente/Queues) pour des réponses ultra-rapides.
 - **🛡️ Sécurité Maximale** :
+    - **RBAC (Contrôle d'accès basé sur les rôles)** : Propulsé par `spatie/laravel-permission` avec le guard `api`.
     - **Headers de Sécurité** personnalisés (CSP, XSS, Frame-options, etc.).
     - **Rate Limiting** robuste (configuré pour l'Auth et l'API générale).
     - Validation des mots de passe renforcée.
@@ -91,6 +92,26 @@ app/
 │   └── Resources/  # Ressources Eloquent (Sérialisation JSON)
 ├── Traits/         # LogsActivity et autres traits réutilisables
 └── Notifications/  # Emails et alertes asynchrones
+```
+
+---
+
+## 🔑 Rôles & Permissions (RBAC)
+
+Ce projet utilise `spatie/laravel-permission` spécifiquement configuré pour le guard `api`.
+
+### Utilisation dans les Routes
+```php
+Route::middleware(['auth:sanctum', 'role:Partner'])->group(function () {
+    Route::post('/rooms/disable', ...)->middleware('permission:rooms.disable');
+});
+```
+
+### Optimisation des Performances
+Les rôles et permissions sont **pré-chargés** dans le `AuthController` et les actions pour éviter les requêtes N+1.
+Pour vérifier les permissions dans le code :
+```php
+if ($user->hasPermissionTo('rooms.disable')) { ... }
 ```
 
 ---

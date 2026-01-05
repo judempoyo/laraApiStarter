@@ -21,7 +21,13 @@ All routes are prefixed by `/api/v1`.
     "code": 201,
     "success": true,
     "data": {
-        "user": { "id": 1, "name": "...", "email": "..." },
+        "user": { 
+            "id": 1, 
+            "name": "...", 
+            "email": "...",
+            "roles": ["User"],
+            "permissions": ["profile.update"]
+        },
         "token": "...",
         "token_type": "Bearer",
         "expires_at": "..."

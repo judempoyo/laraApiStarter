@@ -18,6 +18,7 @@
     - **Refresh Token** logic with expiration metadata.
     - **Queued** Email Verification & Password Reset (Ultra-fast responses).
 - **🛡️ Security First**:
+    - **RBAC (Role-Based Access Control)**: Powered by `spatie/laravel-permission` with `api` guard.
     - Custom **Security Headers** (CSP, XSS, Frame-options, etc.).
     - Robust **Rate Limiting** (configured for Auth and General API).
     - Hardened Password validation.
@@ -106,6 +107,26 @@ This starter kit includes a `SecurityHeadersMiddleware` that automatically injec
 Rate limiting is applied in `AppServiceProvider`:
 - **Auth**: 5 attempts / minute per IP.
 - **Global API**: 60 requests / minute.
+
+---
+
+## 🔑 Roles & Permissions (RBAC)
+
+This project uses `spatie/laravel-permission` specifically configured for the `api` guard.
+
+### Usage in Routes
+```php
+Route::middleware(['auth:sanctum', 'role:Partner'])->group(function () {
+    Route::post('/rooms/disable', ...)->middleware('permission:rooms.disable');
+});
+```
+
+### Performance Optimization
+Roles and permissions are **pre-loaded** in the `AuthController` and actions to prevent N+1 queries.
+To check permissions in code:
+```php
+if ($user->hasPermissionTo('rooms.disable')) { ... }
+```
 
 ---
 
