@@ -24,7 +24,6 @@ class RolesAndPermissionsSeeder extends Seeder
             'users.create',
             'users.edit',
             'users.delete',
-            'rooms.disable',
             'profile.update',
         ];
 
@@ -34,9 +33,6 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Create roles and assign created permissions
 
-        // Partner Role
-        $partnerRole = Role::findOrCreate('Partner', 'api');
-        $partnerRole->givePermissionTo(Permission::whereIn('name', ['rooms.disable', 'profile.update'])->where('guard_name', 'api')->get());
 
         // Admin Role
         $adminRole = Role::findOrCreate('Admin', 'api');
@@ -56,14 +52,5 @@ class RolesAndPermissionsSeeder extends Seeder
         ]);
         $admin->assignRole($adminRole);
 
-        // Create initial Partner User
-        $partner = User::create([
-            'name' => 'Partner User',
-            'email' => 'partner@test.com',
-            'password' => bcrypt('password'),
-            'password_updated_at' => now(),
-            'email_verified_at' => now(),
-        ]);
-        $partner->assignRole($partnerRole);
     }
 }

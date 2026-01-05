@@ -28,28 +28,6 @@ class PermissionTest extends TestCase
             ->assertJson(['message' => 'Admin stats access granted.']);
     }
 
-    public function test_partner_can_disable_rooms()
-    {
-        $partner = User::where('email', 'partner@test.com')->first();
-
-        $response = $this->actingAs($partner, 'sanctum')
-            ->postJson('/api/v1/auth/partnership/rooms/disable');
-
-        $response->assertStatus(200)
-            ->assertJson(['message' => 'Room disabled by partner.']);
-    }
-
-    public function test_normal_user_cannot_access_partner_routes()
-    {
-        $user = User::factory()->create();
-        // Give generic permission but not the Partner role
-        $user->givePermissionTo('profile.update');
-
-        $response = $this->actingAs($user, 'sanctum')
-            ->postJson('/api/v1/auth/partnership/rooms/disable');
-
-        $response->assertStatus(403);
-    }
 
     public function test_login_response_contains_roles_and_permissions()
     {

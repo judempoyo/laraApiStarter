@@ -102,8 +102,8 @@ Ce projet utilise `spatie/laravel-permission` spécifiquement configuré pour le
 
 ### Utilisation dans les Routes
 ```php
-Route::middleware(['auth:sanctum', 'role:Partner'])->group(function () {
-    Route::post('/rooms/disable', ...)->middleware('permission:rooms.disable');
+Route::middleware(['auth:sanctum', 'role:Admin'])->group(function () {
+    Route::get('/admin/stats', ...);
 });
 ```
 
@@ -111,7 +111,7 @@ Route::middleware(['auth:sanctum', 'role:Partner'])->group(function () {
 Les rôles et permissions sont **pré-chargés** dans le `AuthController` et les actions pour éviter les requêtes N+1.
 Pour vérifier les permissions dans le code :
 ```php
-if ($user->hasPermissionTo('rooms.disable')) { ... }
+if ($user->hasPermissionTo('users.view')) { ... }
 ```
 
 ---
