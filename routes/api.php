@@ -25,5 +25,22 @@ Route::prefix('v1')->group(function () {
 
         Route::get('email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
             ->name('verification.verify');
+
+        // RBAC Examples
+        Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
+            // Partners only
+            Route::middleware(['role:Partner'])->prefix('partnership')->group(function () {
+                Route::post('rooms/disable', function () {
+                    return response()->json(['message' => 'Room disabled by partner.']);
+                })->middleware('permission:rooms.disable');
+            });
+
+            // Admins only
+            Route::middleware(['role:Admin'])->prefix('admin')->group(function () {
+                Route::get('stats', function () {
+                    return response()->json(['message' => 'Admin stats access granted.']);
+                });
+            });
+        });
     });
 });
