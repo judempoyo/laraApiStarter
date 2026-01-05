@@ -31,6 +31,9 @@ return [
      /* Api version */
     'api_version' => env('API_VERSION','V1'),
 
+    /* Scramble documentation access key */
+    'scramble_access_key' => env('SCRAMBLE_ACCESS_KEY', 'lara-api-starter-secret'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode
