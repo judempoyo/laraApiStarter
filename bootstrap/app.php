@@ -16,6 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'verified.email' => \App\Http\Middleware\EnsureEmailIsVerifiedJson::class,
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ])->append([
             \App\Http\Middleware\ForceJsonResponse::class,
             \App\Http\Middleware\SecurityHeadersMiddleware::class,
