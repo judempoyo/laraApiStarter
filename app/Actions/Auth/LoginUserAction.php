@@ -24,6 +24,8 @@ class LoginUserAction
 
         $this->logActivity('auth.login', "User logged in.", $user->id);
 
+        $user->load(['roles', 'permissions']);
+
         $tokenInstance = $user->createToken('auth_token');
         $token = $tokenInstance->plainTextToken;
 

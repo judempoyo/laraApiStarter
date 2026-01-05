@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Dedoc\Scramble\Scramble;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +27,26 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $this->configureRateLimiting();
+
+        $this->configureScramble();
+    }
+
+    /**
+     * Configure Scramble documentation access.
+     */
+    protected function configureScramble(): void
+    {
+        Gate::define('viewApiDocs', function ($user = null) {
+            // Allow in local environment by default
+            if (app()->environment('local')) {
+                return true;
+            }
+
+            // Check for a specific cookie/secret to allow access in other environments
+            $accessKey = config('app.scramble_access_key', 'lara-api-starter-secret');
+            
+            return request()->cookie('scramble_access_key') === $accessKey;
+        });
     }
 
     /**

@@ -87,7 +87,7 @@ public function logout(Request $request): JsonResponse
      */
     public function user(Request $request): JsonResponse
     {
-        return ApiResponse::success(UserResource::make($request->user()));
+        return ApiResponse::success(UserResource::make($request->user()->load(['roles', 'permissions'])));
     }
 
     /**
@@ -138,7 +138,7 @@ public function logout(Request $request): JsonResponse
         $expiresAt = $expiration ? now()->addMinutes($expiration)->toIso8601String() : null;
 
         return ApiResponse::success([
-            'user' => UserResource::make($user),
+            'user' => UserResource::make($user->load(['roles', 'permissions'])),
             'token' => $newToken,
             'token_type' => 'Bearer',
             'expires_at' => $expiresAt,

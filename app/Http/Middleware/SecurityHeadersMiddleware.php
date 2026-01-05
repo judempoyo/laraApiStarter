@@ -27,7 +27,19 @@ class SecurityHeadersMiddleware
     $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
     $response->headers->set('X-Download-Options', 'noopen');
 
-    $response->headers->set('Content-Security-Policy', "default-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'self';");
+        $csp = [
+            "default-src 'self'",
+            "script-src 'self' https://unpkg.com 'unsafe-inline'",
+            "style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com",
+            "font-src 'self' https://fonts.gstatic.com",
+            "img-src 'self' data: https://unpkg.com",
+            "connect-src 'self'",
+            "frame-ancestors 'none'",
+            "object-src 'none'",
+            "base-uri 'self'",
+        ];
+
+        $response->headers->set('Content-Security-Policy', implode('; ', $csp) . ';');
 
     return $response;
 }
