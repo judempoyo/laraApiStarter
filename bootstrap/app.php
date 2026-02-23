@@ -29,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (AuthenticationException $e, $request) {
             if ($request->expectsJson()) {
-                return ApiResponse::error(ErrorCode::UNAUTHENTICATED, 'Unauthenticated.', 401, 'You are not authentificated');
+                return ApiResponse::error(ErrorCode::UNAUTHENTICATED, 'Unauthenticated.', 401, 'You are not authenticated.');
             }
         });
 
@@ -43,4 +43,41 @@ return Application::configure(basePath: dirname(__DIR__))
                 );
             }
         });
+
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, $request) {
+            if ($request->expectsJson()) {
+                return ApiResponse::error(ErrorCode::NOT_FOUND, 'Resource not found.', 404, 'The requested resource could not be found.');
+            }
+        });
+
+        $exceptions->render(function (\Illuminate\Validation\ValidationException $e, $request) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'code' => 422,
+                    'success' => false,
+                    'error' => [
+                        'code' => ErrorCode::VALIDATION_FAILED->value,
+                        'message' => 'Validation failed.',
+                        'details' => $e->errors(),
+                    ],
+                    'message' => 'The given data was invalid.',
+                    'data' => null,
+                ], 422);
+            }
+        });
+
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e, $request) {
+            if ($request->expectsJson()) {
+                return ApiResponse::error(ErrorCode::FORBIDDEN, 'Access denied.', 403, $e->getMessage() ?: 'You do not have permission to access this resource.');
+            }
+        });
+
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException $e, $request) {
+            if ($request->expectsJson()) {
+                return ApiResponse::error(ErrorCode::METHOD_NOT_ALLOWED, 'Method not allowed.', 405, $e->getMessage() ?: 'The HTTP method is not allowed for this route.');
+            }
+        });
+
+        // Optional generic Throwable catch-all if required (excluding explicitly handled)
+        // Leaving it to default for now to leverage Laravel's exception view during dev.
     })->create();
