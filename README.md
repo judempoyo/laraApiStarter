@@ -1,4 +1,4 @@
-# 🚀 LaraApiStarter - Professional Laravel 12 API Architecture
+# LaraApiStarter - Professional Laravel 12 API Architecture
 
 [![Laravel 12+](https://img.shields.io/badge/Laravel-12.x-red.svg)](https://laravel.com)
 [![PHP 8.2+](https://img.shields.io/badge/PHP-8.2+-blue.svg)](https://php.net)
@@ -10,38 +10,39 @@
 
 ---
 
-## 🔥 Key Features
+## Key Features
 
-- **🏗️ Clean Architecture**: Uses **Actions** for business logic and **DTOs** (Data Transfer Objects) for typed data handling.
-- **🔐 Secure Authentication**: Powered by **Laravel Sanctum**. Includes:
+- **Clean Architecture**: Uses **Actions** for business logic and **DTOs** (Data Transfer Objects) for typed data handling.
+- **Secure Authentication**: Powered by **Laravel Sanctum**. Includes:
     - Login / Register / Logout (Single & Multi-device).
     - **Refresh Token** logic with expiration metadata.
     - **Queued** Email Verification & Password Reset (Ultra-fast responses).
-- **🛡️ Security First**:
+- **Security First**:
     - **RBAC (Role-Based Access Control)**: Powered by `spatie/laravel-permission` with `api` guard.
     - Custom **Security Headers** (CSP, XSS, Frame-options, etc.).
     - Robust **Rate Limiting** (configured for Auth and General API).
     - Hardened Password validation.
-- **📑 Activity Logging**: Automated **Audit Logs** to track all security-sensitive actions (profile updates, password changes, logins).
-- **🚀 Performance Optimized**:
+- **Activity Logging**: Automated **Audit Logs** to track all security-sensitive actions (profile updates, password changes, logins).
+- **Performance Optimized**:
     - Asynchronous notifications (Queued).
     - Database indices for audit logs and common queries.
     - Automated Sanctum token pruning.
-- **💎 Response Standardization**: Consistent JSON structure using a dedicated `ApiResponse` class and `ErrorCode` Enums.
+- **Response Standardization**: Consistent JSON structure using a dedicated `ApiResponse` class and `ErrorCode` Enums.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Framework**: Laravel 12
 - **Auth**: Laravel Sanctum
 - **Architecture**: Action-DTO Pattern
 - **Logs**: Native Database Audit Service
 - **Optimization**: Laravel Boost
+- **Developer Experience (DX)**: Laravel Sail (Docker), Pint (Formatting), Larastan (Static Analysis), Scramble (API Docs)
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - PHP 8.2+
@@ -61,25 +62,24 @@
    composer install
    ```
 
-3. **Environment Setup**
+3. **Start Docker Environment (Laravel Sail)**
    ```bash
-   cp .env.example .env
-   php artisan key:generate
+   ./vendor/bin/sail up -d
    ```
 
-4. **Run Migrations**
+4. **Environment Setup**
    ```bash
-   php artisan migrate
+   ./vendor/bin/sail artisan key:generate
    ```
 
-5. **Start the server**
+5. **Run Migrations**
    ```bash
-   php artisan serve
+   ./vendor/bin/sail artisan migrate
    ```
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 app/
@@ -96,7 +96,7 @@ app/
 
 ---
 
-## 🔒 Security Best Practices
+## Security Best Practices
 
 This starter kit includes a `SecurityHeadersMiddleware` that automatically injects:
 - `Content-Security-Policy`
@@ -110,7 +110,7 @@ Rate limiting is applied in `AppServiceProvider`:
 
 ---
 
-## 🔑 Roles & Permissions (RBAC)
+## Roles & Permissions (RBAC)
 
 This project uses `spatie/laravel-permission` specifically configured for the `api` guard.
 
@@ -130,15 +130,34 @@ if ($user->hasPermissionTo('users.view')) { ... }
 
 ---
 
-## 🧪 Testing
+## Quality Assurance & DX
 
-Run the feature tests to ensure everything is working:
+This project is configured with a modern CI/CD pipeline and local DX tools:
+
+### Interactive API Documentation (Scramble)
+No annotations needed. Simply visit `/docs/api` in your browser to interact with the auto-generated Swagger UI.
+
+### Static Analysis (Larastan)
+Catch type errors before they run. Configured to Level 5.
 ```bash
-php artisan test
+composer analyze
 ```
+
+### Code Formatting (Pint)
+Keep the codebase clean and standard.
+```bash
+composer format
+```
+
+### Run Tests
+```bash
+composer test
+```
+
+> **Tip:** You can run all checks at once before committing using `composer check-all`.
 
 ---
 
-## 📄 License
+## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
