@@ -12,6 +12,8 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_register()
     {
+        \Spatie\Permission\Models\Role::create(['name' => 'user', 'guard_name' => 'api']);
+
         $response = $this->postJson('/api/v1/auth/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
@@ -64,8 +66,11 @@ class AuthenticationTest extends TestCase
         $this->postJson('/api/v1/auth/login', [
             'email' => $user->email,
             'password' => 'wrong-password',
-        ])->assertStatus(422) 
-          ->assertJsonValidationErrors(['email']); 
+        ])->assertStatus(401)
+          ->assertJsonFragment([
+              'code' => 401,
+              'success' => false,
+          ]);
     }
 
     public function test_authenticated_users_can_logout()

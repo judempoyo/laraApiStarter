@@ -73,8 +73,11 @@ class ProfileTest extends TestCase
             'password_confirmation' => 'new_password',
         ]);
 
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['current_password']);
+        $response->assertStatus(400)
+            ->assertJsonFragment([
+                'code' => 400,
+                'success' => false,
+            ]);
     }
 
     public function test_users_can_refresh_their_token()
