@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Actions\Auth;
 
 use Illuminate\Support\Facades\Password;
@@ -13,23 +12,18 @@ class SendPasswordResetLinkAction
      * Send a password reset link to the given user.
      *
      * @param  array  $credentials
-     * @return string
-     *
-     * @throws \Illuminate\Validation\ValidationException
+     * @return array
      */
-    public function execute(array $credentials): string
+    public function execute(array $credentials): array
     {
         $status = Password::sendResetLink($credentials);
 
         if ($status !== Password::RESET_LINK_SENT) {
             $this->logActivity('auth.password.forgot_failed', "Failed password reset link request for: {$credentials['email']}");
-            throw ValidationException::withMessages([
-                'email' => [__($status)],
-            ]);
+            return ['status' => \App\Enums\Auth\PasswordResetStatus::INVALID_USER];
         }
 
         $this->logActivity('auth.password.forgot', "Password reset link sent to: {$credentials['email']}");
-
-        return $status;
+        return ['status' => \App\Enums\Auth\PasswordResetStatus::LINK_SENT];
     }
 }

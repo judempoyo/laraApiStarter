@@ -5,6 +5,7 @@ namespace App\Actions\Auth;
 use App\DTOs\Auth\LoginDTO;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use App\Enums\Auth\LoginStatus;
 use Illuminate\Validation\ValidationException;
 
 class LoginUserAction
@@ -17,9 +18,7 @@ class LoginUserAction
 
         if (! $user || ! Hash::check($dto->password, $user->password)) {
             $this->logActivity('auth.login.failed', "Failed login attempt for email: {$dto->email}");
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+            return ['status' => LoginStatus::INVALID_CREDENTIALS];
         }
 
         $this->logActivity('auth.login', "User logged in.", $user->id);
@@ -33,10 +32,13 @@ class LoginUserAction
         $expiresAt = $expiration ? now()->addMinutes($expiration)->toIso8601String() : null;
 
         return [
-            'user' => $user,
-            'token' => $token,
-            'token_type' => 'Bearer',
-            'expires_at' => $expiresAt,
+            'status' => LoginStatus::SUCCESS,
+            'data' => [
+                'user' => $user,
+                'token' => $token,
+                'token_type' => 'Bearer',
+                'expires_at' => $expiresAt,
+            ]
         ];
     }
 }
