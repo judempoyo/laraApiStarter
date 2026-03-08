@@ -98,6 +98,4 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        // Optional generic Throwable catch-all if required (excluding explicitly handled)
-        // Leaving it to default for now to leverage Laravel's exception view during dev.
     })->create();
