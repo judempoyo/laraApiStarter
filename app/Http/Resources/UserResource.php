@@ -21,9 +21,11 @@ class UserResource extends JsonResource
             'password_updated_at' => $this->password_updated_at,
             'created_at'          => $this->created_at,
             'updated_at'          => $this->updated_at,
-
-
+            'status' => $this->status,
+            
         ];
+        $data['is_active'] = $this->status === \App\Enums\UserStatus::ACTIVE;
+
         return $data;
 
     }

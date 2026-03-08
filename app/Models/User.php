@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Enums\UserRole;
+use App\Enums\UserStatus;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -31,6 +32,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'password_updated_at',
+        'status'
     ];
 
     /**
@@ -54,7 +56,12 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'password_updated_at' => 'datetime',
+            'status' =>UserStatus::class
         ];
+    }
+    public function securityLogs()
+    {
+        return $this->hasMany(UserSecurityLog::class);
     }
      /**
      * Create a new personal access token for the user.
