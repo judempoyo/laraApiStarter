@@ -28,17 +28,18 @@ class AuthController extends Controller
      */
     public function register(RegisterRequest $request, RegisterUserAction $action): JsonResponse
     {
-         $result = $action->execute(
-        RegisterDTO::fromRequest($request->validated())
-    );
+        $result = $action->execute(
+            RegisterDTO::fromRequest($request->validated())
+        );
 
-
-        return ApiResponse::success([
-            'user' => UserResource::make($result['user']),
-            'token' => $result['token'],
-            'token_type' => $result['token_type'],
-            'expires_at' => $result['expires_at'],
-        ], 'User registered successfully. Please verify your email.', 201);
+        return match ($result['status']) {
+            \App\Enums\Auth\RegisterStatus::SUCCESS => ApiResponse::success([
+                'user' => UserResource::make($result['data']['user']),
+                'token' => $result['data']['token'],
+                'token_type' => $result['data']['token_type'],
+                'expires_at' => $result['data']['expires_at'],
+            ], 'User registered successfully. Please verify your email.', 201),
+        };
     }
 
     /**
@@ -48,12 +49,15 @@ class AuthController extends Controller
     {
         $result = $action->execute(LoginDTO::fromRequest($request->validated()));
 
-        return ApiResponse::success([
-            'user' => UserResource::make($result['user']),
-            'token' => $result['token'],
-            'token_type' => $result['token_type'],
-            'expires_at' => $result['expires_at'],
-        ], 'Login successful.');
+        return match ($result['status']) {
+            \App\Enums\Auth\LoginStatus::INVALID_CREDENTIALS => ApiResponse::error(ErrorCode::INVALID_CREDENTIALS, 'Invalid credentials.', 401),
+            \App\Enums\Auth\LoginStatus::SUCCESS => ApiResponse::success([
+                'user' => UserResource::make($result['data']['user']),
+                'token' => $result['data']['token'],
+                'token_type' => $result['data']['token_type'],
+                'expires_at' => $result['data']['expires_at'],
+            ], 'Login successful.'),
+        };
     }
 
     /**
@@ -150,9 +154,12 @@ public function logout(Request $request): JsonResponse
      */
     public function forgotPassword(ForgotPasswordRequest $request, SendPasswordResetLinkAction $action): JsonResponse
     {
-        $status = $action->execute($request->validated());
+        $result = $action->execute($request->validated());
 
-        return ApiResponse::success(null, __($status));
+        return match ($result['status']) {
+            \App\Enums\Auth\PasswordResetStatus::INVALID_USER => ApiResponse::error(ErrorCode::USER_NOT_FOUND, 'User not found.', 404),
+            \App\Enums\Auth\PasswordResetStatus::LINK_SENT => ApiResponse::success(null, __('passwords.sent')),
+        };
     }
 
     /**
@@ -160,8 +167,11 @@ public function logout(Request $request): JsonResponse
      */
     public function resetPassword(ResetPasswordRequest $request, ResetPasswordAction $action): JsonResponse
     {
-        $status = $action->execute($request->validated());
+        $result = $action->execute($request->validated());
 
-        return ApiResponse::success(null, __($status));
+        return match ($result['status']) {
+            \App\Enums\Auth\PasswordResetStatus::INVALID_TOKEN => ApiResponse::error(ErrorCode::INVALID_VALIDATION_LINK, 'Invalid or expired password reset token.', 400),
+            \App\Enums\Auth\PasswordResetStatus::RESET_SUCCESS => ApiResponse::success(null, __('passwords.reset')),
+        };
     }
 }

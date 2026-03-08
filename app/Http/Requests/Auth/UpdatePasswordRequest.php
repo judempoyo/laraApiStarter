@@ -3,8 +3,10 @@
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
-class UpdatePasswordRequest extends FormRequest
+class UpdatePasswordRequest extends ApiRequest
+
 {
     /**
      * Determine if the user is authorized to make this request.

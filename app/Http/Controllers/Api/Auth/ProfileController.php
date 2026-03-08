@@ -21,12 +21,18 @@ class ProfileController extends Controller
      */
     public function update(UpdateProfileRequest $request, UpdateProfileAction $action): JsonResponse
     {
-        $user = $action->execute(
+        $result = $action->execute(
             $request->user(),
             UpdateProfileDTO::fromRequest($request->validated())
         );
 
-        return ApiResponse::success(UserResource::make($user), 'Profile updated successfully.');
+        return match ($result['status']) {
+            \App\Enums\Auth\ProfileStatus::SUCCESS => ApiResponse::success(
+                UserResource::make($result['data']['user']),
+                'Profile updated successfully.'
+            ),
+            default => ApiResponse::error(\App\Enums\ErrorCode::SERVER_ERROR, 'Failed to update profile.', 500)
+        };
     }
 
     /**
@@ -34,11 +40,14 @@ class ProfileController extends Controller
      */
     public function updatePassword(UpdatePasswordRequest $request, UpdatePasswordAction $action): JsonResponse
     {
-        $action->execute(
+        $result = $action->execute(
             $request->user(),
             UpdatePasswordDTO::fromRequest($request->validated())
         );
 
-        return ApiResponse::success(null, 'Password updated successfully.');
+        return match ($result['status']) {
+            \App\Enums\Auth\ProfileStatus::INVALID_CURRENT_PASSWORD => ApiResponse::error(\App\Enums\ErrorCode::PASSWORD_MISMATCH, 'The provided password does not match your current password.', 400),
+            \App\Enums\Auth\ProfileStatus::SUCCESS => ApiResponse::success(null, 'Password updated successfully.'),
+        };
     }
 }
