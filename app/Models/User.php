@@ -63,10 +63,14 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function createToken(string $name, array $abilities = ['*'])
     {
+        $expiration = config('sanctum.expiration');
+
         $token = $this->tokens()->create([
             'name' => $name,
             'token' => hash('sha256', $plainTextToken = Str::random(150)),
             'abilities' => $abilities,
+            'expires_at' => $expiration ? now()->addMinutes($expiration) : null,
+
         ]);
 
         return new NewAccessToken($token, $token->getKey().'|'.$plainTextToken);
