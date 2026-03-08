@@ -23,7 +23,7 @@ abstract class ApiRequest extends FormRequest
                 ErrorCode::VALIDATION_FAILED,
                 'Validation failed',
                 422,
-                null,
+                $validator->errors()->first(),
                 $formattedErrors 
             )
         );

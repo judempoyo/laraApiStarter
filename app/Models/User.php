@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Enums\UserRole;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -95,5 +97,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new \App\Notifications\QueuedResetPassword($token));
+    }
+
+      public function determineAccountType(): string
+    {
+        if ($this->hasRole('admin')) {
+            return UserRole::ADMIN->value;
+        }
+
+        return UserRole::USER->value
+;
     }
 }
