@@ -1,10 +1,10 @@
 <?php
-
 namespace App\Http\Responses;
 
 use App\Enums\ErrorCode;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\AbstractPaginator;
+use Illuminate\Support\Facades\DB;
 
 class ApiResponse
 {
@@ -14,10 +14,10 @@ class ApiResponse
     public static function success($data = null, ?string $message = null, int $code = 200, array $meta = []): JsonResponse
     {
         $response = [
-            'code' => $code,
+            'code'    => $code,
             'success' => true,
-            'data' => $data,
-            'error' => null,
+            'data'    => $data,
+            'error'   => null,
         ];
 
         if ($message !== null) {
@@ -34,19 +34,20 @@ class ApiResponse
     /**
      * Send an error response.
      */
-public static function error(ErrorCode|string $error_code, ?string $error_message = null, int $code = 400, ?string $message = null): JsonResponse
-{
-    return response()->json([
-        'code' => $code,
-        'success' => false,
-        'error' => [
-            'code' => $error_code instanceof ErrorCode ? $error_code->value : $error_code,
-            'message' => $error_message ?? $error_code,
-        ],
-        'message' => $message,
-        'data' => null,
-    ], $code);
-}
+    public static function error(ErrorCode | string $error_code, ?string $error_message = null, int $code = 400, ?string $message = null, ?array $errors = null): JsonResponse
+    {
+        return response()->json([
+            'code'    => $code,
+            'success' => false,
+            'error'   => [
+                'code'    => $error_code instanceof ErrorCode ? $error_code->value : $error_code,
+                'message' => $error_message ?? $error_code,
+            ],
+            'message' => $message,
+            'errors'  => $errors,
+            'data'    => null,
+        ], $code);
+    }
 
     /**
      * Send a paginated response.
@@ -56,20 +57,20 @@ public static function error(ErrorCode|string $error_code, ?string $error_messag
         $items = $paginator->items();
 
         $meta = [
-            'api_version' => config('app.api_version'),
-            'current_page' => $paginator->currentPage(),
-            'per_page' => $paginator->perPage(),
-            'total_items' => $paginator->total(),
-            'total_pages' => $paginator->lastPage(),
-            'count' => count($items),
-            'is_empty' => count($items) === 0,
+            'api_version'    => config('app.api_version'),
+            'current_page'   => $paginator->currentPage(),
+            'per_page'       => $paginator->perPage(),
+            'total_items'    => $paginator->total(),
+            'total_pages'    => $paginator->lastPage(),
+            'count'          => count($items),
+            'is_empty'       => count($items) === 0,
             'has_more_pages' => $paginator->hasMorePages(),
         ];
 
         if (app()->environment('local')) {
             $meta['debug'] = [
                 'memory_usage' => memory_get_peak_usage(true),
-                'query_count' => \DB::getQueryLog() ? count(\DB::getQueryLog()) : 0,
+                'query_count'  => DB::getQueryLog() ? count(DB::getQueryLog()) : 0,
             ];
         }
 
