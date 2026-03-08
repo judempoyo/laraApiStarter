@@ -18,6 +18,7 @@ enum ErrorCode: string
     case ENUM_NOT_FOUND = 'ENUM_NOT_FOUND';
     case NEED_TO_BE_ADMIN = 'NEED_TO_BE_ADMIN';
     case ACCOUNT_DISABLED = 'ACCOUNT_DISABLED';
+    case RESET_PASSWORD_FAILED = 'RESET_PASSWORD_FAILED';
 
     
     // Global Errors
