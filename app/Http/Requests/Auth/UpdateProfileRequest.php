@@ -22,8 +22,15 @@ class UpdateProfileRequest extends ApiRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $this->user()?->id],
+            'name' => ['required', 'string', 'max:100'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Please provide your name.',
+            'name.max'      => 'Your name cannot exceed 100 characters.',
         ];
     }
 }

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Actions\Auth;
 
 use App\DTOs\Auth\UpdateProfileDTO;
@@ -13,16 +12,13 @@ class UpdateProfileAction
     {
         $user->update([
             'name' => $dto->name,
-            'email' => $dto->email,
         ]);
 
         $this->logActivity('auth.profile.updated', "User profile updated.", $user->id);
 
         return [
-            'status' => \App\Enums\Auth\ProfileStatus::SUCCESS,
-            'data' => [
-                'user' => $user
-            ]
+            'status' => \App\Enums\Result\Auth\UpdateProfileResult::SUCCESS,
+            'user'   => $user,
         ];
     }
 }
