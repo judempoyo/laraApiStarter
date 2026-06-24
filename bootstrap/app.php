@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role'               => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission'         => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'optional.auth' => App\Http\Middleware\OptionalSanctumAuth::class,
         ])->append([
             \App\Http\Middleware\ForceJsonResponse::class,
             \App\Http\Middleware\SecurityHeadersMiddleware::class,
@@ -63,7 +64,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return;
             }
             return ApiResponse::error(
-                'RESOURCE_NOT_FOUND',
+                ErrorCode::RESOURCE_NOT_FOUND,
                 'Resource not found.',
                 404,
                 'The requested resource does not exist'

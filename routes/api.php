@@ -36,6 +36,15 @@ Route::prefix('v1')->group(function () {
         });
     });
 
+    /**
+     * Routes within this group allow both authenticated users and guests.
+     * The 'optional.auth' middleware resolves the user if a valid token is present,
+     * but does not block the request if the user is unauthenticated.
+     */
+    Route::middleware('optional.auth')->group(function () {
+        //
+    });
+
     Route::get('enums/{enum}', [EnumController::class, 'show']);
 
 });

@@ -26,6 +26,7 @@ enum ErrorCode: string
     case SERVER_ERROR = 'SERVER_ERROR';
     case FORBIDDEN = 'FORBIDDEN';
     case METHOD_NOT_ALLOWED = 'METHOD_NOT_ALLOWED';
+    case RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND';
 }
 
 
