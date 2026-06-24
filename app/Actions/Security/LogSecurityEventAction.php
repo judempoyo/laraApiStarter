@@ -14,7 +14,7 @@ class LogSecurityEventAction
         UserSecurityLog::create([
             'user_id'    => $user?->id,
             'event'      => $event,
-            'ip_address' => request()?->ip(),
+            'ip_address' => request()->ip() ? hash('sha256', request()->ip() . config('app.key')) : null,
             'user_agent' => request()?->userAgent(),
             'device'     => request()?->header('User-Agent'),
             'meta'       => $meta,

@@ -1,9 +1,9 @@
 <?php
-
 namespace App\Traits;
 
 use App\Models\AuditLog;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Auth;
 
 trait LogsActivity
 {
@@ -12,12 +12,16 @@ trait LogsActivity
      */
     protected function logActivity(string $action, ?string $description = null, ?int $userId = null): void
     {
+        $ip           = Request::ip();
+        $anonymizedIp = $ip ? hash('sha256', $ip . config('app.key')) : null;
+
         AuditLog::create([
-            'user_id' => $userId ?? auth()->id(),
-            'action' => $action,
+            'user_id'     => $userId ?? Auth::id(),
+            'action'      => $action,
             'description' => $description,
-            'ip_address' => Request::ip(),
-            'user_agent' => Request::userAgent(),
+            'ip_address'  => $anonymizedIp,
+            'user_agent'  => Request::userAgent(),
         ]);
+
     }
 }
