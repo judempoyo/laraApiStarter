@@ -27,7 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\ForceJsonResponse::class,
             \App\Http\Middleware\SecurityHeadersMiddleware::class,
         ])->encryptCookies(except: [
-            'scramble_access_key',
+            'docs_access_key',
         ]);
     })
     ->booted(function () {

@@ -4,6 +4,8 @@ namespace App\Providers;
 
 
 use Dedoc\Scramble\Scramble;
+use Dedoc\Scramble\Support\Generator\OpenApi;
+use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -28,25 +30,34 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configureRateLimiting();
 
-        $this->configureScramble();
+        $this->configureGates();
+
+        Scramble::configure()
+        ->withDocumentTransformers(function (OpenApi $openApi) {
+           $openApi->components->securitySchemes['sanctum'] = SecurityScheme::http('bearer');
+        });
     }
 
     /**
      * Configure Scramble documentation access.
      */
-    protected function configureScramble(): void
+        protected function configureGates(): void
     {
-        Gate::define('viewApiDocs', function ($user = null) {
+        $checkAccess = function ($user = null) {
             // Allow in local environment by default
             if (app()->environment('local')) {
                 return true;
             }
 
             // Check for a specific cookie/secret to allow access in other environments
-            $accessKey = config('app.scramble_access_key', 'lara-api-starter-secret');
-            
-            return request()->cookie('scramble_access_key') === $accessKey;
-        });
+            $accessKey = config('app.docs_access_key', 'lara-api-starter-secret');
+
+            return request()->cookie('docs_access_key') === $accessKey;
+
+        };
+        Gate::define('viewApiDocs',$checkAccess);
+
+        Gate::define('viewScalar', $checkAccess);
     }
 
     /**
