@@ -30,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ])->append([
             \App\Http\Middleware\ForceJsonResponse::class,
             \App\Http\Middleware\SecurityHeadersMiddleware::class,
+            \App\Http\Middleware\RequestIdMiddleware::class,
         ])->encryptCookies(except: [
             'docs_access_key',
         ]);
