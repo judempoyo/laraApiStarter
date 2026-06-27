@@ -6,7 +6,7 @@ namespace App\Actions\Auth;
 
 use App\Actions\Security\LogSecurityEventAction;
 use App\DTOs\Auth\LoginDTO;
-use App\Enums\Result\auth\LoginResult;
+use App\Enums\Result\Auth\LoginResult;
 use App\Enums\SecurityEvent;
 use App\Enums\UserStatus;
 use App\Models\User;

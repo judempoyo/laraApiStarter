@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Enums\Result\Auth;
+
 enum PasswordResetResult: string {
     case RESET_SUCCESS = 'RESET_SUCCESS';
     case LINK_SENT    = 'LINK_SENT';
