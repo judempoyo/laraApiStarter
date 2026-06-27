@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enums\ErrorCode;
+use App\Exceptions\ApiException;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -97,6 +100,18 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException $e, $request) {
             if ($request->expectsJson()) {
                 return ApiResponse::error(ErrorCode::METHOD_NOT_ALLOWED, 'Method not allowed.', 405, $e->getMessage() ?: 'The HTTP method is not allowed for this route.');
+            }
+        });
+
+        $exceptions->render(function (ApiException $e, $request) {
+            if ($request->expectsJson()) {
+                return ApiResponse::error(
+                    $e->errorCode,
+                    $e->getMessage(),
+                    $e->getStatusCode(),
+                    $e->userMessage,
+                    $e->errors,
+                );
             }
         });
 
