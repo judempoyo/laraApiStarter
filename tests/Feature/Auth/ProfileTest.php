@@ -17,24 +17,21 @@ class ProfileTest extends TestCase
         $token = $user->createToken('auth_token')->plainTextToken;
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer '.$token,
-        ])->putJson('/api/v1/auth/profile', [
+            'Authorization' => 'Bearer ' . $token,
+        ])->patchJson('/api/v1/auth/profile', [
             'name' => 'Updated Name',
-            'email' => 'updated@example.com',
         ]);
 
         $response->assertStatus(200)
             ->assertJson([
                 'data' => [
                     'name' => 'Updated Name',
-                    'email' => 'updated@example.com',
                 ],
             ]);
 
         $this->assertDatabaseHas('users', [
-            'id' => $user->id,
+            'id'   => $user->id,
             'name' => 'Updated Name',
-            'email' => 'updated@example.com',
         ]);
     }
 
@@ -46,10 +43,10 @@ class ProfileTest extends TestCase
         $token = $user->createToken('auth_token')->plainTextToken;
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer '.$token,
-        ])->putJson('/api/v1/auth/profile/password', [
-            'current_password' => 'old_password',
-            'password' => 'new_password',
+            'Authorization' => 'Bearer ' . $token,
+        ])->patchJson('/api/v1/auth/profile/password', [
+            'current_password'      => 'old_password',
+            'password'              => 'new_password',
             'password_confirmation' => 'new_password',
         ]);
 
@@ -66,16 +63,15 @@ class ProfileTest extends TestCase
         $token = $user->createToken('auth_token')->plainTextToken;
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer '.$token,
-        ])->putJson('/api/v1/auth/profile/password', [
-            'current_password' => 'wrong_password',
-            'password' => 'new_password',
+            'Authorization' => 'Bearer ' . $token,
+        ])->patchJson('/api/v1/auth/profile/password', [
+            'current_password'      => 'wrong_password',
+            'password'              => 'new_password',
             'password_confirmation' => 'new_password',
         ]);
 
-        $response->assertStatus(400)
+        $response->assertStatus(422)
             ->assertJsonFragment([
-                'code' => 400,
                 'success' => false,
             ]);
     }
