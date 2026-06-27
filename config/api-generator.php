@@ -10,7 +10,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Define the root namespaces for each generated component.
-    | These are used by the make:* commands to resolve proper namespaces.
+    | These are used by the las:* commands to resolve proper namespaces.
     |
     */
 
