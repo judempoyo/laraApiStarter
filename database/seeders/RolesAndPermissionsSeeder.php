@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
@@ -34,11 +35,11 @@ class RolesAndPermissionsSeeder extends Seeder
 
 
         // Admin Role
-        $adminRole = Role::findOrCreate('Admin', 'api');
+        $adminRole = Role::findOrCreate(UserRole::ADMIN->value, 'api');
         $adminRole->givePermissionTo(Permission::all());
 
         // Standard User Role
-        $userRole = Role::findOrCreate('User', 'api');
+        $userRole = Role::findOrCreate(UserRole::USER->value, 'api');
         $userRole->givePermissionTo(Permission::where('name', 'profile.update')->where('guard_name', 'api')->first());
 
         // Create initial Admin User

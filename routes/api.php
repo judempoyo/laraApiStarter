@@ -54,7 +54,7 @@ Route::prefix('v1')->group(function () {
     // RBAC Examples
     Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         // Admins only
-        Route::middleware(['role:Admin'])->prefix('admin')->group(function () {
+        Route::middleware(['role:admin'])->prefix('admin')->group(function () {
             Route::get('stats', function () {
                 return response()->json(['message' => 'Admin stats access granted.']);
             });
