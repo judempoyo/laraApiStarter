@@ -1,0 +1,22 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+readonly class {{ class }}
+{
+    public function __construct(
+{{ properties }}
+    ) {}
+
+    /**
+     * Create a new DTO from validated request data.
+     */
+    public static function fromRequest(array $validated): self
+    {
+        return new self(
+{{ fromRequestMapping }}
+        );
+    }
+}
