@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\DocsAccess;
 use Dedoc\Scramble\Http\Middleware\RestrictedDocsAccess;
 
 return [
@@ -89,7 +90,9 @@ return [
      * ],
      * ```
      */
-    'servers' => null,
+    'servers' => [
+        'current' => config('app.url').'/api',
+    ],
 
     /**
      * Determines how Scramble stores the descriptions of enum cases.
@@ -127,9 +130,9 @@ return [
      */
     'flatten_deep_query_parameters' => true,
 
-    'middleware' => [
+     'middleware' => [
         'web',
-        RestrictedDocsAccess::class,
+        DocsAccess::class
     ],
 
     'extensions' => [],

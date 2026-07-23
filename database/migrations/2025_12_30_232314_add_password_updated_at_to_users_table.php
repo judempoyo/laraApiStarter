@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->timestamp('password_updated_at')->nullable()->after('password');
+            $table->string('status')->default(\App\Enums\UserStatus::ACTIVE->value)->after('password_updated_at');
         });
     }
 
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('password_updated_at');
+            $table->dropColumn('status');
         });
     }
 };

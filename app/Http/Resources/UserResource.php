@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
@@ -9,16 +11,25 @@ class UserResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'email' => $this->email,
-            'email_verified_at' => $this->email_verified_at,
+        $data = [
+            'id'                  => $this->id,
+            'name'                => $this->name,
+            'account_type'        => $this->determineAccountType(),
+            'email'               => $this->email,
+            'is_email_verified'   => $this->email_verified_at !== null,
+            //'roles' => $this->roles->pluck('name'),
+            //'permissions' => $this->getAllPermissions()->pluck('name'),
+            'has_password'        => $this->password !== null,
+            'email_verified_at'   => $this->email_verified_at,
             'password_updated_at' => $this->password_updated_at,
-            'roles' => $this->roles->pluck('name'),
-            'permissions' => $this->getAllPermissions()->pluck('name'),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'created_at'          => $this->created_at,
+            'updated_at'          => $this->updated_at,
+            'status' => $this->status,
+            
         ];
+        $data['is_active'] = $this->status === \App\Enums\UserStatus::ACTIVE;
+
+        return $data;
+
     }
 }

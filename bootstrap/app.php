@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enums\ErrorCode;
+use App\Exceptions\ApiException;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -18,15 +21,18 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'verified.email'     => \App\Http\Middleware\EnsureEmailIsVerifiedJson::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'verified.email'     => \App\Http\Middleware\EnsureEmailIsVerified::class,
             'role'               => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission'         => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'optional.auth' => App\Http\Middleware\OptionalSanctumAuth::class,
         ])->append([
             \App\Http\Middleware\ForceJsonResponse::class,
             \App\Http\Middleware\SecurityHeadersMiddleware::class,
+            \App\Http\Middleware\RequestIdMiddleware::class,
         ])->encryptCookies(except: [
-            'scramble_access_key',
+            'docs_access_key',
         ]);
     })
     ->booted(function () {
@@ -62,7 +68,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return;
             }
             return ApiResponse::error(
-                'RESOURCE_NOT_FOUND',
+                ErrorCode::RESOURCE_NOT_FOUND,
                 'Resource not found.',
                 404,
                 'The requested resource does not exist'
@@ -98,6 +104,16 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        // Optional generic Throwable catch-all if required (excluding explicitly handled)
-        // Leaving it to default for now to leverage Laravel's exception view during dev.
+        $exceptions->render(function (ApiException $e, $request) {
+            if ($request->expectsJson()) {
+                return ApiResponse::error(
+                    $e->errorCode,
+                    $e->getMessage(),
+                    $e->getStatusCode(),
+                    $e->userMessage,
+                    $e->errors,
+                );
+            }
+        });
+
     })->create();

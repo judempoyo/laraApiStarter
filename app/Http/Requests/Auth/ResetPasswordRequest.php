@@ -22,4 +22,15 @@ class ResetPasswordRequest extends ApiRequest
             // 'password' => ['required', 'string', \Illuminate\Validation\Rules\Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'token.required'    => 'The password reset token is missing.',
+            'email.required'    => 'Please provide your email address.',
+            'email.email'       => 'Please provide a valid email address format.',
+            'password.required' => 'A new password is required.',
+            'password.min'      => 'Your password must be at least 8 characters long.',
+        ];
+    }
 }

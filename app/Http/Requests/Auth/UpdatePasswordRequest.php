@@ -26,4 +26,13 @@ class UpdatePasswordRequest extends ApiRequest
             'password' => ['required', 'string', 'min:8'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'current_password.required' => 'You must provide your current password.',
+            'password.required'         => 'A new password is required.',
+            'password.min'              => 'Your new password must be at least 8 characters long.',
+        ];
+    }
 }

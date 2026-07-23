@@ -1,44 +1,91 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\Auth;
 
+use App\Actions\Security\LogSecurityEventAction;
 use App\DTOs\Auth\LoginDTO;
+use App\Enums\Result\Auth\LoginResult;
+use App\Enums\SecurityEvent;
+use App\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use App\Enums\Auth\LoginStatus;
-use Illuminate\Validation\ValidationException;
 
 class LoginUserAction
 {
-    use \App\Traits\LogsActivity;
-
     public function execute(LoginDTO $dto): array
     {
         $user = User::where('email', $dto->email)->first();
 
         if (! $user || ! Hash::check($dto->password, $user->password)) {
-            $this->logActivity('auth.login.failed', "Failed login attempt for email: {$dto->email}");
-            return ['status' => LoginStatus::INVALID_CREDENTIALS];
+            app(LogSecurityEventAction::class)->execute(
+                $user,
+                SecurityEvent::LOGIN_FAILED->value
+            );
+
+            return [
+                'status' => LoginResult::INVALID_CREDENTIALS,
+            ];
         }
 
-        $this->logActivity('auth.login', "User logged in.", $user->id);
+        if ($user->status === UserStatus::DISABLED) {
+            return [
+                'status' => LoginResult::USER_DISABLED,
+            ];
+        }
 
         $user->load(['roles', 'permissions']);
 
-        $tokenInstance = $user->createToken('auth_token');
-        $token = $tokenInstance->plainTextToken;
+        $lastLogin = $user->securityLogs()
+            ->where('event', SecurityEvent::LOGIN_SUCCESS->value)
+            ->latest()
+            ->first();
+
+        $currentIp     = request()->ip();
+        $currentDevice = request()->header('Device-Name', 'unknown');
+
+        if ($lastLogin) {
+            if ($lastLogin->ip_address !== $currentIp) {
+                app(LogSecurityEventAction::class)->execute(
+                    $user,
+                    SecurityEvent::IP_CHANGED->value,
+                    [
+                        'from' => $lastLogin->ip_address,
+                        'to'   => $currentIp,
+                    ]
+                );
+            }
+
+            if (($lastLogin->meta['device'] ?? null) !== $currentDevice) {
+                app(LogSecurityEventAction::class)->execute(
+                    $user,
+                    SecurityEvent::DEVICE_CHANGED->value,
+                    [
+                        'from' => $lastLogin->meta['device'] ?? null,
+                        'to'   => $currentDevice,
+                    ]
+                );
+            }
+        }
+
+        $tokenInstance = $user->createToken($currentDevice);
+
+        app(LogSecurityEventAction::class)->execute(
+            $user,
+            SecurityEvent::LOGIN_SUCCESS->value
+        );
 
         $expiration = config('sanctum.expiration');
-        $expiresAt = $expiration ? now()->addMinutes($expiration)->toIso8601String() : null;
 
         return [
-            'status' => LoginStatus::SUCCESS,
-            'data' => [
-                'user' => $user,
-                'token' => $token,
-                'token_type' => 'Bearer',
-                'expires_at' => $expiresAt,
-            ]
+            'status'     => LoginResult::SUCCESS,
+            'user'       => $user,
+            'token'      => $tokenInstance->plainTextToken,
+            'token_type' => 'Bearer',
+            'expires_at' => $expiration
+                ? now()->addMinutes($expiration)->toIso8601String()
+                : null,
         ];
     }
 }

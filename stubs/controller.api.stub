@@ -1,0 +1,76 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use App\Http\Controllers\Controller;
+use App\Http\Responses\ApiResponse;
+use Illuminate\Http\JsonResponse;
+{{ imports }}
+
+class {{ class }} extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(): JsonResponse
+    {
+        // TODO: implement listing with pagination
+        // return ApiResponse::paginated({{ modelClass }}::paginate());
+        return ApiResponse::success([], '{{ modelVariable }} list retrieved successfully.');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store({{ storeRequestClass }} $request, {{ storeActionClass }} $action): JsonResponse
+    {
+        $result = $action->execute(
+            {{ storeDtoClass }}::fromRequest($request->validated())
+        );
+
+        return ApiResponse::success(
+            {{ resourceClass }}::make($result),
+            '{{ modelLabel }} created successfully.',
+            201
+        );
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show({{ modelClass }} ${{ modelVariable }}): JsonResponse
+    {
+        return ApiResponse::success(
+            {{ resourceClass }}::make(${{ modelVariable }}),
+            '{{ modelLabel }} retrieved successfully.'
+        );
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update({{ updateRequestClass }} $request, {{ modelClass }} ${{ modelVariable }}, {{ updateActionClass }} $action): JsonResponse
+    {
+        $result = $action->execute(
+            ${{ modelVariable }},
+            {{ updateDtoClass }}::fromRequest($request->validated())
+        );
+
+        return ApiResponse::success(
+            {{ resourceClass }}::make($result),
+            '{{ modelLabel }} updated successfully.'
+        );
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy({{ modelClass }} ${{ modelVariable }}, {{ deleteActionClass }} $action): JsonResponse
+    {
+        $action->execute(${{ modelVariable }});
+
+        return ApiResponse::success(null, '{{ modelLabel }} deleted successfully.');
+    }
+}

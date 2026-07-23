@@ -1,8 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Enums\UserRole;
+use App\Enums\UserStatus;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -29,6 +34,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'password_updated_at',
+        'status'
     ];
 
     /**
@@ -52,7 +58,12 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'password_updated_at' => 'datetime',
+            'status' =>UserStatus::class
         ];
+    }
+    public function securityLogs()
+    {
+        return $this->hasMany(UserSecurityLog::class);
     }
      /**
      * Create a new personal access token for the user.
@@ -63,10 +74,14 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function createToken(string $name, array $abilities = ['*'])
     {
+        $expiration = config('sanctum.expiration');
+
         $token = $this->tokens()->create([
             'name' => $name,
             'token' => hash('sha256', $plainTextToken = Str::random(150)),
             'abilities' => $abilities,
+            'expires_at' => $expiration ? now()->addMinutes($expiration) : null,
+
         ]);
 
         return new NewAccessToken($token, $token->getKey().'|'.$plainTextToken);
@@ -91,5 +106,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new \App\Notifications\QueuedResetPassword($token));
+    }
+
+      public function determineAccountType(): string
+    {
+        if ($this->hasRole('admin')) {
+            return UserRole::ADMIN->value;
+        }
+
+        return UserRole::USER->value
+;
     }
 }
