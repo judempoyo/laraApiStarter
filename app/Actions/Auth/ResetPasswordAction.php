@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Actions\Auth;
 
 use App\Models\User;
@@ -17,6 +16,8 @@ class ResetPasswordAction
      *
      * @param  array  $credentials
      * @return array
+     *
+     * @throws \Illuminate\Validation\ValidationException
      */
     public function execute(array $credentials): array
     {
@@ -24,8 +25,8 @@ class ResetPasswordAction
             $credentials,
             function (User $user, string $password) {
                 $user->forceFill([
-                    'password' => Hash::make($password),
-                    'remember_token' => Str::random(60),
+                    'password'            => Hash::make($password),
+                    'remember_token'      => Str::random(60),
                     'password_updated_at' => now(),
                 ])->save();
 
@@ -33,10 +34,12 @@ class ResetPasswordAction
             }
         );
 
-        if ($status !== Password::PASSWORD_RESET) {
-            return ['status' => \App\Enums\Auth\PasswordResetStatus::INVALID_TOKEN];
-        }
-
-        return ['status' => \App\Enums\Auth\PasswordResetStatus::RESET_SUCCESS];
+        return match ($status) {
+            Password::PASSWORD_RESET  => ['status' => \App\Enums\Result\Auth\PasswordResetResult::RESET_SUCCESS],
+            Password::INVALID_TOKEN   => ['status' => \App\Enums\Result\Auth\PasswordResetResult::INVALID_TOKEN],
+            Password::INVALID_USER    => ['status' => \App\Enums\Result\Auth\PasswordResetResult::INVALID_USER],
+            Password::RESET_THROTTLED => ['status' => \App\Enums\Result\Auth\PasswordResetResult::THROTTLED],
+            default                   => ['status' => \App\Enums\Result\Auth\PasswordResetResult::INVALID_TOKEN],
+        };
     }
 }

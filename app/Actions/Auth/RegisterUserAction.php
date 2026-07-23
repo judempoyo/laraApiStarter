@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\Auth;
 
 use App\DTOs\Auth\RegisterDTO;
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -23,7 +26,7 @@ class RegisterUserAction
 
         $this->logActivity('auth.register', "User {$user->email} registered.", $user->id);
 
-        $user->assignRole('user');
+        $user->assignRole(UserRole::USER->value);
         $user->load(['roles', 'permissions']);
 
         $user->sendEmailVerificationNotification();
@@ -35,13 +38,10 @@ class RegisterUserAction
         $expiresAt = $expiration ? now()->addMinutes($expiration)->toIso8601String() : null;
 
         return [
-            'status' => \App\Enums\Auth\RegisterStatus::SUCCESS,
-            'data' => [
-                'user' => $user,
-                'token' => $token,
-                'token_type' => 'Bearer',
-                'expires_at' => $expiresAt,
-            ]
+            'user' => $user,
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'expires_at' => $expiresAt,
         ];
     }
 }

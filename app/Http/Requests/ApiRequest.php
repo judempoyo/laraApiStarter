@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Enums\ErrorCode;
@@ -23,7 +26,7 @@ abstract class ApiRequest extends FormRequest
                 ErrorCode::VALIDATION_FAILED,
                 'Validation failed',
                 422,
-                null,
+                $validator->errors()->first(),
                 $formattedErrors 
             )
         );
