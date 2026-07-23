@@ -11,13 +11,12 @@ class UpdatePasswordAction
 {
     use \App\Traits\LogsActivity;
 
-    public function execute(User $user, UpdatePasswordDTO $dto): void
+    public function execute(User $user, UpdatePasswordDTO $dto): array
     {
         if (! Hash::check($dto->currentPassword, $user->password)) {
             $this->logActivity('auth.password.update_failed', "Failed password update (incorrect current password).", $user->id);
-            throw ValidationException::withMessages([
-                'current_password' => ['The provided password does not match your current password.'],
-            ]);
+            return ['status' => \App\Enums\Auth\ProfileStatus::INVALID_CURRENT_PASSWORD];
+
         }
 
         $user->update([
@@ -26,5 +25,6 @@ class UpdatePasswordAction
         ]);
 
         $this->logActivity('auth.password.updated', "User password updated.", $user->id);
+        return ['status' => \App\Enums\Auth\ProfileStatus::SUCCESS];
     }
 }

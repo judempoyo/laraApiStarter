@@ -9,7 +9,7 @@ class UpdateProfileAction
 {
     use \App\Traits\LogsActivity;
 
-    public function execute(User $user, UpdateProfileDTO $dto): User
+    public function execute(User $user, UpdateProfileDTO $dto): array
     {
         $user->update([
             'name' => $dto->name,
@@ -18,6 +18,11 @@ class UpdateProfileAction
 
         $this->logActivity('auth.profile.updated', "User profile updated.", $user->id);
 
-        return $user;
+        return [
+            'status' => \App\Enums\Auth\ProfileStatus::SUCCESS,
+            'data' => [
+                'user' => $user
+            ]
+        ];
     }
 }

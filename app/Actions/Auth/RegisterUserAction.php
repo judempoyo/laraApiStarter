@@ -23,6 +23,7 @@ class RegisterUserAction
 
         $this->logActivity('auth.register', "User {$user->email} registered.", $user->id);
 
+        $user->assignRole('user');
         $user->load(['roles', 'permissions']);
 
         $user->sendEmailVerificationNotification();
@@ -34,10 +35,13 @@ class RegisterUserAction
         $expiresAt = $expiration ? now()->addMinutes($expiration)->toIso8601String() : null;
 
         return [
-            'user' => $user,
-            'token' => $token,
-            'token_type' => 'Bearer',
-            'expires_at' => $expiresAt,
+            'status' => \App\Enums\Auth\RegisterStatus::SUCCESS,
+            'data' => [
+                'user' => $user,
+                'token' => $token,
+                'token_type' => 'Bearer',
+                'expires_at' => $expiresAt,
+            ]
         ];
     }
 }

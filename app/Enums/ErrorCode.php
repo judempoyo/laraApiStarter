@@ -14,6 +14,12 @@ enum ErrorCode: string
     case PASSWORD_MISMATCH = 'PASSWORD_MISMATCH';
     case RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED';
     case ACTION_NOT_ALLOWED = 'ACTION_NOT_ALLOWED';
+    
+    // Global Errors
+    case NOT_FOUND = 'NOT_FOUND';
+    case SERVER_ERROR = 'SERVER_ERROR';
+    case FORBIDDEN = 'FORBIDDEN';
+    case METHOD_NOT_ALLOWED = 'METHOD_NOT_ALLOWED';
 }
 
 

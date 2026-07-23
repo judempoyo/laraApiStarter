@@ -16,11 +16,9 @@ class ResetPasswordAction
      * Reset the given user's password.
      *
      * @param  array  $credentials
-     * @return string
-     *
-     * @throws \Illuminate\Validation\ValidationException
+     * @return array
      */
-    public function execute(array $credentials): string
+    public function execute(array $credentials): array
     {
         $status = Password::reset(
             $credentials,
@@ -36,11 +34,9 @@ class ResetPasswordAction
         );
 
         if ($status !== Password::PASSWORD_RESET) {
-            throw ValidationException::withMessages([
-                'email' => [__($status)],
-            ]);
+            return ['status' => \App\Enums\Auth\PasswordResetStatus::INVALID_TOKEN];
         }
 
-        return $status;
+        return ['status' => \App\Enums\Auth\PasswordResetStatus::RESET_SUCCESS];
     }
 }
