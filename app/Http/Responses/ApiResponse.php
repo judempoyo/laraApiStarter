@@ -55,10 +55,7 @@ class ApiResponse
      */
     public static function noContent(?string $message = null): JsonResponse
     {
-        return response()->json(
-            $message ? ['message' => $message] : null,
-            204
-        );
+        return self::success(null, $message, 204);
     }
 
     /**

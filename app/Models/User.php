@@ -8,6 +8,7 @@ use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -15,6 +16,13 @@ use Laravel\Sanctum\HasApiTokens;
 use Laravel\Sanctum\NewAccessToken;
 use Spatie\Permission\Traits\HasRoles;
 
+/**
+ * @property string|null $two_factor_secret
+ * @property \Illuminate\Support\Carbon|null $two_factor_confirmed_at
+ *
+ * To switch to Passport, replace `Laravel\Sanctum\HasApiTokens` with
+ * `Laravel\Passport\HasApiTokens` and set AUTH_DRIVER=passport in .env.
+ */
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -39,6 +47,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'provider',
         'provider_id',
         'avatar',
+        'two_factor_secret',
+        'two_factor_confirmed_at',
     ];
 
     /**
@@ -49,6 +59,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
     ];
 
     /**
@@ -59,21 +70,39 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'password_updated_at' => 'datetime',
-            'status' => UserStatus::class
+            'email_verified_at'       => 'datetime',
+            'password'                => 'hashed',
+            'password_updated_at'     => 'datetime',
+            'status'                  => UserStatus::class,
+            'two_factor_confirmed_at' => 'datetime',
         ];
     }
-    public function securityLogs()
+
+    // ─── Relationships ──────────────────────────────────────────────────────
+
+    public function securityLogs(): HasMany
     {
         return $this->hasMany(UserSecurityLog::class);
     }
+
+    public function apiKeys(): HasMany
+    {
+        return $this->hasMany(ApiKey::class);
+    }
+
+    public function preferences(): HasMany
+    {
+        return $this->hasMany(UserPreference::class);
+    }
+
+    // ─── Token ─────────────────────────────────────────────────────────────
+
     /**
      * Create a new personal access token for the user.
+     * Respects the expiration configured in config/sanctum.php.
      *
      * @param  string  $name
-     * @param  array  $abilities
+     * @param  array   $abilities
      * @return \Laravel\Sanctum\NewAccessToken
      */
     public function createToken(string $name, array $abilities = ['*'])
@@ -81,49 +110,36 @@ class User extends Authenticatable implements MustVerifyEmail
         $expiration = config('sanctum.expiration');
 
         $token = $this->tokens()->create([
-            'name' => $name,
-            'token' => hash('sha256', $plainTextToken = Str::random(150)),
-            'abilities' => $abilities,
+            'name'       => $name,
+            'token'      => hash('sha256', $plainTextToken = Str::random(150)),
+            'abilities'  => $abilities,
             'expires_at' => $expiration ? now()->addMinutes($expiration) : null,
-
         ]);
 
         return new NewAccessToken($token, $token->getKey() . '|' . $plainTextToken);
     }
 
+    // ─── Accessors ──────────────────────────────────────────────────────────
+
     public function getAvatarUrlAttribute(): ?string
     {
-        if (!$this->avatar) {
+        if (! $this->avatar) {
             return null;
         }
 
-        // External URL from OAuth provider (starts with http)
         if (str_starts_with($this->avatar, 'http')) {
             return $this->avatar;
         }
 
         return \Illuminate\Support\Facades\Storage::url($this->avatar);
     }
-    /**
-     * Send the email verification notification.
-     *
-     * @return void
-     */
-    public function sendEmailVerificationNotification()
+
+    public function hasTwoFactorEnabled(): bool
     {
-        $this->notify(new \App\Notifications\QueuedVerifyEmail);
+        return $this->two_factor_confirmed_at !== null;
     }
 
-    /**
-     * Send the password reset notification.
-     *
-     * @param  string  $token
-     * @return void
-     */
-    public function sendPasswordResetNotification($token)
-    {
-        $this->notify(new \App\Notifications\QueuedResetPassword($token));
-    }
+    // ─── Business Logic ─────────────────────────────────────────────────────
 
     public function determineAccountType(): string
     {
@@ -131,7 +147,18 @@ class User extends Authenticatable implements MustVerifyEmail
             return UserRole::ADMIN->value;
         }
 
-        return UserRole::USER->value
-        ;
+        return UserRole::USER->value;
+    }
+
+    // ─── Notifications ──────────────────────────────────────────────────────
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new \App\Notifications\QueuedVerifyEmail());
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new \App\Notifications\QueuedResetPassword($token));
     }
 }

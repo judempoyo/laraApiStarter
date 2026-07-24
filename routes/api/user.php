@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\ApiKeyController;
+use App\Http\Controllers\Api\User\NotificationController;
+use App\Http\Controllers\Api\User\PreferenceController;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -20,6 +22,17 @@ Route::middleware(['auth:' . config('api.auth_guard', 'sanctum'), 'throttle:api'
     ->prefix('user')
     ->name('user.')
     ->group(function (): void {
+
+        // ── User Preferences ────────────────────────────────────────────────
+        Route::get('preferences', [PreferenceController::class, 'index'])->name('preferences.index');
+        Route::put('preferences/{key}', [PreferenceController::class, 'set'])->name('preferences.set');
+        Route::delete('preferences/{key}', [PreferenceController::class, 'destroy'])->name('preferences.destroy');
+
+        // ── Notifications ───────────────────────────────────────────────────
+        Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::post('notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+        Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+        Route::delete('notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
         // ── API Keys ────────────────────────────────────────────────────────
         Route::get('api-keys', [ApiKeyController::class, 'index'])->name('api-keys.index');
