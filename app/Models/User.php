@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -32,9 +30,15 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name',
         'email',
+        'email_verified_at',
         'password',
         'password_updated_at',
-        'status'
+        'partner_status',
+        'status',
+        'google_id',
+        'provider',
+        'provider_id',
+        'avatar',
     ];
 
     /**
@@ -58,14 +62,14 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'password_updated_at' => 'datetime',
-            'status' =>UserStatus::class
+            'status' => UserStatus::class
         ];
     }
     public function securityLogs()
     {
         return $this->hasMany(UserSecurityLog::class);
     }
-     /**
+    /**
      * Create a new personal access token for the user.
      *
      * @param  string  $name
@@ -84,9 +88,22 @@ class User extends Authenticatable implements MustVerifyEmail
 
         ]);
 
-        return new NewAccessToken($token, $token->getKey().'|'.$plainTextToken);
+        return new NewAccessToken($token, $token->getKey() . '|' . $plainTextToken);
     }
 
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (!$this->avatar) {
+            return null;
+        }
+
+        // External URL from OAuth provider (starts with http)
+        if (str_starts_with($this->avatar, 'http')) {
+            return $this->avatar;
+        }
+
+        return \Illuminate\Support\Facades\Storage::url($this->avatar);
+    }
     /**
      * Send the email verification notification.
      *
@@ -108,13 +125,13 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new \App\Notifications\QueuedResetPassword($token));
     }
 
-      public function determineAccountType(): string
+    public function determineAccountType(): string
     {
         if ($this->hasRole('admin')) {
             return UserRole::ADMIN->value;
         }
 
         return UserRole::USER->value
-;
+        ;
     }
 }
