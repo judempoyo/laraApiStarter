@@ -20,5 +20,5 @@ it('resets password successfully', function () {
         'token'                 => $token,
     ]);
 
-    expect($result['status'])->toBe(\App\Enums\Result\PasswordResetResult::RESET_SUCCESS);
+    expect($result['status'])->toBe(\App\Enums\Result\Auth\PasswordResetResult::RESET_SUCCESS);
 });

@@ -101,7 +101,7 @@ it('DELETE /profile/avatar removes avatar', function () {
 
     $this->withToken($token)
         ->deleteJson('/api/v1/auth/profile/avatar')
-        ->assertOk();
+        ->assertNoContent();
 
     expect($user->fresh()->avatar)->toBeNull();
     expect(Storage::disk('public')->exists('avatars/remove-me.jpg'))->toBeFalse();

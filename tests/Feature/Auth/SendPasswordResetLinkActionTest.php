@@ -15,5 +15,5 @@ it('sends password reset link', function () {
         'email' => 'test@example.com',
     ]);
 
-    expect($result['status'])->toBe(\App\Enums\Result\PasswordResetResult::LINK_SENT);
+    expect($result['status'])->toBe(\App\Enums\Result\Auth\PasswordResetResult::LINK_SENT);
 });

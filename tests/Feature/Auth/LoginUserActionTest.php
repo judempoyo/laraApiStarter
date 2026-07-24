@@ -4,7 +4,7 @@ use App\Actions\Auth\LoginUserAction;
 use App\Actions\Auth\ResolveDeviceNameAction;
 use App\Actions\Auth\SocialiteLoginAction;
 use App\DTOs\Auth\LoginDTO;
-use App\Enums\Result\LoginResult;
+use App\Enums\Result\Auth\LoginResult;
 use App\Enums\UserRole;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;

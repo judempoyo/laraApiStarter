@@ -19,7 +19,7 @@ it('updates password when current password is valid', function () {
 
     $result = $action->execute($user, $dto);
     
-    expect($result['status'])->toBe(\App\Enums\Result\UpdatePasswordResult::SUCCESS);
+    expect($result['status'])->toBe(\App\Enums\Result\Auth\UpdatePasswordResult::SUCCESS);
     expect(Hash::check('new_password', $user->fresh()->password))->toBeTrue();
 });
 
@@ -37,5 +37,5 @@ it('fails password update when current password is invalid', function () {
 
     $result = $action->execute($user, $dto);
 
-    expect($result['status'])->toBe(\App\Enums\Result\UpdatePasswordResult::INVALID_CURRENT_PASSWORD);
+    expect($result['status'])->toBe(\App\Enums\Result\Auth\UpdatePasswordResult::INVALID_CURRENT_PASSWORD);
 });

@@ -50,7 +50,7 @@ it('user can revoke a specific session', function () {
 
     $this->withToken($main->plainTextToken)
         ->deleteJson("/api/v1/auth/sessions/{$other->accessToken->id}")
-        ->assertOk();
+        ->assertNoContent();
 
     expect($user->tokens()->count())->toBe(1);
 });
@@ -80,7 +80,7 @@ it('user can revoke all sessions except the current one', function () {
 
     $this->withToken($current->plainTextToken)
         ->deleteJson('/api/v1/auth/sessions/others')
-        ->assertOk();
+        ->assertNoContent();
 
     expect($user->fresh()->tokens()->count())->toBe(1);
     expect($user->tokens()->first()->name)->toBe('Current');

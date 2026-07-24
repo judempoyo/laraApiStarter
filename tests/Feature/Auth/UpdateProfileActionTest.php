@@ -16,6 +16,6 @@ it('updates user profile', function () {
     $result = $action->execute($user, $dto);
     $updatedUser = $result['user'];
 
-    expect($result['status'])->toBe(\App\Enums\Result\UpdateProfileResult::SUCCESS);
+    expect($result['status'])->toBe(\App\Enums\Result\Auth\UpdateProfileResult::SUCCESS);
     expect($updatedUser->name)->toBe('New Name');
 });
