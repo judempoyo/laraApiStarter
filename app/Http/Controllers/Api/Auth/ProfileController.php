@@ -11,7 +11,7 @@ use App\Actions\Auth\UploadAvatarAction;
 use App\DTOs\Auth\UpdateEmailDTO;
 use App\DTOs\Auth\UpdatePasswordDTO;
 use App\DTOs\Auth\UpdateProfileDTO;
-use App\Enums\ErrorCode;
+use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\UpdateEmailRequest;
 use App\Http\Requests\Auth\UpdatePasswordRequest;
@@ -42,7 +42,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * change the user email
+     * Change the user email.
      */
     public function changeEmail(UpdateEmailRequest $request, UpdateEmailAction $action): JsonResponse
     {
@@ -53,7 +53,7 @@ class ProfileController extends Controller
 
         return match ($result['status']) {
             \App\Enums\Result\Auth\UpdateEmailResult::SUCCESS =>
-            ApiResponse::success(UserResource::make($result['user']), 'User email changed successfully, new verification email has been sent.'),
+            ApiResponse::success(UserResource::make($result['user']), 'Email changed successfully. A new verification link has been sent.'),
         };
     }
 
@@ -68,15 +68,13 @@ class ProfileController extends Controller
         );
 
         return match ($result['status']) {
-            \App\Enums\Result\Auth\UpdatePasswordResult::SUCCESS                  =>
-            ApiResponse::success(null, 'Password updated successfully.'),
+            \App\Enums\Result\Auth\UpdatePasswordResult::SUCCESS =>
+            ApiResponse::noContent('Password updated successfully.'),
 
             \App\Enums\Result\Auth\UpdatePasswordResult::INVALID_CURRENT_PASSWORD =>
-            ApiResponse::error(
-                ErrorCode::PASSWORD_MISMATCH,
+            throw ApiException::unprocessable(
                 'The provided password does not match your current password.',
-                422,
-                'password mismatch'
+                \App\Enums\ErrorCode::PASSWORD_MISMATCH
             ),
         };
     }
@@ -102,20 +100,15 @@ class ProfileController extends Controller
         $user = $request->user();
 
         if (! $user->avatar) {
-            return ApiResponse::error(
-                ErrorCode::NOT_FOUND,
-                'No profile picture to delete.',
-                404
-            );
+            throw ApiException::notFound('Avatar');
         }
 
-        // Delete file only if it is a local path
         if (! str_starts_with($user->avatar, 'http')) {
             Storage::disk('public')->delete($user->avatar);
         }
 
         $user->update(['avatar' => null]);
 
-        return ApiResponse::success(null, 'Profile picture deleted.');
+        return ApiResponse::noContent('Profile picture deleted.');
     }
 }
