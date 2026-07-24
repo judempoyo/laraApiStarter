@@ -35,9 +35,36 @@ class ApiResponse
     }
 
     /**
+     * Send a 201 Created response.
+     */
+    public static function created($data = null, ?string $message = null): JsonResponse
+    {
+        return self::success($data, $message, 201);
+    }
+
+    /**
+     * Send a 202 Accepted response (for async/queued operations).
+     */
+    public static function accepted(?string $message = null, $data = null): JsonResponse
+    {
+        return self::success($data, $message, 202);
+    }
+
+    /**
+     * Send a 204 No Content response.
+     */
+    public static function noContent(?string $message = null): JsonResponse
+    {
+        return response()->json(
+            $message ? ['message' => $message] : null,
+            204
+        );
+    }
+
+    /**
      * Send an error response.
      */
-    public static function error(ErrorCode | string $error_code, ?string $error_message = null, int $code = 400, ?string $message = null, ?array $errors = null): JsonResponse
+    public static function error(ErrorCode|string $error_code, ?string $error_message = null, int $code = 400, ?string $message = null, ?array $errors = null): JsonResponse
     {
         return response()->json([
             'code'    => $code,
@@ -60,7 +87,7 @@ class ApiResponse
         $items = $paginator->items();
 
         $meta = [
-            'api_version'    => config('app.api_version'),
+            'api_version'    => config('api.version'),
             'current_page'   => $paginator->currentPage(),
             'per_page'       => $paginator->perPage(),
             'total_items'    => $paginator->total(),
