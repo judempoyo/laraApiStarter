@@ -1,0 +1,30 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Http\Controllers\Api\ApiKeyController;
+use Illuminate\Support\Facades\Route;
+
+/**
+ * Authenticated user routes (any role).
+ *
+ * These routes are loaded from routes/api.php with the /api/v1 prefix.
+ * All routes here require authentication via the configured guard.
+ *
+ * Register your user-specific resource routes in this file.
+ *
+ * Example:
+ *   Route::apiResource('orders', \App\Http\Controllers\Api\User\OrderController::class);
+ */
+Route::middleware(['auth:' . config('api.auth_guard', 'sanctum'), 'throttle:api'])
+    ->prefix('user')
+    ->name('user.')
+    ->group(function (): void {
+
+        // ── API Keys ────────────────────────────────────────────────────────
+        Route::get('api-keys', [ApiKeyController::class, 'index'])->name('api-keys.index');
+        Route::post('api-keys', [ApiKeyController::class, 'store'])->name('api-keys.store');
+        Route::delete('api-keys/{id}', [ApiKeyController::class, 'destroy'])->name('api-keys.destroy');
+
+        // ── Add user resource routes below ──────────────────────────────────
+    });
