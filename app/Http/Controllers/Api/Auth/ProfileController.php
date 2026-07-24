@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Actions\Auth\UpdateEmailAction;
 use App\Actions\Auth\UpdatePasswordAction;
 use App\Actions\Auth\UpdateProfileAction;
+use App\Actions\Auth\UploadAvatarAction;
 use App\DTOs\Auth\UpdateEmailDTO;
 use App\DTOs\Auth\UpdatePasswordDTO;
 use App\DTOs\Auth\UpdateProfileDTO;
@@ -15,9 +16,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\UpdateEmailRequest;
 use App\Http\Requests\Auth\UpdatePasswordRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
+use App\Http\Requests\Auth\UploadAvatarRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -75,5 +79,43 @@ class ProfileController extends Controller
                 'password mismatch'
             ),
         };
+    }
+
+    /**
+     * Upload or replace the user avatar.
+     */
+    public function uploadAvatar(UploadAvatarRequest $request, UploadAvatarAction $action): JsonResponse
+    {
+        $user = $action->execute($request->user(), $request->file('avatar'));
+
+        return ApiResponse::success(
+            ['avatar_url' => $user->avatar_url],
+            'Profile picture updated.'
+        );
+    }
+
+    /**
+     * Delete the user avatar.
+     */
+    public function deleteAvatar(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $user->avatar) {
+            return ApiResponse::error(
+                ErrorCode::NOT_FOUND,
+                'No profile picture to delete.',
+                404
+            );
+        }
+
+        // Delete file only if it is a local path
+        if (! str_starts_with($user->avatar, 'http')) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        $user->update(['avatar' => null]);
+
+        return ApiResponse::success(null, 'Profile picture deleted.');
     }
 }

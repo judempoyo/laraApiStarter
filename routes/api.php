@@ -1,11 +1,13 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\ProfileController;
 use App\Http\Controllers\Api\EnumController;
 use App\Http\Controllers\Api\HealthController;
+use App\Http\Controllers\Api\SessionController;
+use App\Http\Controllers\Api\SocialiteController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -17,6 +19,10 @@ Route::prefix('v1')->group(function () {
         Route::post('check-email', [AuthController::class, 'checkEmail']);
         Route::get('email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
 
+        // ── Google OAuth ──
+        Route::get('google/redirect', [SocialiteController::class, 'redirectToGoogle']);
+        Route::get('google/callback', [SocialiteController::class, 'handleGoogleCallback']);
+
         Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::post('logout-all', [AuthController::class, 'logoutAll']);
@@ -24,13 +30,22 @@ Route::prefix('v1')->group(function () {
             Route::get('user', [AuthController::class, 'user']);
             Route::post('email/verification-notification', [AuthController::class, 'resendVerificationEmail']);
 
-            Route::prefix('profile')->name('profile.')->group(function () {
+            // ── Sessions ──
+            Route::prefix('sessions')->group(function () {
+                Route::get('/', [SessionController::class, 'index']);
+                Route::delete('/others', [AuthController::class, 'logoutOthers']);
+                Route::delete('/{tokenId}', [AuthController::class, 'logoutSession']);
+            });
+
+            // ── Profile ──
+            Route::prefix('profile')->group(function () {
                 Route::patch('/', [ProfileController::class, 'update']);
                 Route::patch('/email', [ProfileController::class, 'changeEmail']);
-                Route::patch('/password', [ProfileController::class, 'updatePassword']);
+                Route::put('/password', [ProfileController::class, 'updatePassword']);
+                Route::post('/avatar', [ProfileController::class, 'uploadAvatar']);
+                Route::delete('/avatar', [ProfileController::class, 'deleteAvatar']);
             });
         });
-
     });
 
     Route::get('enums/{enum}', [EnumController::class, 'show']);
