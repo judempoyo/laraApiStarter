@@ -11,25 +11,25 @@ class UserResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $data = [
-            'id'                  => $this->id,
-            'name'                => $this->name,
-            'account_type'        => $this->determineAccountType(),
-            'email'               => $this->email,
-            'is_email_verified'   => $this->email_verified_at !== null,
-            //'roles' => $this->roles->pluck('name'),
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'account_type' => $this->determineAccountType(),
+            'email' => $this->email,
+            'is_email_verified' => $this->email_verified_at !== null,
+            'roles' => $this->roles->pluck('name'),
             //'permissions' => $this->getAllPermissions()->pluck('name'),
-            'has_password'        => $this->password !== null,
-            'email_verified_at'   => $this->email_verified_at,
-            'password_updated_at' => $this->password_updated_at,
-            'created_at'          => $this->created_at,
-            'updated_at'          => $this->updated_at,
+            'has_password' => $this->password !== null,
+            'email_verified_at' => $this->email_verified_at,
             'status' => $this->status,
-            
+            'is_active' => $this->status === \App\Enums\UserStatus::ACTIVE,
+            'avatar_url' => $this->avatar_url,
+            'provider' => $this->provider,
+            //'unread_notifications_count' => $this->unreadNotifications()->count(),
+            'password_updated_at' => $this->password_updated_at,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
-        $data['is_active'] = $this->status === \App\Enums\UserStatus::ACTIVE;
-
-        return $data;
 
     }
 }

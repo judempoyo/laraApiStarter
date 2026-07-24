@@ -37,7 +37,7 @@ class AuthController extends Controller
         $result = $action->execute($request->validated('email'));
 
         return ApiResponse::success([
-            'exists' => $result['exists'],
+            'exists' => $result['exists']
         ], $result['exists'] ? 'Email exists.' : 'Email not found.');
     }
 
@@ -96,7 +96,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout user (revoke the token).
+     * Logout user (revoke the current token).
      */
     public function logout(Request $request): JsonResponse
     {
@@ -119,6 +119,42 @@ class AuthController extends Controller
         $this->logActivity('auth.logout_all', "User logged out from all devices.", $user->id);
 
         return ApiResponse::success(null, 'Logged out from all devices successfully.');
+    }
+
+    /**
+     * Revoke a specific session by token ID (must belong to the authenticated user).
+     */
+    public function logoutSession(Request $request, int $tokenId): JsonResponse
+    {
+        $user  = $request->user();
+        $token = $user->tokens()->where('id', $tokenId)->first();
+
+        if (! $token) {
+            return ApiResponse::error(
+                ErrorCode::NOT_FOUND,
+                'Session not found.',
+                404
+            );
+        }
+
+        $token->delete();
+        $this->logActivity('auth.logout_session', "Session {$tokenId} revoked.", $user->id);
+
+        return ApiResponse::success(null, 'Session revoked successfully.');
+    }
+
+    /**
+     * Revoke all sessions except the current one.
+     */
+    public function logoutOthers(Request $request): JsonResponse
+    {
+        $user    = $request->user();
+        $current = $user->currentAccessToken()->id;
+
+        $user->tokens()->where('id', '!=', $current)->delete();
+        $this->logActivity('auth.logout_others', "All other sessions revoked.", $user->id);
+
+        return ApiResponse::success(null, 'All other sessions revoked.');
     }
 
     /**
@@ -162,15 +198,16 @@ class AuthController extends Controller
         return ApiResponse::success(null, 'A new verification link has been sent.');
     }
 
-    public function refresh(Request $request)
+    public function refresh(Request $request): JsonResponse
     {
         $user = $request->user();
 
         // Revoke the current token
         $user->currentAccessToken()->delete();
 
-        // Create a new token
-        $tokenInstance = $user->createToken('auth_token');
+        // Issue a new token with the same device name
+        $deviceName    = app(\App\Actions\Auth\ResolveDeviceNameAction::class)->execute();
+        $tokenInstance = $user->createToken($deviceName);
         $newToken      = $tokenInstance->plainTextToken;
 
         $expiration = config('sanctum.expiration');
@@ -181,7 +218,7 @@ class AuthController extends Controller
             'token'      => $newToken,
             'token_type' => 'Bearer',
             'expires_at' => $expiresAt,
-        ], 'Successfully refreshed token.');
+        ], 'Token refreshed successfully.');
     }
 
     /**

@@ -16,6 +16,15 @@ class RegisterRequest extends ApiRequest
         return true; 
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('name') && is_string($this->input('name'))) {
+            $this->merge([
+                'name' => htmlspecialchars(strip_tags($this->input('name')), ENT_QUOTES, 'UTF-8'),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [

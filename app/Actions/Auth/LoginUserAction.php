@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\Auth;
 
@@ -43,7 +43,7 @@ class LoginUserAction
             ->first();
 
         $currentIp     = request()->ip();
-        $currentDevice = request()->header('Device-Name', 'unknown');
+        $currentDevice = app(ResolveDeviceNameAction::class)->execute();
 
         if ($lastLogin) {
             if ($lastLogin->ip_address !== $currentIp) {
