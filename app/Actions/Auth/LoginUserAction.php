@@ -1,10 +1,11 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Actions\Auth;
 
 use App\Actions\Security\LogSecurityEventAction;
+use App\Contracts\Auth\TokenServiceInterface;
 use App\DTOs\Auth\LoginDTO;
 use App\Enums\Result\Auth\LoginResult;
 use App\Enums\SecurityEvent;
@@ -20,7 +21,7 @@ class LoginUserAction
 
         if (! $user || ! Hash::check($dto->password, $user->password)) {
             app(LogSecurityEventAction::class)->execute(
-                $user,
+                $user ?? null,
                 SecurityEvent::LOGIN_FAILED->value
             );
 
@@ -69,23 +70,21 @@ class LoginUserAction
             }
         }
 
-        $tokenInstance = $user->createToken($currentDevice);
+        /** @var TokenServiceInterface $tokenService */
+        $tokenService = app(TokenServiceInterface::class);
+        $plainToken   = $tokenService->createToken($user, $currentDevice);
 
         app(LogSecurityEventAction::class)->execute(
             $user,
             SecurityEvent::LOGIN_SUCCESS->value
         );
 
-        $expiration = config('sanctum.expiration');
-
         return [
             'status'     => LoginResult::SUCCESS,
             'user'       => $user,
-            'token'      => $tokenInstance->plainTextToken,
+            'token'      => $plainToken,
             'token_type' => 'Bearer',
-            'expires_at' => $expiration
-                ? now()->addMinutes($expiration)->toIso8601String()
-                : null,
+            'expires_at' => $tokenService->getTokenExpiry(),
         ];
     }
 }
