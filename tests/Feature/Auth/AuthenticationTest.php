@@ -82,7 +82,7 @@ class AuthenticationTest extends TestCase
             'Authorization' => 'Bearer '.$token,
         ])->postJson('/api/v1/auth/logout');
 
-        $response->assertStatus(200);
+        $response->assertNoContent();
         $this->assertCount(0, $user->tokens);
     }
 

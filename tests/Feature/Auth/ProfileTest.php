@@ -44,13 +44,13 @@ class ProfileTest extends TestCase
 
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->patchJson('/api/v1/auth/profile/password', [
+        ])->putJson('/api/v1/auth/profile/password', [
             'current_password'      => 'old_password',
             'password'              => 'new_password',
             'password_confirmation' => 'new_password',
         ]);
 
-        $response->assertStatus(200);
+        $response->assertNoContent();
 
         $this->assertTrue(Hash::check('new_password', $user->fresh()->password));
     }
@@ -64,7 +64,7 @@ class ProfileTest extends TestCase
 
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->patchJson('/api/v1/auth/profile/password', [
+        ])->putJson('/api/v1/auth/profile/password', [
             'current_password'      => 'wrong_password',
             'password'              => 'new_password',
             'password_confirmation' => 'new_password',

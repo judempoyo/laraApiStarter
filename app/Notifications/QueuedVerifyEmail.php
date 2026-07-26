@@ -1,10 +1,10 @@
 <?php
-
 namespace App\Notifications;
 
 use Illuminate\Auth\Notifications\VerifyEmail as BaseVerifyEmail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\URL;
@@ -12,7 +12,28 @@ use Illuminate\Support\Facades\URL;
 class QueuedVerifyEmail extends BaseVerifyEmail implements ShouldQueue
 {
     use Queueable;
-       protected function verificationUrl($notifiable): string
+
+    /**
+     * Build the French verification mail.
+     */
+    public function toMail($notifiable)
+    {
+        $url = $this->verificationUrl($notifiable);
+
+        return (new MailMessage)
+            ->subject('Vérifiez votre adresse e-mail')
+            ->greeting('Bonjour ' . $notifiable->name . ',')
+            ->line('Merci de vous être inscrit sur ' . config('app.name') . '. Veuillez cliquer sur le bouton ci-dessous pour vérifier votre adresse e-mail.')
+            ->action('Vérifier mon adresse e-mail', $url)
+            ->line('Ce lien expirera dans ' . Config::get('auth.verification.expire', 60) . ' minutes.')
+            ->line('Si vous n\'avez pas créé de compte, aucune action n\'est requise.')
+            ->salutation('Cordialement, l\'équipe ' . config('app.name'));
+    }
+
+    /**
+     * Generate the custom signed verification URL pointing to the frontend.
+     */
+    protected function verificationUrl($notifiable): string
     {
         $apiSignedUrl = URL::temporarySignedRoute(
             'verification.verify',

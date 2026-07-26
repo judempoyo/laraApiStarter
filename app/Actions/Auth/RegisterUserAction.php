@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Auth;
 
+use App\Contracts\Auth\TokenServiceInterface;
 use App\DTOs\Auth\RegisterDTO;
 use App\Enums\UserRole;
 use App\Models\User;
@@ -15,12 +16,10 @@ class RegisterUserAction
 
     public function execute(RegisterDTO $dto): array
     {
-        $hashed = Hash::make($dto->password);
-
         $user = User::create([
-            'name' => $dto->name,
-            'email' => $dto->email,
-            'password' => $hashed,
+            'name'                => $dto->name,
+            'email'               => $dto->email,
+            'password'            => Hash::make($dto->password),
             'password_updated_at' => now(),
         ]);
 
@@ -28,20 +27,17 @@ class RegisterUserAction
 
         $user->assignRole(UserRole::USER->value);
         $user->load(['roles', 'permissions']);
-
         $user->sendEmailVerificationNotification();
 
-        $tokenInstance = $user->createToken('auth_token');
-        $token = $tokenInstance->plainTextToken;
-
-        $expiration = config('sanctum.expiration');
-        $expiresAt = $expiration ? now()->addMinutes($expiration)->toIso8601String() : null;
+        /** @var TokenServiceInterface $tokenService */
+        $tokenService = app(TokenServiceInterface::class);
+        $plainToken   = $tokenService->createToken($user, 'auth_token');
 
         return [
-            'user' => $user,
-            'token' => $token,
+            'user'       => $user,
+            'token'      => $plainToken,
             'token_type' => 'Bearer',
-            'expires_at' => $expiresAt,
+            'expires_at' => $tokenService->getTokenExpiry(),
         ];
     }
 }
