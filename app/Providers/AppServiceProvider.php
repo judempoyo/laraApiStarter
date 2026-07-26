@@ -12,6 +12,8 @@ use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use App\Auth\ApiKeyGuard;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -43,6 +45,20 @@ class AppServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
         $this->configureGates();
         $this->configureApiDocs();
+        $this->registerApiKeyGuard();
+    }
+
+    /**
+     * Register the custom API Key guard driver.
+     *
+     * Allows routes to use auth:api-key natively, e.g.:
+     *   Route::middleware('auth:api-key,sanctum') or 'auth:api-key'
+     */
+    protected function registerApiKeyGuard(): void
+    {
+        Auth::extend('api-key', function ($app, string $name, array $config): ApiKeyGuard {
+            return new ApiKeyGuard($app['request']);
+        });
     }
 
     /**

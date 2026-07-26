@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\ProfileController;
+use App\Http\Controllers\Api\Auth\SessionController;
 use App\Http\Controllers\Api\Auth\SocialiteController;
 use App\Http\Controllers\Api\Auth\TwoFactorController;
 use App\Http\Controllers\Api\EnumController;
 use App\Http\Controllers\Api\HealthController;
-use App\Http\Controllers\Api\Auth\SessionController;
+use App\Http\Responses\ApiResponse;
 use Illuminate\Support\Facades\Route;
 
 $guard = config('api.auth_guard', 'sanctum');
@@ -70,6 +71,20 @@ Route::prefix('v1')->group(function () use ($guard): void {
     Route::middleware('optional.auth')->group(function (): void {
         // Routes accessible to both guests and authenticated users.
         // Use request()->user() to conditionally change behavior.
+    });
+
+    // ─── API Key Test ───────────────────────────────────────────────────────
+    // Accepts BOTH authentication methods (try-first order):
+    //   1. Sanctum Bearer token  →  Authorization: Bearer <token>
+    //   2. API Key               →  X-API-Key: <key>  |  Authorization: <key>
+    // DELETE this route block once your integration is validated.
+    Route::middleware("auth:{$guard},api-key")->group(function (): void {
+        Route::get('test-api-key', function () {
+            return \App\Http\Responses\ApiResponse::success([
+                'user'       => auth()->user()->only('id', 'name', 'email'),
+                'guard_used' => auth()->getDefaultDriver(),
+            ], 'Authenticated successfully.');
+        })->name('test.api-key');
     });
 
     // ─── Role-based route files ────────────────────────────────────────────

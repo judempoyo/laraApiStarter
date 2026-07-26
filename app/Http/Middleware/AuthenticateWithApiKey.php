@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use App\Enums\ErrorCode;
 use App\Exceptions\ApiException;
-use App\Models\ApiKey;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,44 +13,32 @@ use Symfony\Component\HttpFoundation\Response;
 class AuthenticateWithApiKey
 {
     /**
-     * Authenticate a request using the X-API-Key header.
+     * Enforce API Key authentication (X-API-Key header).
      *
-     * Sets the authenticated user on the request so downstream controllers
-     * can use $request->user() as usual.
+     * This middleware delegates all authentication logic to ApiKeyGuard
+     * — the single source of truth for API key resolution and validation.
+     *
+     * ┌─────────────────────────────────────────────────────────────────┐
+     * │  Use 'api.key' middleware when you want to restrict a route     │
+     * │  exclusively to API keys (no Bearer tokens accepted).           │
+     * │                                                                 │
+     * │  To accept BOTH Sanctum Bearer tokens AND API keys, use:       │
+     * │    middleware("auth:{$guard},api-key")                          │
+     * └─────────────────────────────────────────────────────────────────┘
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $rawKey = $request->header('X-API-Key');
+        $guard = Auth::guard('api-key');
 
-        if (! $rawKey) {
-            throw ApiException::unauthorized('API key is missing.');
+        $user = $guard->user();
+
+        if (! $user) {
+            throw ApiException::unauthorized('API key is missing or invalid.');
         }
 
-        $hashed = hash('sha256', $rawKey);
-        $apiKey = ApiKey::where('key', $hashed)->with('user')->first();
-
-        if (! $apiKey) {
-            throw new ApiException(
-                errorCode: ErrorCode::API_KEY_INVALID,
-                message: 'Invalid API key.',
-                statusCode: 401,
-                userMessage: 'The provided API key is not valid.',
-            );
-        }
-
-        if ($apiKey->isExpired()) {
-            throw new ApiException(
-                errorCode: ErrorCode::API_KEY_EXPIRED,
-                message: 'API key has expired.',
-                statusCode: 401,
-                userMessage: 'Your API key has expired. Please generate a new one.',
-            );
-        }
-
-        $apiKey->update(['last_used_at' => now()]);
-
-        Auth::setUser($apiKey->user);
-        $request->setUserResolver(fn () => $apiKey->user);
+        // Expose the resolved user to the rest of the request lifecycle.
+        Auth::setUser($user);
+        $request->setUserResolver(fn () => $user);
 
         return $next($request);
     }
