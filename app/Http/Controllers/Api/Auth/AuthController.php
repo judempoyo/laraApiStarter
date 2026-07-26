@@ -9,10 +9,12 @@ use App\Actions\Auth\LoginUserAction;
 use App\Actions\Auth\RegisterUserAction;
 use App\Actions\Auth\ResetPasswordAction;
 use App\Actions\Auth\SendPasswordResetLinkAction;
+use App\Contracts\Auth\TokenServiceInterface;
 use App\DTOs\Auth\LoginDTO;
 use App\DTOs\Auth\RegisterDTO;
 use App\Enums\ErrorCode;
 use App\Enums\Result\Auth\LoginResult;
+use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\CheckEmailRequest;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
@@ -29,6 +31,8 @@ class AuthController extends Controller
 {
     use \App\Traits\LogsActivity;
 
+    public function __construct(private readonly TokenServiceInterface $tokenService) {}
+
     /**
      * Check if email exists in the database.
      */
@@ -36,9 +40,10 @@ class AuthController extends Controller
     {
         $result = $action->execute($request->validated('email'));
 
-        return ApiResponse::success([
-            'exists' => $result['exists'],
-        ], $result['exists'] ? 'Email exists.' : 'Email not found.');
+        return ApiResponse::success(
+            ['exists' => $result['exists']],
+            $result['exists'] ? 'Email exists.' : 'Email not found.'
+        );
     }
 
     /**
@@ -50,16 +55,16 @@ class AuthController extends Controller
             RegisterDTO::fromRequest($request->validated())
         );
 
-        return ApiResponse::success([
+        return ApiResponse::created([
             'user'       => AuthResource::make($result['user']),
             'token'      => $result['token'],
             'token_type' => $result['token_type'],
             'expires_at' => $result['expires_at'],
-        ], 'User registered successfully. Please verify your email.', 201);
+        ], 'User registered successfully. Please verify your email.');
     }
 
     /**
-     * Login user and create token.
+     * Login user and return a token.
      */
     public function login(LoginRequest $request, LoginUserAction $action): JsonResponse
     {
@@ -68,25 +73,12 @@ class AuthController extends Controller
         );
 
         return match ($result['status']) {
-
-            LoginResult::USER_DISABLED       =>
-            ApiResponse::error(
-                ErrorCode::ACCOUNT_DISABLED,
+            LoginResult::USER_DISABLED       => throw ApiException::unprocessable(
                 'Your account has been disabled by an administrator.',
-                403,
-                'Account disabled'
+                ErrorCode::ACCOUNT_DISABLED
             ),
-
-            LoginResult::INVALID_CREDENTIALS =>
-            ApiResponse::error(
-                ErrorCode::INVALID_CREDENTIALS,
-                'The provided credentials are incorrect.',
-                401,
-                'Invalid credentials'
-            ),
-
-            LoginResult::SUCCESS             =>
-            ApiResponse::success([
+            LoginResult::INVALID_CREDENTIALS => throw ApiException::unauthorized(),
+            LoginResult::SUCCESS             => ApiResponse::success([
                 'user'       => AuthResource::make($result['user']),
                 'token'      => $result['token'],
                 'token_type' => $result['token_type'],
@@ -96,16 +88,15 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout user (revoke the token).
+     * Logout user (revoke the current token).
      */
     public function logout(Request $request): JsonResponse
     {
         $user = $request->user();
-        $user->currentAccessToken()->delete();
+        $this->tokenService->revokeCurrentToken($user);
+        $this->logActivity('auth.logout', 'User logged out.', $user->id);
 
-        $this->logActivity('auth.logout', "User logged out.", $user->id);
-
-        return ApiResponse::success(null, 'Logged out successfully.');
+        return ApiResponse::noContent('Logged out successfully.');
     }
 
     /**
@@ -114,11 +105,39 @@ class AuthController extends Controller
     public function logoutAll(Request $request): JsonResponse
     {
         $user = $request->user();
-        $user->tokens()->delete();
+        $this->tokenService->revokeAllTokens($user);
+        $this->logActivity('auth.logout_all', 'User logged out from all devices.', $user->id);
 
-        $this->logActivity('auth.logout_all', "User logged out from all devices.", $user->id);
+        return ApiResponse::noContent('Logged out from all devices successfully.');
+    }
 
-        return ApiResponse::success(null, 'Logged out from all devices successfully.');
+    /**
+     * Revoke a specific session by token ID.
+     */
+    public function logoutSession(Request $request, int $tokenId): JsonResponse
+    {
+        $user    = $request->user();
+        $deleted = $this->tokenService->revokeTokenById($user, $tokenId);
+
+        if (! $deleted) {
+            throw ApiException::notFound('Session');
+        }
+
+        $this->logActivity('auth.logout_session', "Session {$tokenId} revoked.", $user->id);
+
+        return ApiResponse::noContent('Session revoked successfully.');
+    }
+
+    /**
+     * Revoke all sessions except the current one.
+     */
+    public function logoutOthers(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $this->tokenService->revokeOtherTokens($user);
+        $this->logActivity('auth.logout_others', 'All other sessions revoked.', $user->id);
+
+        return ApiResponse::noContent('All other sessions revoked.');
     }
 
     /**
@@ -126,18 +145,20 @@ class AuthController extends Controller
      */
     public function user(Request $request): JsonResponse
     {
-        return ApiResponse::success(UserResource::make($request->user()->load(['roles', 'permissions'])));
+        return ApiResponse::success(
+            UserResource::make($request->user()->load(['roles', 'permissions']))
+        );
     }
 
     /**
-     * verify email.
+     * Verify email address.
      */
     public function verifyEmail(Request $request, string $id, string $hash): JsonResponse
     {
         $user = \App\Models\User::findOrFail($id);
 
         if (! hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
-            return ApiResponse::error(ErrorCode::INVALID_VALIDATION_LINK, 'Invalid verification link.', 403, 'You send an invalid verification link');
+            throw ApiException::forbidden('Invalid verification link.');
         }
 
         if ($user->hasVerifiedEmail()) {
@@ -149,39 +170,40 @@ class AuthController extends Controller
         return ApiResponse::success(null, 'Email verified successfully.');
     }
 
-    public function resendVerificationEmail(Request $request)
+    /**
+     * Resend email verification link.
+     */
+    public function resendVerificationEmail(Request $request): JsonResponse
     {
         $user = $request->user();
 
         if ($user->hasVerifiedEmail()) {
-            return ApiResponse::error(ErrorCode::EMAIL_ALREADY_VERIFIED, 'Email already verified.', 400, 'Your email already verified');
+            throw ApiException::unprocessable('Your email is already verified.', ErrorCode::EMAIL_ALREADY_VERIFIED);
         }
 
         $user->sendEmailVerificationNotification();
 
-        return ApiResponse::success(null, 'A new verification link has been sent.');
+        return ApiResponse::accepted('A new verification link has been sent.');
     }
 
-    public function refresh(Request $request)
+    /**
+     * Refresh the current token.
+     */
+    public function refresh(Request $request): JsonResponse
     {
         $user = $request->user();
 
-        // Revoke the current token
-        $user->currentAccessToken()->delete();
+        $this->tokenService->revokeCurrentToken($user);
 
-        // Create a new token
-        $tokenInstance = $user->createToken('auth_token');
-        $newToken      = $tokenInstance->plainTextToken;
-
-        $expiration = config('sanctum.expiration');
-        $expiresAt  = $expiration ? now()->addMinutes($expiration)->toIso8601String() : null;
+        $deviceName = app(\App\Actions\Auth\ResolveDeviceNameAction::class)->execute();
+        $newToken   = $this->tokenService->createToken($user, $deviceName);
 
         return ApiResponse::success([
             'user'       => AuthResource::make($user->load(['roles', 'permissions'])),
             'token'      => $newToken,
             'token_type' => 'Bearer',
-            'expires_at' => $expiresAt,
-        ], 'Successfully refreshed token.');
+            'expires_at' => $this->tokenService->getTokenExpiry(),
+        ], 'Token refreshed successfully.');
     }
 
     /**
@@ -192,14 +214,9 @@ class AuthController extends Controller
         $result = $action->execute($request->validated());
 
         return match ($result['status']) {
-            \App\Enums\Result\Auth\PasswordResetResult::LINK_SENT =>
-            ApiResponse::success(null, __('passwords.sent')),
-
-            \App\Enums\Result\Auth\PasswordResetResult::THROTTLED =>
-            ApiResponse::error(ErrorCode::RESET_PASSWORD_FAILED, __('passwords.throttled'), 429),
-
-            default                                               =>
-            ApiResponse::error(ErrorCode::USER_NOT_FOUND, __('passwords.user'), 422),
+            \App\Enums\Result\Auth\PasswordResetResult::LINK_SENT => ApiResponse::accepted(__('passwords.sent')),
+            \App\Enums\Result\Auth\PasswordResetResult::THROTTLED  => throw ApiException::tooManyRequests(__('passwords.throttled')),
+            default                                                => throw ApiException::unprocessable(__('passwords.user'), ErrorCode::USER_NOT_FOUND),
         };
     }
 
@@ -211,17 +228,10 @@ class AuthController extends Controller
         $result = $action->execute($request->validated());
 
         return match ($result['status']) {
-            \App\Enums\Result\Auth\PasswordResetResult::RESET_SUCCESS =>
-            ApiResponse::success(null, __('passwords.reset')),
-
-            \App\Enums\Result\Auth\PasswordResetResult::INVALID_TOKEN =>
-            ApiResponse::error(ErrorCode::INVALID_VALIDATION_LINK, __('passwords.token'), 422),
-
-            \App\Enums\Result\Auth\PasswordResetResult::THROTTLED     =>
-            ApiResponse::error(ErrorCode::RESET_PASSWORD_FAILED, __('passwords.throttled'), 429),
-
-            default                                                   =>
-            ApiResponse::error(ErrorCode::RESET_PASSWORD_FAILED, __('passwords.user'), 422),
+            \App\Enums\Result\Auth\PasswordResetResult::RESET_SUCCESS => ApiResponse::success(null, __('passwords.reset')),
+            \App\Enums\Result\Auth\PasswordResetResult::INVALID_TOKEN  => throw ApiException::unprocessable(__('passwords.token'), ErrorCode::INVALID_VALIDATION_LINK),
+            \App\Enums\Result\Auth\PasswordResetResult::THROTTLED      => throw ApiException::tooManyRequests(__('passwords.throttled')),
+            default                                                    => throw ApiException::unprocessable(__('passwords.user'), ErrorCode::RESET_PASSWORD_FAILED),
         };
     }
 }
