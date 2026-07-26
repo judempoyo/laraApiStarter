@@ -1,8 +1,8 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
@@ -28,7 +28,7 @@ class HealthController extends Controller
             'storage'  => $this->checkStorage(),
         ];
 
-        $isHealthy = collect($services)->every(fn (array $s): bool => $s['status'] === 'up');
+        $isHealthy = collect($services)->every(fn(array $s): bool => $s['status'] === 'up');
 
         $health = [
             'status'      => $isHealthy ? 'healthy' : 'degraded',
@@ -56,7 +56,7 @@ class HealthController extends Controller
     protected function checkDatabase(): array
     {
         try {
-            $start   = microtime(true);
+            $start = microtime(true);
             DB::connection()->getPdo();
             $latency = round((microtime(true) - $start) * 1000, 2);
 

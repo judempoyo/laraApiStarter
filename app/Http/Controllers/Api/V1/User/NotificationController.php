@@ -1,8 +1,8 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
-namespace App\Http\Controllers\Api\User;
+namespace App\Http\Controllers\Api\V1\User;
 
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;

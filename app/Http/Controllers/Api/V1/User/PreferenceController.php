@@ -1,15 +1,15 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
-namespace App\Http\Controllers\Api\User;
+namespace App\Http\Controllers\Api\V1\User;
 
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\UpdatePreferenceRequest;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Http\Requests\User\UpdatePreferenceRequest;
 
 class PreferenceController extends Controller
 {
@@ -22,7 +22,7 @@ class PreferenceController extends Controller
             ->preferences()
             ->orderBy('key')
             ->get(['key', 'value', 'updated_at'])
-            ->mapWithKeys(fn ($pref) => [$pref->key => $pref->value]);
+            ->mapWithKeys(fn($pref) => [$pref->key => $pref->value]);
 
         return ApiResponse::success($preferences, 'Preferences retrieved successfully.');
     }

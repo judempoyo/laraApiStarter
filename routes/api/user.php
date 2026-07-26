@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Api\ApiKeyController;
-use App\Http\Controllers\Api\User\NotificationController;
-use App\Http\Controllers\Api\User\PreferenceController;
+use App\Http\Controllers\Api\V1\ApiKeyController;
+use App\Http\Controllers\Api\V1\User\NotificationController;
+use App\Http\Controllers\Api\V1\User\PreferenceController;
 use Illuminate\Support\Facades\Route;
 
 /**

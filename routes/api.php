@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\Auth\SessionController;
 use App\Http\Controllers\Api\Auth\SocialiteController;
 use App\Http\Controllers\Api\Auth\TwoFactorController;
 use App\Http\Controllers\Api\EnumController;
-use App\Http\Controllers\Api\HealthController;
+use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Support\Facades\Route;
 

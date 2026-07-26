@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Api\Admin\ImpersonationController;
+use App\Http\Controllers\Api\V1\Admin\ImpersonationController;
 use Illuminate\Support\Facades\Route;
 
 /**

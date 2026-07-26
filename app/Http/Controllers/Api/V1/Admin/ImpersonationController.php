@@ -1,8 +1,8 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
-namespace App\Http\Controllers\Api\Admin;
+namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Actions\Admin\StartImpersonationAction;
 use App\Contracts\Auth\TokenServiceInterface;

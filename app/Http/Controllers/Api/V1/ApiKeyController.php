@@ -1,17 +1,16 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\StoreApiKeyRequest;
 use App\Http\Responses\ApiResponse;
-use App\Models\ApiKey;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use App\Http\Requests\Api\StoreApiKeyRequest;
 
 class ApiKeyController extends Controller
 {
