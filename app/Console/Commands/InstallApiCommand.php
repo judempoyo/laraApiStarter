@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Artisan;
 
 class InstallApiCommand extends Command
 {
-    protected $signature   = 'las:install';
+    protected $signature   = 'api:install';
     protected $description = 'Interactive setup for LaraApiStarter — configure auth driver, database, and run migrations.';
 
     public function handle(): int
