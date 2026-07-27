@@ -94,7 +94,7 @@ class InstallApiCommand extends Command
         $this->line('  Next steps:');
         $this->line('    php artisan serve');
         $this->line('    Visit /api/v1/health to verify the installation');
-        $this->line('    Visit /docs/api for the interactive API documentation');
+        $this->line('    Visit /docs/api for scramble API documentation  or  /doc for scalar API documentation');
         $this->newLine();
     }
 
