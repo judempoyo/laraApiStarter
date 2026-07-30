@@ -23,13 +23,15 @@ class ApiException extends HttpException
     /**
      * Create a 400 Bad Request exception.
      */
-    public static function badRequest(string $message = 'Bad request.', ErrorCode $errorCode = ErrorCode::VALIDATION_FAILED): self
+    public static function badRequest(string $message = '', ErrorCode $errorCode = ErrorCode::VALIDATION_FAILED): self
     {
+        $msg = $message ?: __('api.validation_failed');
+
         return new self(
             errorCode: $errorCode,
-            message: $message,
+            message: $msg,
             statusCode: 400,
-            userMessage: $message,
+            userMessage: $msg,
         );
     }
 
@@ -40,9 +42,9 @@ class ApiException extends HttpException
     {
         return new self(
             errorCode: ErrorCode::INVALID_CREDENTIALS,
-            message: $message ?? 'Invalid credentials.',
+            message: $message ?? __('api.invalid_credentials'),
             statusCode: 401,
-            userMessage: 'The provided credentials are incorrect.',
+            userMessage: __('api.invalid_credentials_message'),
         );
     }
 
@@ -53,35 +55,40 @@ class ApiException extends HttpException
     {
         return new self(
             errorCode: ErrorCode::FORBIDDEN,
-            message: $message ?? 'Access denied.',
+            message: $message ?? __('api.unauthorized'),
             statusCode: 403,
-            userMessage: 'You do not have permission to perform this action.',
+            userMessage: __('api.unauthorized_message'),
         );
     }
 
     /**
      * Create a 404 Not Found exception.
+     *
+     * The resource name is interpolated into the translation string
+     * so callers keep passing a plain English noun (e.g. 'User', 'Webhook').
      */
     public static function notFound(string $resource = 'Resource', ?string $message = null): self
     {
         return new self(
             errorCode: ErrorCode::RESOURCE_NOT_FOUND,
-            message: $message ?? "{$resource} not found.",
+            message: $message ?? __('api.not_found', ['resource' => $resource]),
             statusCode: 404,
-            userMessage: "The requested {$resource} does not exist.",
+            userMessage: __('api.not_found_message', ['resource' => $resource]),
         );
     }
 
     /**
      * Create a 409 Conflict exception.
      */
-    public static function conflict(string $message = 'Resource already exists.', ?array $errors = null): self
+    public static function conflict(string $message = '', ?array $errors = null): self
     {
+        $msg = $message ?: __('api.conflict', ['resource' => 'Resource']);
+
         return new self(
             errorCode: ErrorCode::CONFLICT,
-            message: $message,
+            message: $msg,
             statusCode: 409,
-            userMessage: $message,
+            userMessage: $msg,
             errors: $errors,
         );
     }
@@ -93,9 +100,9 @@ class ApiException extends HttpException
     {
         return new self(
             errorCode: ErrorCode::GONE,
-            message: "{$resource} has been permanently removed.",
+            message: __('api.gone', ['resource' => $resource]),
             statusCode: 410,
-            userMessage: "The requested {$resource} no longer exists.",
+            userMessage: __('api.gone_message', ['resource' => $resource]),
         );
     }
 
@@ -133,9 +140,9 @@ class ApiException extends HttpException
     {
         return new self(
             errorCode: ErrorCode::TOO_MANY_REQUESTS,
-            message: $message ?? 'Too many requests.',
+            message: $message ?? __('api.too_many_requests'),
             statusCode: 429,
-            userMessage: 'You have exceeded your request limit. Please try again later.',
+            userMessage: __('api.too_many_requests_message'),
         );
     }
 
@@ -146,9 +153,9 @@ class ApiException extends HttpException
     {
         return new self(
             errorCode: ErrorCode::SERVER_ERROR,
-            message: $message ?? 'An unexpected error occurred.',
+            message: $message ?? __('api.server_error'),
             statusCode: 500,
-            userMessage: 'An unexpected error occurred. Please try again later.',
+            userMessage: __('api.server_error_message'),
             previous: $previous,
         );
     }
@@ -160,9 +167,9 @@ class ApiException extends HttpException
     {
         return new self(
             errorCode: ErrorCode::SERVICE_UNAVAILABLE,
-            message: $message ?? 'Service temporarily unavailable.',
+            message: $message ?? __('api.service_unavailable'),
             statusCode: 503,
-            userMessage: 'The service is temporarily unavailable. Please try again later.',
+            userMessage: __('api.service_unavailable_message'),
         );
     }
 }

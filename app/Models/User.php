@@ -95,6 +95,21 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(UserPreference::class);
     }
 
+    public function webhooks(): HasMany
+    {
+        return $this->hasMany(\App\Models\Webhook::class);
+    }
+
+    public function media(): HasMany
+    {
+        return $this->hasMany(\App\Models\Media::class);
+    }
+
+    public function exports(): HasMany
+    {
+        return $this->hasMany(\App\Models\Export::class);
+    }
+
     // ─── Token ─────────────────────────────────────────────────────────────
 
     /**

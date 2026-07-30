@@ -5,7 +5,78 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0.html).
 
+## [1.1.0] - 2026-07-30
+
+### Added
+
+**i18n & Localization**
+- `app/Http/Middleware/SetLocale.php` — reads the `Accept-Language` header (with quality-value parsing, e.g. `fr-FR,fr;q=0.9`) and calls `App::setLocale()` for every request
+- `lang/en/api.php` — complete English translation file for all API messages
+- `lang/fr/api.php` — complete French translation file for all API messages
+- `config/app.php` — `supported_locales` list drives locale resolution
+
+**Outbound Webhook System**
+- `app/Models/Webhook.php` + migration — stores endpoint URL, event subscriptions, HMAC secret, active flag
+- `app/Models/WebhookDelivery.php` + migration — full delivery log (status, HTTP code, response body, attempt count)
+- `app/Enums/WebhookEvent.php` — `api_key.created`, `api_key.deleted`, `export.completed`, `export.failed`
+- `app/Services/WebhookDispatcher.php` — single entry point; queries active subscribers and dispatches async jobs
+- `app/Jobs/WebhookDeliveryJob.php` — signs payload with HMAC-SHA256 (`X-Signature: sha256=...`), exponential backoff (60 / 300 / 900 s), logs every attempt
+- `app/Actions/Webhook/{Create,Update,Delete}WebhookAction.php` + DTOs
+- `app/Http/Controllers/Api/V1/WebhookController.php` — list, create, update, delete, delivery history (paginated), manual redeliver, available events listing
+- `app/Http/Requests/Webhook/{Store,Update}WebhookRequest.php` — validates against `WebhookEvent` enum
+- `app/Http/Resources/{Webhook,WebhookDelivery}Resource.php`
+- `database/factories/{Webhook,WebhookDelivery}Factory.php`
+- `tests/Feature/WebhookTest.php`
+- Routes: `GET|POST /user/webhooks`, `PATCH|DELETE /user/webhooks/{id}`, `GET /user/webhooks/{id}/deliveries`, `POST /user/webhooks/{id}/deliveries/{dId}/redeliver`, `GET /user/webhooks/events`
+
+**File & Media Manager**
+- `app/Models/Media.php` + migration — stores disk, path, thumbnail path, MIME type, size, collection
+- `app/Services/MediaService.php` — upload, auto-thumbnail (300×300) for images via `intervention/image-laravel`, deletion, signed URL generation for private disks
+- `app/Actions/Media/{Upload,Delete}MediaAction.php` + `app/DTOs/Media/UploadMediaDTO.php`
+- `app/Http/Controllers/Api/V1/MediaController.php` — list (filterable by collection), upload, signed URL, delete
+- `app/Http/Requests/Media/UploadMediaRequest.php` — validates file, collection name format, disk
+- `app/Http/Resources/MediaResource.php`
+- `database/factories/MediaFactory.php`
+- `tests/Feature/MediaTest.php`
+- Routes: `GET|POST /user/media`, `GET /user/media/{id}/url`, `DELETE /user/media/{id}`
+- Collections system: `avatars`, `product_images`, `store_images`, `documents`, `exports`, any custom string
+- Multi-disk: `local`, `s3`, `r2` — configure via `FILESYSTEM_DISK` env variable
+
+**Async Data Export**
+- `app/Contracts/ExportableInterface.php` — `rows(?User $user, array $filters)`, `isAdminOnly()`
+- `app/Exports/Concerns/AppliesExportFilters.php` — reusable trait: `ids`, `id_from`/`id_to`, `date_from`/`date_to`, `status`, `role` filters for any Eloquent query
+- Built-in exporters: `UserPreferenceExport`, `NotificationExport` (user-scoped); `UsersExport`, `ApiKeysExport` (admin-only)
+- `config/export.php` — extensible resource registry; add any model by implementing `ExportableInterface`
+- `app/Jobs/ProcessExportJob.php` — async CSV/JSON generation, stores file via `MediaService`, notifies user, fires `export.completed` / `export.failed` webhooks
+- `app/Notifications/ExportReadyNotification.php`
+- `app/Actions/Export/CreateExportAction.php` + `app/DTOs/Export/CreateExportDTO.php`
+- `app/Http/Controllers/Api/V1/ExportController.php` — 202 Accepted trigger, list, show with signed download URL, resources listing
+- `app/Http/Requests/Export/StoreExportRequest.php` — validates resource against config, format against enum, optional filters
+- `app/Http/Resources/ExportResource.php`
+- `database/factories/ExportFactory.php`
+- `tests/Feature/ExportTest.php`
+- `tests/Feature/LocalizationTest.php`
+- Routes: `GET /user/exports/resources`, `GET|POST /user/exports`, `GET /user/exports/{id}`
+- Env variable: `EXPORT_DISK`, `EXPORT_URL_TTL`
+
+### Changed
+
+- `app/Exceptions/ApiException.php` — all default messages now use `__('api.*')` translation keys; fully multilingual at the exception level
+- `app/Http/Controllers/Api/Auth/AuthController.php` — all response messages replaced with `__('api.*')` calls
+- `app/Http/Controllers/Api/Auth/ProfileController.php` — all response messages replaced with `__('api.*')` calls
+- `app/Http/Controllers/Api/Auth/TwoFactorController.php` — all response messages replaced with `__('api.*')` calls
+- `app/Http/Controllers/Api/V1/ApiKeyController.php` — fires `api_key.created` and `api_key.deleted` webhook events; messages translated
+- `app/Http/Controllers/Api/V1/User/NotificationController.php` — messages translated
+- `app/Http/Controllers/Api/V1/User/PreferenceController.php` — messages translated
+- `app/Http/Controllers/Api/V1/Admin/ImpersonationController.php` — messages translated
+- `app/Models/User.php` — added `webhooks()`, `media()`, `exports()` HasMany relations
+- `bootstrap/app.php` — `SetLocale` middleware appended to global stack
+- `routes/api/user.php` — added webhook, media, and export endpoints
+
+---
+
 ## [1.0.0] - 2026-07-24
+
 
 ### Added
 
