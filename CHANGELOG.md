@@ -59,6 +59,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
 - Routes: `GET /user/exports/resources`, `GET|POST /user/exports`, `GET /user/exports/{id}`
 - Env variable: `EXPORT_DISK`, `EXPORT_URL_TTL`
 
+**Async Data Import**
+- `app/Contracts/ImportableInterface.php` — `requiredHeaders()`, `rules(array $row, int $rowIndex)`, `import(array $row, ?User $user)`, `label()`, `isAdminOnly()`
+- `app/Jobs/ProcessImportJob.php` — background CSV/JSON processing, validation validation tracking, error reporting, notifies user, dispatches `import.completed` / `import.failed` webhooks
+- `app/Notifications/ImportCompletedNotification.php`
+- `app/Imports/UserPreferenceImport.php` (user-scoped); `app/Imports/UsersImport.php` (admin-only)
+- `config/import.php` — import registry configuration
+- `app/Actions/Import/CreateImportAction.php` + `app/DTOs/Import/CreateImportDTO.php`
+- `app/Http/Controllers/Api/V1/ImportController.php` — index, store (202 Accepted), show, resources listing
+- `app/Http/Requests/Import/StoreImportRequest.php` — validates file type, size, resource keys
+- `app/Http/Resources/ImportResource.php`
+- `tests/Feature/ImportTest.php`
+- Routes: `GET /user/imports/resources`, `GET|POST /user/imports`, `GET /user/imports/{id}`
+- Env variable: `IMPORT_DISK`
+
 ### Changed
 
 - `app/Exceptions/ApiException.php` — all default messages now use `__('api.*')` translation keys; fully multilingual at the exception level
@@ -69,9 +83,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
 - `app/Http/Controllers/Api/V1/User/NotificationController.php` — messages translated
 - `app/Http/Controllers/Api/V1/User/PreferenceController.php` — messages translated
 - `app/Http/Controllers/Api/V1/Admin/ImpersonationController.php` — messages translated
-- `app/Models/User.php` — added `webhooks()`, `media()`, `exports()` HasMany relations
+- `app/Models/User.php` — added `webhooks()`, `media()`, `exports()`, `imports()` HasMany relations
 - `bootstrap/app.php` — `SetLocale` middleware appended to global stack
-- `routes/api/user.php` — added webhook, media, and export endpoints
+- `routes/api/user.php` — added webhook, media, export, and import endpoints
 
 ---
 
