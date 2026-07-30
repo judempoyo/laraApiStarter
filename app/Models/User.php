@@ -100,6 +100,10 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(\App\Models\Webhook::class);
     }
 
+    public function media(): HasMany
+    {
+        return $this->hasMany(\App\Models\Media::class);
+    }
     // ─── Token ─────────────────────────────────────────────────────────────
 
     /**

@@ -56,6 +56,9 @@ enum ErrorCode: string
     case WEBHOOK_NOT_FOUND        = 'WEBHOOK_NOT_FOUND';
     case WEBHOOK_DELIVERY_FAILED  = 'WEBHOOK_DELIVERY_FAILED';
 
+    // Media
+    case MEDIA_NOT_FOUND          = 'MEDIA_NOT_FOUND';
+    case MEDIA_UPLOAD_FAILED      = 'MEDIA_UPLOAD_FAILED';
 
 }
 
