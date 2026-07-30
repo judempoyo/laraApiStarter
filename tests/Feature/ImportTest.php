@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 beforeEach(function (): void {
     $this->seed(RolesAndPermissionsSeeder::class);
     Storage::fake('local');
+    Queue::fake();
 });
 
 // ─── Resources listing ────────────────────────────────────────────────────────
@@ -220,7 +221,7 @@ it('logs validation errors for invalid rows', function (): void {
     expect($import->failed_rows)->toBe(1);
     expect($import->errors)->not->toBeEmpty();
     expect($import->errors[0]['row'])->toBe(1);
-    expect($import->errors[0]['errors']['key'])->toBeDefined();
+    expect($import->errors[0]['errors'])->toHaveKey('key');
 });
 
 it('handles JSON files correctly', function (): void {
