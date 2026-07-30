@@ -13,17 +13,21 @@
 ## Fonctionnalités principales
 
 - **Architecture propre** : Actions pour la logique métier, DTOs pour les données typées, Resources pour la sérialisation.
-- **Authentification flexible** : Choisissez entre **Laravel Sanctum** ou **Laravel Passport** via une seule variable d'environnement (`AUTH_DRIVER`). Le reste du code est driver-agnostique grâce à `TokenServiceInterface`.
+- **Authentification flexible** : Choisissez entre **Laravel Sanctum** ou **Laravel Passport** via une seule variable d’environnement (`AUTH_DRIVER`). Le reste du code est driver-agnostique grâce à `TokenServiceInterface`.
 - **Authentification à deux facteurs (2FA)** : 2FA TOTP via `pragmarx/google2fa`. Compatible Google Authenticator, Authy, et autres applications TOTP.
-- **Clés API** : Authentification machine-to-machine via l'en-tête `X-API-Key` avec portée et expiration configurables.
-- **Impersonation admin** : Les administrateurs peuvent prendre l'identité d'un utilisateur pour le support ou le débogage, avec journalisation d'audit complète.
-- **RBAC** : Contrôle d'accès par rôle via `spatie/laravel-permission` avec fichiers de routes séparés par rôle.
+- **Clés API** : Authentification machine-to-machine via l’en-tête `X-API-Key` avec portée et expiration configurables.
+- **Impersonation admin** : Les administrateurs peuvent prendre l’identité d’un utilisateur pour le support ou le débogage, avec journalisation d’audit complète.
+- **RBAC** : Contrôle d’accès par rôle via `spatie/laravel-permission` avec fichiers de routes séparés par rôle.
 - **Sécurité renforcée** : En-têtes de sécurité, détection de requêtes suspectes, limitation de la taille des requêtes, rate limiting, validation de mot de passe durcie.
 - **API Préférences utilisateur** : Stockage clé-valeur JSON par utilisateur.
 - **API Notifications in-app** : Lecture, marquage et suppression de notifications via des endpoints REST.
+- **Webhooks sortants** : Enregistrez des endpoints HTTP pour les événements système (`api_key.*`, `export.*`). Livraison asynchrone avec signature HMAC-SHA256, backoff exponentiel, historique complet et réémission manuelle.
+- **Gestionnaire de fichiers / Médias** : Upload générique pour les disques `local`, `S3` et `Cloudflare R2`. Système de collections (`avatars`, `product_images`, `store_images`, …), thumbnails automatiques et URL signées pour les fichiers privés.
+- **Export de données asynchrone** : Exportez n’importe quel modèle en CSV ou JSON en arrière-plan. Exports admin (utilisateurs, clés API) et exports utilisateur. Filtres dynamiques : plage d’IDs, IDs spécifiques, plage de dates, rôle, statut. Extensible via `ExportableInterface`.
+- **Internationalisation (i18n)** : Lecture du header `Accept-Language` (avec quality-values). Tous les messages de l’API — y compris les exceptions — sont traduits. Livré en anglais et français. Ajouter une nouvelle langue ne nécessite qu’un seul fichier de traduction.
 - **Générateur de scaffold** : `php artisan make:api-scaffold Product` génère la pile complète en une commande.
 - **Réponses standardisées** : JSON cohérent via `ApiResponse` et enums `ErrorCode`.
-- **Installateur interactif** : `php artisan api:install` guide la configuration du driver, des migrations et de la clé d'application.
+- **Installateur interactif** : `php artisan api:install` guide la configuration du driver, des migrations et de la clé d’application.
 
 ---
 
@@ -172,6 +176,21 @@ Toutes les routes sont préfixées par `/api/v1/`.
 | GET | `/user/api-keys` | Lister les clés API |
 | POST | `/user/api-keys` | Créer une clé API |
 | DELETE | `/user/api-keys/{id}` | Révoquer une clé API |
+| GET | `/user/webhooks/events` | Événements disponibles |
+| GET | `/user/webhooks` | Lister les webhooks |
+| POST | `/user/webhooks` | Enregistrer un webhook |
+| PATCH | `/user/webhooks/{id}` | Mettre à jour |
+| DELETE | `/user/webhooks/{id}` | Supprimer |
+| GET | `/user/webhooks/{id}/deliveries` | Historique des livraisons |
+| POST | `/user/webhooks/{id}/deliveries/{dId}/redeliver` | Réenvoyer |
+| GET | `/user/media` | Lister les fichiers |
+| POST | `/user/media` | Téléverser un fichier |
+| GET | `/user/media/{id}/url` | Obtenir l’URL signée |
+| DELETE | `/user/media/{id}` | Supprimer un fichier |
+| GET | `/user/exports/resources` | Ressources exportables |
+| GET | `/user/exports` | Lister les exports |
+| POST | `/user/exports` | Déclencher un export (202 Accepted) |
+| GET | `/user/exports/{id}` | Statut / URL de téléchargement |
 
 ### Routes admin (`/admin/*`)
 | Méthode | Endpoint | Description |
