@@ -29,7 +29,7 @@ class ImpersonationController extends Controller
 
         if ($request->user()->id === $target->id) {
             throw ApiException::unprocessable(
-                'You cannot impersonate yourself.',
+                __('api.impersonation_self_error'),
                 \App\Enums\ErrorCode::IMPERSONATION_SELF
             );
         }
@@ -45,7 +45,7 @@ class ImpersonationController extends Controller
             'token'      => $result['token'],
             'token_type' => $result['token_type'],
             'expires_at' => $result['expires_at'],
-        ], "Now impersonating {$target->email}. Use this token for subsequent requests.");
+        ], __('api.impersonation_started'));
     }
 
     /**
@@ -55,6 +55,6 @@ class ImpersonationController extends Controller
     {
         $tokenService->revokeCurrentToken($request->user());
 
-        return ApiResponse::noContent('Impersonation session ended.');
+        return ApiResponse::noContent(__('api.impersonation_stopped'));
     }
 }
