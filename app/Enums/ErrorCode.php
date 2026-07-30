@@ -60,6 +60,10 @@ enum ErrorCode: string
     case MEDIA_NOT_FOUND          = 'MEDIA_NOT_FOUND';
     case MEDIA_UPLOAD_FAILED      = 'MEDIA_UPLOAD_FAILED';
 
+    // Exports
+    case EXPORT_NOT_FOUND         = 'EXPORT_NOT_FOUND';
+    case EXPORT_FAILED            = 'EXPORT_FAILED';
+
 }
 
 
