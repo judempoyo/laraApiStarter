@@ -31,14 +31,14 @@ class TwoFactorController extends Controller
         return match ($result['status']) {
             TwoFactorResult::ALREADY_ENABLED => throw new ApiException(
                 errorCode: ErrorCode::TWO_FACTOR_ALREADY_ENABLED,
-                message: 'Two-factor authentication is already enabled.',
+                message: __('api.2fa_already_enabled'),
                 statusCode: 409,
-                userMessage: 'Two-factor authentication is already active on this account.',
+                userMessage: __('api.2fa_already_enabled_msg'),
             ),
             TwoFactorResult::ENABLED => ApiResponse::success([
                 'secret'      => $result['secret'],
                 'qr_code_uri' => $result['qr_code_uri'],
-            ], 'Scan the QR code with your authenticator app, then confirm with the generated code.'),
+            ], __('api.2fa_setup')),
         };
     }
 
@@ -53,15 +53,15 @@ class TwoFactorController extends Controller
         return match ($result['status']) {
             TwoFactorResult::ALREADY_ENABLED => throw new ApiException(
                 errorCode: ErrorCode::TWO_FACTOR_ALREADY_ENABLED,
-                message: 'Two-factor authentication is already enabled.',
+                message: __('api.2fa_already_enabled'),
                 statusCode: 409,
-                userMessage: 'Two-factor authentication is already active on this account.',
+                userMessage: __('api.2fa_already_enabled_msg'),
             ),
             TwoFactorResult::INVALID_CODE => throw ApiException::unprocessable(
-                'The provided code is invalid or expired.',
+                __('api.2fa_invalid_code'),
                 ErrorCode::TWO_FACTOR_INVALID_CODE
             ),
-            TwoFactorResult::CONFIRMED => ApiResponse::success(null, 'Two-factor authentication has been enabled.'),
+            TwoFactorResult::CONFIRMED => ApiResponse::success(null, __('api.2fa_confirmed')),
         };
     }
 
@@ -75,18 +75,18 @@ class TwoFactorController extends Controller
 
         return match ($result['status']) {
             TwoFactorResult::NOT_ENABLED => throw ApiException::unprocessable(
-                'Two-factor authentication is not enabled.',
+                __('api.2fa_not_enabled'),
                 ErrorCode::TWO_FACTOR_NOT_ENABLED
             ),
             TwoFactorResult::NOT_CONFIRMED => throw ApiException::unprocessable(
-                'Two-factor authentication has not been confirmed yet.',
+                __('api.2fa_not_confirmed'),
                 ErrorCode::TWO_FACTOR_NOT_CONFIRMED
             ),
             TwoFactorResult::INVALID_CODE => throw ApiException::unprocessable(
-                'The provided code is invalid or expired.',
+                __('api.2fa_invalid_code'),
                 ErrorCode::TWO_FACTOR_INVALID_CODE
             ),
-            TwoFactorResult::VERIFIED => ApiResponse::success(null, 'Two-factor code verified successfully.'),
+            TwoFactorResult::VERIFIED => ApiResponse::success(null, __('api.2fa_verified')),
         };
     }
 
@@ -100,14 +100,14 @@ class TwoFactorController extends Controller
 
         return match ($result['status']) {
             TwoFactorResult::NOT_ENABLED => throw ApiException::unprocessable(
-                'Two-factor authentication is not enabled.',
+                __('api.2fa_not_enabled'),
                 ErrorCode::TWO_FACTOR_NOT_ENABLED
             ),
             TwoFactorResult::INVALID_PASSWORD => throw ApiException::unprocessable(
-                'The provided password is incorrect.',
+                __('api.2fa_invalid_password'),
                 ErrorCode::PASSWORD_MISMATCH
             ),
-            TwoFactorResult::DISABLED => ApiResponse::noContent('Two-factor authentication has been disabled.'),
+            TwoFactorResult::DISABLED => ApiResponse::noContent(__('api.2fa_disabled')),
         };
     }
 }

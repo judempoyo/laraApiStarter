@@ -21,6 +21,10 @@
 - **Security First**: Security headers, suspicious request detection, request size limiting, rate limiting, and hardened password validation.
 - **User Preferences API**: Key-value store for arbitrary per-user settings.
 - **In-App Notifications API**: Read, mark as read, and delete database notifications via REST endpoints.
+- **Outbound Webhooks**: Register HTTP listener endpoints for system events (`api_key.*`, `export.*`). Async delivery with HMAC-SHA256 signing, exponential backoff, delivery history, and manual redeliver.
+- **File & Media Manager**: Generic upload system for `local`, `S3`, and `Cloudflare R2` disks. Collection system (`avatars`, `product_images`, `store_images`, ...), automatic image thumbnails, and signed URL generation for private files.
+- **Async Data Export**: Export any model to CSV or JSON in the background. Admin exports (users, API keys) and user-scoped exports. Dynamic filters: ID range, specific IDs, date range, role, status. Extensible via `ExportableInterface`.
+- **Internationalization (i18n)**: `Accept-Language` header support (with quality-value parsing). All API responses — including exceptions — are translated. Ships with English and French. Adding new locales requires only a new lang file.
 - **Scaffold Generator**: `php artisan make:api-scaffold Product` generates the full stack in one command.
 - **Response Standardization**: Consistent JSON via `ApiResponse` and `ErrorCode` enums.
 - **Interactive Installer**: `php artisan api:install` guides through driver selection, migrations, and setup.
@@ -91,41 +95,63 @@ app/
 │   ├── Auth/                  # Login, Register, 2FA, Password...
 │   │   └── TwoFactor/         # Enable, Confirm, Verify, Disable
 │   ├── Admin/                 # Impersonation
-│   ├── User/                  # Preferences, Notifications
+│   ├── Webhook/               # Create, Update, Delete webhook
+│   ├── Media/                 # Upload, Delete
+│   ├── Export/                # CreateExport
 │   └── Security/              # Security event logging
 ├── Console/Commands/
 │   ├── InstallApiCommand.php  # php artisan api:install
 │   └── MakeApiScaffoldCommand.php # php artisan make:api-scaffold
-├── Contracts/Auth/
-│   └── TokenServiceInterface.php  # Auth driver abstraction
+├── Contracts/
+│   ├── Auth/TokenServiceInterface.php  # Auth driver abstraction
+│   └── ExportableInterface.php         # Export model contract
 ├── DTOs/                      # Typed data transfer objects
-├── Enums/                     # ErrorCode, SecurityEvent, Result enums
+├── Enums/                     # ErrorCode, SecurityEvent, WebhookEvent, ExportFormat, ...
 ├── Exceptions/
-│   └── ApiException.php       # Semantic exception factory (notFound, forbidden...)
+│   └── ApiException.php       # Semantic exception factory — fully multilingual
+├── Exports/                   # ExportableInterface implementations
+│   ├── Concerns/AppliesExportFilters.php
+│   ├── UsersExport.php        # Admin-only
+│   ├── ApiKeysExport.php      # Admin-only
+│   ├── UserPreferenceExport.php
+│   └── NotificationExport.php
 ├── Http/
 │   ├── Controllers/Api/
 │   │   ├── Auth/              # Auth, Profile, Session, 2FA, Socialite
 │   │   ├── Admin/             # Impersonation
 │   │   ├── User/              # Preferences, Notifications
-│   │   └── ApiKeyController   # Machine-to-machine API keys
-│   ├── Middleware/            # OptionalAuth, Security, RequestSizeLimit...
-│   ├── Requests/              # Form Requests with ApiRequest base
+│   │   └── V1/                # ApiKey, Webhook, Media, Export
+│   ├── Middleware/            # OptionalAuth, Security, SetLocale, RequestSizeLimit...
+│   ├── Requests/              # FormRequests per feature (no inline validation)
 │   ├── Resources/             # Eloquent JSON Resources
-│   └── Responses/
-│       └── ApiResponse.php    # success/created/accepted/noContent/error/paginated
+│   └── Responses/ApiResponse.php
+├── Jobs/
+│   ├── WebhookDeliveryJob.php # HMAC-signed delivery + backoff
+│   └── ProcessExportJob.php   # Async CSV/JSON export
 ├── Models/
-│   ├── User.php               # + apiKeys/preferences/securityLogs relations
+│   ├── User.php               # + apiKeys/preferences/webhooks/media/exports
 │   ├── ApiKey.php
-│   └── UserPreference.php
-├── Services/Auth/
-│   ├── SanctumTokenService.php
-│   └── PassportTokenService.php
-└── Traits/                    # LogsActivity, HasPagination, Filterable
+│   ├── UserPreference.php
+│   ├── Webhook.php
+│   ├── WebhookDelivery.php
+│   ├── Media.php
+│   └── Export.php
+├── Services/
+│   ├── Auth/SanctumTokenService.php
+│   ├── Auth/PassportTokenService.php
+│   ├── WebhookDispatcher.php  # Event → subscribers → async jobs
+│   └── MediaService.php       # Upload/thumbnail/signed-URL/delete
+config/
+├── api.php                    # Version, auth, rate limits, security
+└── export.php                 # Exportable resource registry
+lang/
+├── en/api.php                 # Complete English translations
+└── fr/api.php                 # Complete French translations
 routes/
 ├── api.php                    # Auth, Profile, 2FA, public routes
 └── api/
-    ├── admin.php              # role:admin routes (Impersonation, stats...)
-    └── user.php               # authenticated user routes (Preferences, Notifications, API Keys)
+    ├── admin.php              # role:admin routes
+    └── user.php               # Auth user: Preferences, Notifications, API Keys, Webhooks, Media, Exports
 ```
 
 ---
@@ -179,6 +205,21 @@ All routes are prefixed with `/api/v1/`.
 | GET | `/user/api-keys` | List API keys |
 | POST | `/user/api-keys` | Create API key |
 | DELETE | `/user/api-keys/{id}` | Revoke API key |
+| GET | `/user/webhooks/events` | List available events |
+| GET | `/user/webhooks` | List registered webhooks |
+| POST | `/user/webhooks` | Register a webhook |
+| PATCH | `/user/webhooks/{id}` | Update a webhook |
+| DELETE | `/user/webhooks/{id}` | Delete a webhook |
+| GET | `/user/webhooks/{id}/deliveries` | Delivery history |
+| POST | `/user/webhooks/{id}/deliveries/{dId}/redeliver` | Retry a delivery |
+| GET | `/user/media` | List media files |
+| POST | `/user/media` | Upload a file |
+| GET | `/user/media/{id}/url` | Get signed download URL |
+| DELETE | `/user/media/{id}` | Delete a file |
+| GET | `/user/exports/resources` | List exportable resources |
+| GET | `/user/exports` | List exports |
+| POST | `/user/exports` | Trigger an export (202 Accepted) |
+| GET | `/user/exports/{id}` | Check export status / get download URL |
 
 ### Admin Routes (`/admin/*`)
 | Method | Endpoint | Description |

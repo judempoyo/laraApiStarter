@@ -93,6 +93,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Supported Locales
+    |--------------------------------------------------------------------------
+    | The list of locales supported by the SetLocale middleware.
+    | Requests with an Accept-Language header matching one of these locales
+    | will have the application locale set accordingly.
+    */
+    'supported_locales' => ['en', 'fr'],
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

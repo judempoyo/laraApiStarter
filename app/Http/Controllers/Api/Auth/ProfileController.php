@@ -37,7 +37,7 @@ class ProfileController extends Controller
 
         return match ($result['status']) {
             \App\Enums\Result\Auth\UpdateProfileResult::SUCCESS =>
-            ApiResponse::success(UserResource::make($result['user']), 'Profile updated successfully.'),
+            ApiResponse::success(UserResource::make($result['user']), __('api.profile_updated')),
         };
     }
 
@@ -53,7 +53,7 @@ class ProfileController extends Controller
 
         return match ($result['status']) {
             \App\Enums\Result\Auth\UpdateEmailResult::SUCCESS =>
-            ApiResponse::success(UserResource::make($result['user']), 'Email changed successfully. A new verification link has been sent.'),
+            ApiResponse::success(UserResource::make($result['user']), __('api.email_changed')),
         };
     }
 
@@ -69,11 +69,11 @@ class ProfileController extends Controller
 
         return match ($result['status']) {
             \App\Enums\Result\Auth\UpdatePasswordResult::SUCCESS =>
-            ApiResponse::noContent('Password updated successfully.'),
+            ApiResponse::noContent(__('api.password_updated')),
 
             \App\Enums\Result\Auth\UpdatePasswordResult::INVALID_CURRENT_PASSWORD =>
             throw ApiException::unprocessable(
-                'The provided password does not match your current password.',
+                __('api.wrong_current_password'),
                 \App\Enums\ErrorCode::PASSWORD_MISMATCH
             ),
         };
@@ -88,7 +88,7 @@ class ProfileController extends Controller
 
         return ApiResponse::success(
             ['avatar_url' => $user->avatar_url],
-            'Profile picture updated.'
+            __('api.avatar_updated')
         );
     }
 
@@ -109,6 +109,6 @@ class ProfileController extends Controller
 
         $user->update(['avatar' => null]);
 
-        return ApiResponse::noContent('Profile picture deleted.');
+        return ApiResponse::noContent(__('api.avatar_deleted'));
     }
 }

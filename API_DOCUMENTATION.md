@@ -510,6 +510,264 @@ Returns a new Bearer token scoped to the target user. Use this token for subsequ
 
 ---
 
+## Webhooks
+
+Register HTTP endpoints to receive real-time notifications when system events occur.
+All webhook routes require authentication.
+
+### List Available Events
+
+`GET /user/webhooks/events`
+
+**Response 200:**
+```json
+{
+    "data": [
+        { "value": "api_key.created", "label": "API Key Created" },
+        { "value": "api_key.deleted", "label": "API Key Deleted" },
+        { "value": "export.completed", "label": "Export Completed" },
+        { "value": "export.failed",    "label": "Export Failed" }
+    ]
+}
+```
+
+### List Webhooks
+
+`GET /user/webhooks`
+
+### Register a Webhook
+
+`POST /user/webhooks`
+
+| Field | Type | Rules |
+|-------|------|-------|
+| `url` | string | required, valid URL, max:2048 |
+| `events` | array | required, min 1 item, each must be a valid event value |
+| `description` | string | optional, max:255 |
+
+**Response 201:**
+```json
+{
+    "data": {
+        "id": 1,
+        "url": "https://example.com/hooks",
+        "events": ["api_key.created"],
+        "is_active": true,
+        "description": "CI hook"
+    }
+}
+```
+
+> The signing `secret` is never returned after creation. Store it when you create the webhook.
+
+### Update a Webhook
+
+`PATCH /user/webhooks/{id}`
+
+| Field | Type |
+|-------|------|
+| `url` | string, optional |
+| `events` | array, optional |
+| `is_active` | boolean, optional |
+| `description` | string, optional |
+
+### Delete a Webhook
+
+`DELETE /user/webhooks/{id}` — **Response 204**
+
+### Delivery History
+
+`GET /user/webhooks/{id}/deliveries` — Paginated, newest first.
+
+### Redeliver a Failed Delivery
+
+`POST /user/webhooks/{webhookId}/deliveries/{deliveryId}/redeliver` — **Response 202**
+
+### Payload Signature
+
+Every delivery includes an `X-Signature` header:
+```
+X-Signature: sha256=<hmac-sha256-hex-digest>
+```
+
+Verify it server-side:
+```php
+hash_equals(
+    'sha256=' . hash_hmac('sha256', $rawBody, $secret),
+    $request->header('X-Signature')
+);
+```
+
+---
+
+## Media
+
+Generic file upload and management system. Supports `local`, `S3`, and `Cloudflare R2` disks.
+Use the `collection` field to organize files by purpose.
+All routes require authentication.
+
+### List Media
+
+`GET /user/media` — Paginated. Filter by collection: `?collection=avatars`
+
+**Response 200:**
+```json
+{
+    "data": [
+        {
+            "id": 1,
+            "original_name": "photo.jpg",
+            "mime_type": "image/jpeg",
+            "size": 204800,
+            "human_size": "200 KB",
+            "collection": "avatars",
+            "disk": "local",
+            "is_image": true,
+            "created_at": "2026-07-30T00:00:00+00:00"
+        }
+    ]
+}
+```
+
+### Upload a File
+
+`POST /user/media` — `multipart/form-data`
+
+| Field | Type | Rules |
+|-------|------|-------|
+| `file` | file | required, max 100 MB |
+| `collection` | string | optional, lowercase/numbers/underscores only |
+| `disk` | string | optional, must be a configured filesystem disk |
+
+**Response 201** with `MediaResource`.
+
+Image uploads automatically generate a 300×300 thumbnail (`intervention/image-laravel` required).
+
+**Common collections:** `avatars`, `product_images`, `store_images`, `documents`, `exports`
+
+### Get Signed URL
+
+`GET /user/media/{id}/url`
+
+**Response 200:**
+```json
+{
+    "data": {
+        "url": "https://...",
+        "thumbnail": "https://...",
+        "expires_in": "60 minutes"
+    }
+}
+```
+
+### Delete a File
+
+`DELETE /user/media/{id}` — **Response 204** — Also deletes the physical file and thumbnail from storage.
+
+---
+
+## Data Export
+
+Asynchronous export system. Requests return `202 Accepted` immediately while the file is generated in the background.
+All routes require authentication.
+
+### List Available Resources
+
+`GET /user/exports/resources`
+
+**Response 200:**
+```json
+{
+    "data": {
+        "resources": [
+            { "key": "user_preferences", "label": "User Preferences", "admin_only": false },
+            { "key": "notifications",    "label": "Notifications",     "admin_only": false },
+            { "key": "users",            "label": "Users",             "admin_only": true  },
+            { "key": "api_keys",         "label": "API Keys",          "admin_only": true  }
+        ],
+        "formats": ["csv", "json", "xlsx"]
+    }
+}
+```
+
+### Trigger an Export
+
+`POST /user/exports`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `resource` | string | required, must match a key in `config/export.php` |
+| `format` | string | required: `csv`, `json`, or `xlsx` |
+| `filters` | object | optional — see filter options below |
+| `filters.ids` | array\<int\> | Specific record IDs to include |
+| `filters.id_from` | integer | Minimum ID (inclusive) |
+| `filters.id_to` | integer | Maximum ID (inclusive) |
+| `filters.date_from` | date | Lower bound on `created_at` |
+| `filters.date_to` | date | Upper bound on `created_at` |
+| `filters.status` | string | Filter by status field |
+| `filters.role` | string | Filter by role name (admin exports) |
+| `filters.user_id` | integer | Scope to a specific user (admin exports) |
+
+**Response 202:**
+```json
+{
+    "message": "Export queued. You will be notified when it is ready.",
+    "data": {
+        "id": 12,
+        "resource": "users",
+        "format": "csv",
+        "status": "pending",
+        "filters": { "role": "admin" },
+        "download_url": null
+    }
+}
+```
+
+> Admin-only resources (`users`, `api_keys`) require the `admin` role. Regular users will receive `403 Forbidden`.
+
+### Check Export Status
+
+`GET /user/exports/{id}`
+
+Returns the export status. When `status` is `completed`, `download_url` contains a signed, time-limited URL.
+
+```json
+{
+    "data": {
+        "id": 12,
+        "status": "completed",
+        "download_url": "https://storage.example.com/exports/users_20260730_142512.csv?X-Amz-Expires=3600",
+        "created_at": "2026-07-30T14:25:00+00:00"
+    }
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| `pending` | Job has been dispatched, not yet started |
+| `processing` | File is being generated |
+| `completed` | File ready — `download_url` is populated |
+| `failed` | Generation failed — `error_message` is set |
+
+### List Exports
+
+`GET /user/exports` — Paginated, newest first.
+
+### Adding a Custom Exportable Resource
+
+1. Create a class implementing `App\Contracts\ExportableInterface`
+2. Use the `AppliesExportFilters` trait for generic filter support
+3. Register it in `config/export.php` under `resources`
+
+```php
+// config/export.php
+'resources' => [
+    'my_orders' => \App\Exports\OrdersExport::class,
+],
+```
+
+---
+
 ## Error Codes Reference
 
 | Code | HTTP | Description |
@@ -522,7 +780,6 @@ Returns a new Bearer token scoped to the target user. Use this token for subsequ
 | `METHOD_NOT_ALLOWED` | 405 | HTTP verb not allowed on this route |
 | `CONFLICT` | 409 | Resource already exists |
 | `GONE` | 410 | Resource permanently removed |
-| `VALIDATION_FAILED` | 422 | Input validation failed |
 | `UNPROCESSABLE` | 422 | Business logic error |
 | `TOO_MANY_REQUESTS` | 429 | Rate limit exceeded |
 | `SERVER_ERROR` | 500 | Unexpected server error |

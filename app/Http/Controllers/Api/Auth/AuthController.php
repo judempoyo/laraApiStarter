@@ -42,7 +42,7 @@ class AuthController extends Controller
 
         return ApiResponse::success(
             ['exists' => $result['exists']],
-            $result['exists'] ? 'Email exists.' : 'Email not found.'
+            $result['exists'] ? __('api.email_exists') : __('api.email_not_found')
         );
     }
 
@@ -60,7 +60,7 @@ class AuthController extends Controller
             'token'      => $result['token'],
             'token_type' => $result['token_type'],
             'expires_at' => $result['expires_at'],
-        ], 'User registered successfully. Please verify your email.');
+        ], __('api.register_success'));
     }
 
     /**
@@ -74,7 +74,7 @@ class AuthController extends Controller
 
         return match ($result['status']) {
             LoginResult::USER_DISABLED       => throw ApiException::unprocessable(
-                'Your account has been disabled by an administrator.',
+                __('api.account_disabled'),
                 ErrorCode::ACCOUNT_DISABLED
             ),
             LoginResult::INVALID_CREDENTIALS => throw ApiException::unauthorized(),
@@ -83,7 +83,7 @@ class AuthController extends Controller
                 'token'      => $result['token'],
                 'token_type' => $result['token_type'],
                 'expires_at' => $result['expires_at'],
-            ], 'Login successful.'),
+            ], __('api.login_success')),
         };
     }
 
@@ -96,7 +96,7 @@ class AuthController extends Controller
         $this->tokenService->revokeCurrentToken($user);
         $this->logActivity('auth.logout', 'User logged out.', $user->id);
 
-        return ApiResponse::noContent('Logged out successfully.');
+        return ApiResponse::noContent(__('api.logout_success'));
     }
 
     /**
@@ -108,7 +108,7 @@ class AuthController extends Controller
         $this->tokenService->revokeAllTokens($user);
         $this->logActivity('auth.logout_all', 'User logged out from all devices.', $user->id);
 
-        return ApiResponse::noContent('Logged out from all devices successfully.');
+        return ApiResponse::noContent(__('api.logout_all_success'));
     }
 
     /**
@@ -125,7 +125,7 @@ class AuthController extends Controller
 
         $this->logActivity('auth.logout_session', "Session {$tokenId} revoked.", $user->id);
 
-        return ApiResponse::noContent('Session revoked successfully.');
+        return ApiResponse::noContent(__('api.session_revoked'));
     }
 
     /**
@@ -137,7 +137,7 @@ class AuthController extends Controller
         $this->tokenService->revokeOtherTokens($user);
         $this->logActivity('auth.logout_others', 'All other sessions revoked.', $user->id);
 
-        return ApiResponse::noContent('All other sessions revoked.');
+        return ApiResponse::noContent(__('api.other_sessions_revoked'));
     }
 
     /**
@@ -158,16 +158,16 @@ class AuthController extends Controller
         $user = \App\Models\User::findOrFail($id);
 
         if (! hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
-            throw ApiException::forbidden('Invalid verification link.');
+            throw ApiException::forbidden(__('api.invalid_verification_link'));
         }
 
         if ($user->hasVerifiedEmail()) {
-            return ApiResponse::success(null, 'Email already verified.');
+            return ApiResponse::success(null, __('api.email_already_verified'));
         }
 
         $user->markEmailAsVerified();
 
-        return ApiResponse::success(null, 'Email verified successfully.');
+        return ApiResponse::success(null, __('api.email_verified'));
     }
 
     /**
@@ -178,12 +178,12 @@ class AuthController extends Controller
         $user = $request->user();
 
         if ($user->hasVerifiedEmail()) {
-            throw ApiException::unprocessable('Your email is already verified.', ErrorCode::EMAIL_ALREADY_VERIFIED);
+            throw ApiException::unprocessable(__('api.email_already_verified_err'), ErrorCode::EMAIL_ALREADY_VERIFIED);
         }
 
         $user->sendEmailVerificationNotification();
 
-        return ApiResponse::accepted('A new verification link has been sent.');
+        return ApiResponse::accepted(__('api.verification_link_sent'));
     }
 
     /**
@@ -203,7 +203,7 @@ class AuthController extends Controller
             'token'      => $newToken,
             'token_type' => 'Bearer',
             'expires_at' => $this->tokenService->getTokenExpiry(),
-        ], 'Token refreshed successfully.');
+        ], __('api.token_refreshed'));
     }
 
     /**

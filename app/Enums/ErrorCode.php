@@ -52,6 +52,18 @@ enum ErrorCode: string
     case SUSPICIOUS_REQUEST = "SUSPICIOUS_REQUEST";
     case REQUEST_TOO_LARGE = "REQUEST_TOO_LARGE";
 
+    // Webhooks
+    case WEBHOOK_NOT_FOUND        = 'WEBHOOK_NOT_FOUND';
+    case WEBHOOK_DELIVERY_FAILED  = 'WEBHOOK_DELIVERY_FAILED';
+
+    // Media
+    case MEDIA_NOT_FOUND          = 'MEDIA_NOT_FOUND';
+    case MEDIA_UPLOAD_FAILED      = 'MEDIA_UPLOAD_FAILED';
+
+    // Exports
+    case EXPORT_NOT_FOUND         = 'EXPORT_NOT_FOUND';
+    case EXPORT_FAILED            = 'EXPORT_FAILED';
+
 }
 
 

@@ -34,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission'  => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ])->append([
             \App\Http\Middleware\ForceJsonResponse::class,
+            \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\SecurityHeadersMiddleware::class,
             \App\Http\Middleware\RequestIdMiddleware::class,
             \App\Http\Middleware\RequestSizeLimitMiddleware::class,
