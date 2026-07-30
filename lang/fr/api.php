@@ -125,4 +125,12 @@ return [
     'export_not_ready'           => 'L\'export n\'est pas encore prêt au téléchargement.',
     'export_ready'               => 'Votre export est prêt au téléchargement.',
     'export_resources_listed'    => 'Ressources exportables disponibles récupérées.',
+
+    // ── Imports ───────────────────────────────────────────────────────────
+    'import_queued'              => 'Import mis en file d\'attente. Vous serez notifié lorsqu\'il sera prêt.',
+    'import_retrieved'           => 'Imports récupérés avec succès.',
+    'import_not_found'           => 'Import introuvable.',
+    'import_resources_listed'    => 'Ressources importables disponibles récupérées.',
+    'import_completed_msg'       => 'Importation de :resource terminée : :success réussis, :failed échoués sur :total lignes.',
+    'import_failed_msg'          => 'L\'importation de :resource a échoué.',
 ];

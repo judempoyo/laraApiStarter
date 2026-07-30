@@ -768,6 +768,123 @@ Returns the export status. When `status` is `completed`, `download_url` contains
 
 ---
 
+## Data Import
+
+Asynchronous import system. Triggered imports return `202 Accepted` immediately, uploading the file and processing it in the background.
+
+### List Available Resources
+
+`GET /user/imports/resources`
+
+**Response 200:**
+```json
+{
+    "data": {
+        "resources": [
+            { "key": "user_preferences", "label": "User Preferences", "admin_only": false },
+            { "key": "users",            "label": "Users",             "admin_only": true  }
+        ]
+    }
+}
+```
+
+### Trigger an Import
+
+`POST /user/imports` — `multipart/form-data`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `file` | file | required, max 100 MB, CSV or JSON format |
+| `resource` | string | required, must match a key in `config/import.php` |
+| `dry_run` | boolean | optional, default `false`. If `true`, only validates data without writing to database |
+
+**Response 202:**
+```json
+{
+    "message": "Import queued. You will be notified when it is ready.",
+    "data": {
+        "id": 5,
+        "resource": "user_preferences",
+        "status": "pending",
+        "dry_run": false,
+        "total_rows": 0,
+        "processed_rows": 0,
+        "successful_rows": 0,
+        "failed_rows": 0,
+        "errors": null,
+        "error_message": null,
+        "media": {
+            "id": 10,
+            "original_name": "my_preferences.csv",
+            "mime_type": "text/csv",
+            "size": 1024,
+            "human_size": "1 KB",
+            "collection": "imports"
+        }
+    }
+}
+```
+
+### Check Import Status & Errors
+
+`GET /user/imports/{id}`
+
+Returns the import progress. When `status` is `completed`, row validation errors are detailed in the `errors` object.
+
+```json
+{
+    "data": {
+        "id": 5,
+        "status": "completed",
+        "dry_run": false,
+        "total_rows": 10,
+        "processed_rows": 10,
+        "successful_rows": 8,
+        "failed_rows": 2,
+        "errors": [
+            {
+                "row": 3,
+                "errors": {
+                    "key": ["The key field is required."]
+                }
+            },
+            {
+                "row": 7,
+                "errors": {
+                    "value": ["The value field is required."]
+                }
+            }
+        ],
+        "error_message": null
+    }
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| `pending` | Job has been dispatched, not yet started |
+| `processing` | File is being parsed and validated |
+| `completed` | Import complete (errors array will detail any failed rows) |
+| `failed` | System/structural file error occurred (e.g. invalid columns/file structure) |
+
+### List Imports
+
+`GET /user/imports` — Paginated list of import history, newest first.
+
+### Adding a Custom Importable Resource
+
+1. Create a class implementing `App\Contracts\ImportableInterface`
+2. Register it in `config/import.php` under `resources`
+
+```php
+// config/import.php
+'resources' => [
+    'my_items' => \App\Imports\MyItemsImport::class,
+],
+```
+
+---
+
 ## Error Codes Reference
 
 | Code | HTTP | Description |

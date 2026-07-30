@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\ApiKeyController;
 use App\Http\Controllers\Api\V1\ExportController;
+use App\Http\Controllers\Api\V1\ImportController;
 use App\Http\Controllers\Api\V1\MediaController;
 use App\Http\Controllers\Api\V1\WebhookController;
 use App\Http\Controllers\Api\V1\User\NotificationController;
@@ -57,4 +58,10 @@ Route::middleware(['auth:' . config('api.auth_guard', 'sanctum'), 'throttle:api'
         Route::get('exports', [ExportController::class, 'index'])->name('exports.index');
         Route::post('exports', [ExportController::class, 'store'])->name('exports.store');
         Route::get('exports/{id}', [ExportController::class, 'show'])->name('exports.show');
+
+        // ── Imports ─────────────────────────────────────────────────────────
+        Route::get('imports/resources', [ImportController::class, 'resources'])->name('imports.resources');
+        Route::get('imports', [ImportController::class, 'index'])->name('imports.index');
+        Route::post('imports', [ImportController::class, 'store'])->name('imports.store');
+        Route::get('imports/{id}', [ImportController::class, 'show'])->name('imports.show');
     });

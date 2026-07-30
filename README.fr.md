@@ -24,6 +24,7 @@
 - **Webhooks sortants** : Enregistrez des endpoints HTTP pour les événements système (`api_key.*`, `export.*`). Livraison asynchrone avec signature HMAC-SHA256, backoff exponentiel, historique complet et réémission manuelle.
 - **Gestionnaire de fichiers / Médias** : Upload générique pour les disques `local`, `S3` et `Cloudflare R2`. Système de collections (`avatars`, `product_images`, `store_images`, …), thumbnails automatiques et URL signées pour les fichiers privés.
 - **Export de données asynchrone** : Exportez n’importe quel modèle en CSV ou JSON en arrière-plan. Exports admin (utilisateurs, clés API) et exports utilisateur. Filtres dynamiques : plage d’IDs, IDs spécifiques, plage de dates, rôle, statut. Extensible via `ExportableInterface`.
+- **Import de données asynchrone** : Importez des données en masse à partir de fichiers CSV ou JSON. Prend en charge les dry-runs (aperçu de validation), la validation structurelle ligne par ligne, le suivi détaillé de la progression, la journalisation des succès/échecs partiels, les notifications et les webhooks. Extensible via `ImportableInterface`.
 - **Internationalisation (i18n)** : Lecture du header `Accept-Language` (avec quality-values). Tous les messages de l’API — y compris les exceptions — sont traduits. Livré en anglais et français. Ajouter une nouvelle langue ne nécessite qu’un seul fichier de traduction.
 - **Générateur de scaffold** : `php artisan make:api-scaffold Product` génère la pile complète en une commande.
 - **Réponses standardisées** : JSON cohérent via `ApiResponse` et enums `ErrorCode`.
@@ -191,6 +192,10 @@ Toutes les routes sont préfixées par `/api/v1/`.
 | GET | `/user/exports` | Lister les exports |
 | POST | `/user/exports` | Déclencher un export (202 Accepted) |
 | GET | `/user/exports/{id}` | Statut / URL de téléchargement |
+| GET | `/user/imports/resources` | Ressources importables |
+| GET | `/user/imports` | Lister les imports |
+| POST | `/user/imports` | Déclencher un import (202 Accepted) |
+| GET | `/user/imports/{id}` | Vérifier le statut, la progression et les erreurs |
 
 ### Routes admin (`/admin/*`)
 | Méthode | Endpoint | Description |

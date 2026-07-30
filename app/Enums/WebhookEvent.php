@@ -14,6 +14,10 @@ enum WebhookEvent: string
     case EXPORT_COMPLETED = 'export.completed';
     case EXPORT_FAILED    = 'export.failed';
 
+    // Import events
+    case IMPORT_COMPLETED = 'import.completed';
+    case IMPORT_FAILED    = 'import.failed';
+
     /**
      * Human-readable description of the event.
      */
@@ -24,6 +28,8 @@ enum WebhookEvent: string
             self::API_KEY_DELETED  => 'API Key Deleted',
             self::EXPORT_COMPLETED => 'Export Completed',
             self::EXPORT_FAILED    => 'Export Failed',
+            self::IMPORT_COMPLETED => 'Import Completed',
+            self::IMPORT_FAILED    => 'Import Failed',
         };
     }
 }

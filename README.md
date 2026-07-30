@@ -24,6 +24,7 @@
 - **Outbound Webhooks**: Register HTTP listener endpoints for system events (`api_key.*`, `export.*`). Async delivery with HMAC-SHA256 signing, exponential backoff, delivery history, and manual redeliver.
 - **File & Media Manager**: Generic upload system for `local`, `S3`, and `Cloudflare R2` disks. Collection system (`avatars`, `product_images`, `store_images`, ...), automatic image thumbnails, and signed URL generation for private files.
 - **Async Data Export**: Export any model to CSV or JSON in the background. Admin exports (users, API keys) and user-scoped exports. Dynamic filters: ID range, specific IDs, date range, role, status. Extensible via `ExportableInterface`.
+- **Async Data Import**: Bulk import data from CSV or JSON files. Supports dry-runs (validation preview), row-by-row structural validation, detailed progress tracking, partial success logging, user notifications, and webhooks. Extensible via `ImportableInterface`.
 - **Internationalization (i18n)**: `Accept-Language` header support (with quality-value parsing). All API responses — including exceptions — are translated. Ships with English and French. Adding new locales requires only a new lang file.
 - **Scaffold Generator**: `php artisan make:api-scaffold Product` generates the full stack in one command.
 - **Response Standardization**: Consistent JSON via `ApiResponse` and `ErrorCode` enums.
@@ -220,6 +221,10 @@ All routes are prefixed with `/api/v1/`.
 | GET | `/user/exports` | List exports |
 | POST | `/user/exports` | Trigger an export (202 Accepted) |
 | GET | `/user/exports/{id}` | Check export status / get download URL |
+| GET | `/user/imports/resources` | List importable resources |
+| GET | `/user/imports` | List imports |
+| POST | `/user/imports` | Trigger an import (202 Accepted) |
+| GET | `/user/imports/{id}` | Check import status, progress, and errors |
 
 ### Admin Routes (`/admin/*`)
 | Method | Endpoint | Description |
