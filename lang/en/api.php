@@ -125,4 +125,12 @@ return [
     'export_not_ready'           => 'Export is not ready for download yet.',
     'export_ready'               => 'Your export is ready for download.',
     'export_resources_listed'    => 'Available export resources retrieved.',
+
+    // ── Imports ───────────────────────────────────────────────────────────
+    'import_queued'              => 'Import queued. You will be notified when it is ready.',
+    'import_retrieved'           => 'Imports retrieved successfully.',
+    'import_not_found'           => 'Import not found.',
+    'import_resources_listed'    => 'Available import resources retrieved.',
+    'import_completed_msg'       => 'Import of :resource completed: :success success, :failed failed out of :total total rows.',
+    'import_failed_msg'          => 'Import of :resource failed.',
 ];
