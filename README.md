@@ -1,4 +1,4 @@
-# LaraApiStarter — Professional Laravel 12 API Starter Kit
+# LaraApiStarter —  Laravel API Starter Kit
 
 [![Laravel 12+](https://img.shields.io/badge/Laravel-12.x-red.svg)](https://laravel.com)
 [![PHP 8.2+](https://img.shields.io/badge/PHP-8.2+-blue.svg)](https://php.net)
