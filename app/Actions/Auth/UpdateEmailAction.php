@@ -14,7 +14,7 @@ class UpdateEmailAction
             'email' => $dto->email,
         ]);
 
-        $user->email_verified_at === null;
+        $user->email_verified_at = null;
         $user->sendEmailVerificationNotification();
 
         $this->logActivity('auth.email.updated', "User email updated.", $user->id);
