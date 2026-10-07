@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Actions\Auth\SocialiteLoginAction;
+use App\Enums\AuthStatus;
+use App\Enums\ErrorCode;
+use App\Enums\Result\Auth\LoginResult;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AuthResource;
 use App\Http\Responses\ApiResponse;
@@ -33,7 +36,7 @@ class SocialiteController extends Controller
             $socialUser = Socialite::driver('google')->stateless()->user();
         } catch (\Throwable $e) {
             return ApiResponse::error(
-                \App\Enums\ErrorCode::INVALID_CREDENTIALS,
+                ErrorCode::INVALID_CREDENTIALS,
                 'Unable to retrieve Google information. Please try again.',
                 401
             );
@@ -41,11 +44,22 @@ class SocialiteController extends Controller
 
         $result = $action->execute($socialUser, 'google');
 
+        if (($result['status'] ?? null) === LoginResult::TWO_FACTOR_REQUIRED) {
+            return ApiResponse::success([
+                'auth_status'         => AuthStatus::TWO_FACTOR_REQUIRED->value,
+                'two_factor_required' => true,
+                'token'               => $result['token'],
+                'token_type'          => $result['token_type'],
+            ], __('api.2fa_required') ?: 'Two-factor authentication required.');
+        }
+
         return ApiResponse::success([
-            'user'       => AuthResource::make($result['user']),
-            'token'      => $result['token'],
-            'token_type' => $result['token_type'],
-            'expires_at' => $result['expires_at'],
+            'auth_status'         => AuthStatus::AUTHENTICATED->value,
+            'two_factor_required' => false,
+            'user'                => AuthResource::make($result['user']),
+            'token'               => $result['token'],
+            'token_type'          => $result['token_type'],
+            'expires_at'          => $result['expires_at'],
         ], 'Google login successful.');
     }
 }

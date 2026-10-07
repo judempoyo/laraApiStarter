@@ -2,6 +2,7 @@
 namespace App\Actions\Auth;
 
 use App\Actions\Security\LogSecurityEventAction;
+use App\Enums\Result\Auth\LoginResult;
 use App\Enums\SecurityEvent;
 use App\Enums\UserRole;
 use App\Models\User;
@@ -32,7 +33,20 @@ class SocialiteLoginAction
 
         $user->load(['roles', 'permissions']);
 
-        $deviceName    = app(ResolveDeviceNameAction::class)->execute();
+        $deviceName = app(ResolveDeviceNameAction::class)->execute();
+
+        if ($user->hasTwoFactorEnabled()) {
+            $tempToken = $user->createToken($deviceName, ['two-factor:verify'], now()->addMinutes(5));
+
+            return [
+                'status'        => LoginResult::TWO_FACTOR_REQUIRED,
+                'user'          => $user,
+                'token'         => $tempToken->plainTextToken,
+                'token_type'    => 'Bearer',
+                'two_factor_id' => $tempToken->accessToken->id,
+            ];
+        }
+
         $tokenInstance = $user->createToken($deviceName);
 
         app(LogSecurityEventAction::class)->execute(
@@ -45,6 +59,7 @@ class SocialiteLoginAction
         $expiration = config('sanctum.expiration');
 
         return [
+            'status'     => LoginResult::SUCCESS,
             'user'       => $user,
             'token'      => $tokenInstance->plainTextToken,
             'token_type' => 'Bearer',

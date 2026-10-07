@@ -70,6 +70,18 @@ class LoginUserAction
             }
         }
 
+        if ($user->hasTwoFactorEnabled()) {
+            $tempToken = $user->createToken($currentDevice, ['two-factor:verify'], now()->addMinutes(5));
+
+            return [
+                'status'        => LoginResult::TWO_FACTOR_REQUIRED,
+                'user'          => $user,
+                'token'         => $tempToken->plainTextToken,
+                'token_type'    => 'Bearer',
+                'two_factor_id' => $tempToken->accessToken->id,
+            ];
+        }
+
         /** @var TokenServiceInterface $tokenService */
         $tokenService = app(TokenServiceInterface::class);
         $plainToken   = $tokenService->createToken($user, $currentDevice);
