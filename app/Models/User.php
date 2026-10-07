@@ -49,6 +49,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'avatar',
         'two_factor_secret',
         'two_factor_confirmed_at',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -60,6 +61,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'remember_token',
         'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -123,9 +125,10 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @param  string  $name
      * @param  array   $abilities
+     * @param  \DateTimeInterface|null  $expiresAt
      * @return \Laravel\Sanctum\NewAccessToken
      */
-    public function createToken(string $name, array $abilities = ['*'])
+    public function createToken(string $name, array $abilities = ['*'], ?\DateTimeInterface $expiresAt = null)
     {
         $expiration = config('sanctum.expiration');
 
@@ -133,7 +136,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'name'       => $name,
             'token'      => hash('sha256', $plainTextToken = Str::random(150)),
             'abilities'  => $abilities,
-            'expires_at' => $expiration ? now()->addMinutes($expiration) : null,
+            'expires_at' => $expiresAt ?? ($expiration ? now()->addMinutes($expiration) : null),
         ]);
 
         return new NewAccessToken($token, $token->getKey() . '|' . $plainTextToken);
@@ -157,6 +160,55 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasTwoFactorEnabled(): bool
     {
         return $this->two_factor_confirmed_at !== null;
+    }
+
+    public function getRecoveryCodes(): array
+    {
+        if (empty($this->two_factor_recovery_codes)) {
+            return [];
+        }
+
+        try {
+            $decrypted = decrypt($this->two_factor_recovery_codes);
+
+            return is_array($decrypted) ? $decrypted : (json_decode($decrypted, true) ?? []);
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    public function replaceRecoveryCodes(array $codes): void
+    {
+        $this->update([
+            'two_factor_recovery_codes' => encrypt($codes),
+        ]);
+    }
+
+    public function useRecoveryCode(string $code): bool
+    {
+        $codes = $this->getRecoveryCodes();
+        $cleanedCode = strtoupper(trim(str_replace([' ', '-'], '', $code)));
+
+        foreach ($codes as $index => $storedCode) {
+            $cleanedStored = strtoupper(trim(str_replace([' ', '-'], '', $storedCode)));
+            if (hash_equals($cleanedStored, $cleanedCode)) {
+                unset($codes[$index]);
+                $this->replaceRecoveryCodes(array_values($codes));
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function resetTwoFactor(): void
+    {
+        $this->update([
+            'two_factor_secret'         => null,
+            'two_factor_confirmed_at'   => null,
+            'two_factor_recovery_codes' => null,
+        ]);
     }
 
     // ─── Business Logic ─────────────────────────────────────────────────────

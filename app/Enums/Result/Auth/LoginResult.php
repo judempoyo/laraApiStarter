@@ -8,4 +8,5 @@ enum LoginResult: string {
     case SUCCESS             = 'SUCCESS';
     case INVALID_CREDENTIALS = 'INVALID_CREDENTIALS';
     case USER_DISABLED       = 'USER_DISABLED';
+    case TWO_FACTOR_REQUIRED = 'TWO_FACTOR_REQUIRED';
 }
