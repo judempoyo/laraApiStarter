@@ -16,16 +16,17 @@ class VerifyTwoFactorRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => ['required', 'string', 'digits:6'],
+            'code' => ['required', 'string', 'min:6', 'max:30'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'code.required' => 'The two-factor authentication code is required.',
+            'code.required' => 'The two-factor authentication code or recovery code is required.',
             'code.string'   => 'The code must be a string.',
-            'code.digits'   => 'The code must be exactly 6 digits.',
+            'code.min'      => 'The code must be at least 6 characters.',
+            'code.max'      => 'The code may not exceed 30 characters.',
         ];
     }
 }
