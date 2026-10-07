@@ -276,28 +276,56 @@ Returns a TOTP secret and a QR code URI to scan with an authenticator app.
 
 `POST /auth/two-factor/confirm`
 
-Submit the first code from the authenticator app to activate 2FA.
+Submit the first code from the authenticator app to activate 2FA. Returns 8 single-use recovery codes.
 
 | Field | Type |
 |-------|------|
 | `code` | string, required, 6 digits |
 
-**Response 200** on success.
+**Response 200:**
+```json
+{
+    "status": "success",
+    "message": "Two-factor authentication has been enabled.",
+    "data": {
+        "recovery_codes": [
+            "XXXXX-XXXXX",
+            "YYYYY-YYYYY"
+        ]
+    }
+}
+```
 
 **Errors:**
 | HTTP | `error.code` | Reason |
 |------|-------------|--------|
 | 422 | `TWO_FACTOR_INVALID_CODE` | Wrong or expired code |
 
-### Verify 2FA
+### Verify 2FA (Login completion)
 
 `POST /auth/two-factor/verify`
 
-Verify a TOTP code during the login flow.
+Verify a TOTP code (6 digits) or an unused recovery code (`XXXXX-XXXXX`) using the temporary token returned by `/auth/login`.
 
 | Field | Type |
 |-------|------|
-| `code` | string, required, 6 digits |
+| `code` | string, required, 6–30 characters |
+
+**Response 200:**
+```json
+{
+    "status": "success",
+    "message": "Two-factor code verified successfully.",
+    "data": {
+        "auth_status": "AUTHENTICATED",
+        "two_factor_required": false,
+        "user": { ... },
+        "token": "1|...",
+        "token_type": "Bearer",
+        "expires_at": "..."
+    }
+}
+```
 
 **Errors:**
 | HTTP | `error.code` | Reason |
@@ -306,9 +334,77 @@ Verify a TOTP code during the login flow.
 | 422 | `TWO_FACTOR_NOT_CONFIRMED` | 2FA enabled but not yet confirmed |
 | 422 | `TWO_FACTOR_INVALID_CODE` | Wrong code |
 
+### View Recovery Codes
+
+`POST /auth/two-factor/recovery-codes` — *Auth required*
+
+| Field | Type |
+|-------|------|
+| `password` | string, required (current password) |
+
+**Response 200:**
+```json
+{
+    "status": "success",
+    "data": {
+        "recovery_codes": ["XXXXX-XXXXX", "..."]
+    }
+}
+```
+
+### Regenerate Recovery Codes
+
+`POST /auth/two-factor/recovery-codes/regenerate` — *Auth required*
+
+| Field | Type |
+|-------|------|
+| `password` | string, required (current password) |
+
+**Response 200:**
+```json
+{
+    "status": "success",
+    "data": {
+        "recovery_codes": ["XXXXX-XXXXX", "..."]
+    }
+}
+```
+
+### Reset 2FA with Recovery Code (Public lockout recovery)
+
+`POST /auth/two-factor/reset`
+
+| Field | Type |
+|-------|------|
+| `email` | string, optional if authenticated |
+| `password` | string, required |
+| `recovery_code` | string, required |
+
+**Errors:**
+| HTTP | `error.code` | Reason |
+|------|-------------|--------|
+| 422 | `TWO_FACTOR_INVALID_RECOVERY_CODE` | Code is invalid or already consumed |
+| 422 | `PASSWORD_MISMATCH` | Wrong password |
+
+### Send 2FA Reset Link (Public lockout recovery)
+
+`POST /auth/two-factor/send-reset-link`
+
+| Field | Type |
+|-------|------|
+| `email` | string, required |
+
+### Reset 2FA via Signed Link
+
+`POST /auth/two-factor/reset/{id}/{hash}` — *Signed URL required*
+
+| Field | Type |
+|-------|------|
+| `password` | string, required |
+
 ### Disable 2FA
 
-`DELETE /auth/two-factor`
+`DELETE /auth/two-factor` — *Auth required*
 
 | Field | Type |
 |-------|------|
