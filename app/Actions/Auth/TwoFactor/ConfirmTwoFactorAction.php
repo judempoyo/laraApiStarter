@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace App\Actions\Auth\TwoFactor;
 
+use App\Actions\Security\LogSecurityEventAction;
 use App\Enums\Result\Auth\TwoFactorResult;
+use App\Enums\SecurityEvent;
 use App\Models\User;
 use PragmaRX\Google2FA\Google2FA;
 
 class ConfirmTwoFactorAction
 {
-    public function __construct(private readonly Google2FA $google2fa) {}
+    public function __construct(
+        private readonly Google2FA $google2fa,
+        private readonly GenerateTwoFactorRecoveryCodesAction $generateCodesAction
+    ) {}
 
     /**
      * Validate the first TOTP code and activate 2FA for the user.
@@ -28,8 +33,21 @@ class ConfirmTwoFactorAction
             return ['status' => TwoFactorResult::INVALID_CODE];
         }
 
-        $user->update(['two_factor_confirmed_at' => now()]);
+        $recoveryCodes = $this->generateCodesAction->execute();
 
-        return ['status' => TwoFactorResult::CONFIRMED];
+        $user->update([
+            'two_factor_confirmed_at'   => now(),
+            'two_factor_recovery_codes' => encrypt($recoveryCodes),
+        ]);
+
+        app(LogSecurityEventAction::class)->execute(
+            $user,
+            SecurityEvent::TWO_FACTOR_ENABLED->value
+        );
+
+        return [
+            'status'         => TwoFactorResult::CONFIRMED,
+            'recovery_codes' => $recoveryCodes,
+        ];
     }
 }

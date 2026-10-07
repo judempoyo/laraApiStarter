@@ -4,20 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Auth\TwoFactor;
 
-use App\Actions\Security\LogSecurityEventAction;
 use App\Enums\Result\Auth\TwoFactorResult;
-use App\Enums\SecurityEvent;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-class DisableTwoFactorAction
+class ShowTwoFactorRecoveryCodesAction
 {
-    /**
-     * Disable 2FA after verifying the user's password.
-     */
     public function execute(User $user, string $password): array
     {
-        if (! $user->two_factor_confirmed_at) {
+        if (! $user->hasTwoFactorEnabled()) {
             return ['status' => TwoFactorResult::NOT_ENABLED];
         }
 
@@ -25,13 +20,9 @@ class DisableTwoFactorAction
             return ['status' => TwoFactorResult::INVALID_PASSWORD];
         }
 
-        $user->resetTwoFactor();
-
-        app(LogSecurityEventAction::class)->execute(
-            $user,
-            SecurityEvent::TWO_FACTOR_DISABLED->value
-        );
-
-        return ['status' => TwoFactorResult::DISABLED];
+        return [
+            'status'         => TwoFactorResult::RECOVERY_CODES_RETRIEVED,
+            'recovery_codes' => $user->getRecoveryCodes(),
+        ];
     }
 }
