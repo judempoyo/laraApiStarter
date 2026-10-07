@@ -12,6 +12,7 @@ use App\Actions\Auth\SendPasswordResetLinkAction;
 use App\Contracts\Auth\TokenServiceInterface;
 use App\DTOs\Auth\LoginDTO;
 use App\DTOs\Auth\RegisterDTO;
+use App\Enums\AuthStatus;
 use App\Enums\ErrorCode;
 use App\Enums\Result\Auth\LoginResult;
 use App\Exceptions\ApiException;
@@ -78,11 +79,19 @@ class AuthController extends Controller
                 ErrorCode::ACCOUNT_DISABLED
             ),
             LoginResult::INVALID_CREDENTIALS => throw ApiException::unauthorized(),
+            LoginResult::TWO_FACTOR_REQUIRED => ApiResponse::success([
+                'auth_status'         => AuthStatus::TWO_FACTOR_REQUIRED->value,
+                'two_factor_required' => true,
+                'token'               => $result['token'],
+                'token_type'          => $result['token_type'],
+            ], __('api.2fa_required') ?: 'Two-factor authentication required.'),
             LoginResult::SUCCESS             => ApiResponse::success([
-                'user'       => AuthResource::make($result['user']),
-                'token'      => $result['token'],
-                'token_type' => $result['token_type'],
-                'expires_at' => $result['expires_at'],
+                'auth_status'         => AuthStatus::AUTHENTICATED->value,
+                'two_factor_required' => false,
+                'user'                => AuthResource::make($result['user']),
+                'token'               => $result['token'],
+                'token_type'          => $result['token_type'],
+                'expires_at'          => $result['expires_at'],
             ], __('api.login_success')),
         };
     }
