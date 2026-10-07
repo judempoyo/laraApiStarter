@@ -24,13 +24,18 @@ Route::prefix('v1')->group(function () use ($guard): void {
         Route::post('password/reset', [AuthController::class, 'resetPassword'])->name('password.reset');
         Route::post('check-email', [AuthController::class, 'checkEmail']);
         Route::get('email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
+        Route::post('two-factor/reset', [TwoFactorController::class, 'resetWithRecoveryCode']);
+        Route::post('two-factor/send-reset-link', [TwoFactorController::class, 'sendResetLink']);
+        Route::post('two-factor/reset/{id}/{hash}', [TwoFactorController::class, 'resetViaSignedLink'])
+            ->middleware('signed')
+            ->name('auth.2fa.reset-via-link');
 
         // ── Google OAuth ───────────────────────────────────────────────────
         Route::get('google/redirect', [SocialiteController::class, 'redirectToGoogle']);
         Route::get('google/callback', [SocialiteController::class, 'handleGoogleCallback']);
 
         // ── Authenticated Auth Actions ─────────────────────────────────────
-        Route::middleware(["auth:{$guard}", 'throttle:api'])->group(function () use ($guard): void {
+        Route::middleware(["auth:{$guard}", '2fa.complete', 'throttle:api'])->group(function () use ($guard): void {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::post('logout-all', [AuthController::class, 'logoutAll']);
             Route::post('refresh', [AuthController::class, 'refresh']);
@@ -58,6 +63,9 @@ Route::prefix('v1')->group(function () use ($guard): void {
                 Route::post('enable', [TwoFactorController::class, 'enable'])->name('enable');
                 Route::post('confirm', [TwoFactorController::class, 'confirm'])->name('confirm');
                 Route::post('verify', [TwoFactorController::class, 'verify'])->name('verify');
+                Route::post('recovery-codes', [TwoFactorController::class, 'showRecoveryCodes'])->name('recovery-codes.show');
+                Route::post('recovery-codes/regenerate', [TwoFactorController::class, 'regenerateRecoveryCodes'])->name('recovery-codes.regenerate');
+                Route::post('reset-with-recovery-code', [TwoFactorController::class, 'resetWithRecoveryCode'])->name('reset-with-recovery-code');
                 Route::delete('/', [TwoFactorController::class, 'disable'])->name('disable');
             });
         });

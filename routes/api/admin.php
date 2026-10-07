@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
  * Example:
  *   Route::apiResource('users', \App\Http\Controllers\Api\Admin\UserController::class);
  */
-Route::middleware(['auth:' . config('api.auth_guard', 'sanctum'), 'throttle:api', 'role:admin'])
+Route::middleware(['auth:' . config('api.auth_guard', 'sanctum'), '2fa.complete', 'throttle:api', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function (): void {

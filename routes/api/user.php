@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
  * These routes are loaded from routes/api.php with the /api/v1 prefix.
  * All routes here require authentication via the configured guard.
  */
-Route::middleware(['auth:' . config('api.auth_guard', 'sanctum'), 'throttle:api'])
+Route::middleware(['auth:' . config('api.auth_guard', 'sanctum'), '2fa.complete', 'throttle:api'])
     ->prefix('user')
     ->name('user.')
     ->group(function (): void {
