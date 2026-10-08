@@ -9,25 +9,29 @@ use Illuminate\Support\Str;
 
 class MakeApiScaffoldCommand extends Command
 {
-    protected $signature   = 'make:api-scaffold {entity : The model name (e.g. Product)}
+    protected $signature = 'make:api-scaffold {entity : The model name (e.g. Product)}
                               {--no-model : Skip model generation}
                               {--no-migration : Skip migration generation}';
 
     protected $description = 'Generate a full API scaffold: Model, Controller, Actions, DTOs, Requests, Resource, and a route comment.';
 
     private string $entityName;
+
     private string $entityPlural;
+
     private string $entitySnake;
+
     private string $entitySnakePlural;
+
     private string $entityCamel;
 
     public function handle(): int
     {
-        $this->entityName        = Str::studly($this->argument('entity'));
-        $this->entityPlural      = Str::pluralStudly($this->entityName);
-        $this->entitySnake       = Str::snake($this->entityName);
+        $this->entityName = Str::studly($this->argument('entity'));
+        $this->entityPlural = Str::pluralStudly($this->entityName);
+        $this->entitySnake = Str::snake($this->entityName);
         $this->entitySnakePlural = Str::snake($this->entityPlural);
-        $this->entityCamel       = Str::camel($this->entityName);
+        $this->entityCamel = Str::camel($this->entityName);
 
         $this->line("Generating API scaffold for <comment>{$this->entityName}</comment>...");
         $this->newLine();
@@ -61,6 +65,7 @@ class MakeApiScaffoldCommand extends Command
 
         if (file_exists($path)) {
             $this->warn("  Model already exists — skipped: app/Models/{$this->entityName}.php");
+
             return;
         }
 
@@ -92,7 +97,7 @@ PHP;
 
     private function generateController(): void
     {
-        $dir  = app_path('Http/Controllers/Api/v1');
+        $dir = app_path('Http/Controllers/Api/V1');
         $path = "{$dir}/{$this->entityName}Controller.php";
 
         if (! is_dir($dir)) {
@@ -100,11 +105,12 @@ PHP;
         }
 
         if (file_exists($path)) {
-            $this->warn("  Controller already exists — skipped: app/Http/Controllers/Api/v1/{$this->entityName}Controller.php");
+            $this->warn("  Controller already exists — skipped: app/Http/Controllers/Api/V1/{$this->entityName}Controller.php");
+
             return;
         }
 
-        $n  = $this->entityName;
+        $n = $this->entityName;
         $ns = $this->entitySnake;
         $np = $this->entitySnakePlural;
         $nc = $this->entityCamel;
@@ -114,7 +120,7 @@ PHP;
 
 declare(strict_types=1);
 
-namespace App\\Http\\Controllers\\Api\\v1;
+namespace App\\Http\\Controllers\\Api\\V1;
 
 use App\\Actions\\{$n}\\Create{$n}Action;
 use App\\Actions\\{$n}\\Delete{$n}Action;
@@ -136,7 +142,7 @@ class {$n}Controller extends Controller
      */
     public function index(): JsonResponse
     {
-        return ApiResponse::paginated({$n}::paginate(config('api.pagination.default_per_page', 15)));
+        return ApiResponse::paginated({$n}::paginate(config('api.pagination.default_per_page', 15))->through(fn (\$model) => {$n}Resource::make(\$model)));
     }
 
     /**
@@ -193,7 +199,7 @@ class {$n}Controller extends Controller
 }
 PHP;
 
-        $this->writeFile($path, $content, "app/Http/Controllers/Api/v1/{$this->entityName}Controller.php");
+        $this->writeFile($path, $content, "app/Http/Controllers/Api/V1/{$this->entityName}Controller.php");
     }
 
     private function generateActions(): void
@@ -206,10 +212,11 @@ PHP;
 
         foreach (['Create', 'Update', 'Delete'] as $prefix) {
             $filename = "{$prefix}{$this->entityName}Action.php";
-            $path     = "{$actionsDir}/{$filename}";
+            $path = "{$actionsDir}/{$filename}";
 
             if (file_exists($path)) {
                 $this->warn("  Action already exists — skipped: app/Actions/{$this->entityName}/{$filename}");
+
                 continue;
             }
 
@@ -223,8 +230,8 @@ PHP;
 
     private function buildCrudAction(string $prefix): string
     {
-        $n   = $this->entityName;
-        $nc  = $this->entityCamel;
+        $n = $this->entityName;
+        $nc = $this->entityCamel;
         $dto = $prefix === 'Create' ? "Create{$n}DTO" : "Update{$n}DTO";
 
         $modelParam = $prefix === 'Update' ? "\n        {$n} \${$nc}," : '';
@@ -253,7 +260,7 @@ PHP;
 
     private function buildDeleteAction(): string
     {
-        $n  = $this->entityName;
+        $n = $this->entityName;
         $nc = $this->entityCamel;
 
         return <<<PHP
@@ -287,10 +294,11 @@ PHP;
 
         foreach (['Create', 'Update'] as $prefix) {
             $filename = "{$prefix}{$n}DTO.php";
-            $path     = "{$dtoDir}/{$filename}";
+            $path = "{$dtoDir}/{$filename}";
 
             if (file_exists($path)) {
                 $this->warn("  DTO already exists — skipped: app/DTOs/{$n}/{$filename}");
+
                 continue;
             }
 
@@ -332,10 +340,11 @@ PHP;
 
         foreach (['Store', 'Update'] as $prefix) {
             $filename = "{$prefix}{$n}Request.php";
-            $path     = "{$requestDir}/{$filename}";
+            $path = "{$requestDir}/{$filename}";
 
             if (file_exists($path)) {
                 $this->warn("  Request already exists — skipped: app/Http/Requests/{$n}/{$filename}");
+
                 continue;
             }
 
@@ -370,11 +379,12 @@ PHP;
 
     private function generateResource(): void
     {
-        $n    = $this->entityName;
+        $n = $this->entityName;
         $path = app_path("Http/Resources/{$n}Resource.php");
 
         if (file_exists($path)) {
             $this->warn("  Resource already exists — skipped: app/Http/Resources/{$n}Resource.php");
+
             return;
         }
 
@@ -410,7 +420,7 @@ PHP;
         $this->newLine();
         $this->line('  <fg=yellow>Add to routes/api/user.php or routes/api/admin.php:</>');
         $this->newLine();
-        $this->line("  <comment>Route::apiResource('{$this->entitySnakePlural}', \\App\\Http\\Controllers\\Api\\v1\\{$this->entityName}Controller::class);</comment>");
+        $this->line("  <comment>Route::apiResource('{$this->entitySnakePlural}', \\App\\Http\\Controllers\\Api\\V1\\{$this->entityName}Controller::class);</comment>");
         $this->newLine();
     }
 

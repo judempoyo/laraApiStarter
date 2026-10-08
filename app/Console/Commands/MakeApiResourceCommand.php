@@ -1,19 +1,17 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Console\Commands;
 
 use App\Console\Support\ModelIntrospector;
 use Illuminate\Console\GeneratorCommand;
-use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
-#[AsCommand(name: 'las:resource')]
 class MakeApiResourceCommand extends GeneratorCommand
 {
-    protected $name = 'las:resource';
+    protected $name = 'make:api-resource';
 
     protected $description = 'Create a new API Resource class (JSON transformer for Eloquent models)';
 
@@ -27,7 +25,8 @@ class MakeApiResourceCommand extends GeneratorCommand
         $name = $this->argument('name');
 
         if (empty($name)) {
-            $this->components->error('The name argument is required. Usage: php artisan las:resource ProductResource');
+            $this->components->error('The name argument is required. Usage: php artisan make:api-resource ProductResource');
+
             return self::FAILURE;
         }
 
@@ -36,12 +35,12 @@ class MakeApiResourceCommand extends GeneratorCommand
 
     protected function getStub(): string
     {
-        return base_path(config('api-generator.paths.stub', 'stubs') . '/resource.api.stub');
+        return base_path(config('api-generator.paths.stub', 'stubs').'/resource.api.stub');
     }
 
     protected function getDefaultNamespace($rootNamespace): string
     {
-        return config('api-generator.namespaces.resource', $rootNamespace . '\\Http\\Resources');
+        return config('api-generator.namespaces.resource', $rootNamespace.'\\Http\\Resources');
     }
 
     protected function buildClass($name): string
@@ -49,11 +48,11 @@ class MakeApiResourceCommand extends GeneratorCommand
         $stub = parent::buildClass($name);
 
         $modelOption = $this->option('model');
-        $modelClass  = $modelOption ? ModelIntrospector::resolveModelClass($modelOption) : null;
+        $modelClass = $modelOption ? ModelIntrospector::resolveModelClass($modelOption) : null;
 
         if ($modelClass) {
             $introspector = new ModelIntrospector($modelClass);
-            $stub         = str_replace('{{ fields }}', $introspector->generateResourceFields(), $stub);
+            $stub = str_replace('{{ fields }}', $introspector->generateResourceFields(), $stub);
         } else {
             $stub = str_replace('{{ fields }}', "            'id' => \$this->id,", $stub);
         }

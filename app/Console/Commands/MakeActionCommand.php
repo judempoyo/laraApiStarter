@@ -1,18 +1,16 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Console\Commands;
 
 use Illuminate\Console\GeneratorCommand;
-use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
-#[AsCommand(name: 'las:action')]
 class MakeActionCommand extends GeneratorCommand
 {
-    protected $name = 'las:action';
+    protected $name = 'make:api-action';
 
     protected $description = 'Create a new Action class';
 
@@ -26,7 +24,8 @@ class MakeActionCommand extends GeneratorCommand
         $name = $this->argument('name');
 
         if (empty($name)) {
-            $this->components->error('The name argument is required. Usage: php artisan las:action Product/CreateProductAction');
+            $this->components->error('The name argument is required. Usage: php artisan make:api-action Product/CreateProductAction');
+
             return self::FAILURE;
         }
 
@@ -35,12 +34,12 @@ class MakeActionCommand extends GeneratorCommand
 
     protected function getStub(): string
     {
-        return base_path(config('api-generator.paths.stub', 'stubs') . '/action.stub');
+        return base_path(config('api-generator.paths.stub', 'stubs').'/action.stub');
     }
 
     protected function getDefaultNamespace($rootNamespace): string
     {
-        return config('api-generator.namespaces.action', $rootNamespace . '\\Actions');
+        return config('api-generator.namespaces.action', $rootNamespace.'\\Actions');
     }
 
     protected function buildClass($name): string
@@ -51,8 +50,8 @@ class MakeActionCommand extends GeneratorCommand
 
         if ($dto) {
             $dtoNamespace = config('api-generator.namespaces.dto', 'App\\DTOs');
-            $dtoFqcn      = $dtoNamespace . '\\' . str_replace('/', '\\', $dto);
-            $dtoBaseName  = class_basename($dtoFqcn);
+            $dtoFqcn = $dtoNamespace.'\\'.str_replace('/', '\\', $dto);
+            $dtoBaseName = class_basename($dtoFqcn);
 
             $stub = str_replace('{{ dtoImport }}', "use {$dtoFqcn};", $stub);
             $stub = str_replace('{{ dtoParameter }}', "{$dtoBaseName} \$dto", $stub);
