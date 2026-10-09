@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Middleware\DocsAccess;
 
 return [
@@ -14,7 +16,7 @@ return [
     | application. Otherwise, this value will serve as the subdomain.
     |
     */
-    'domain'        => null,
+    'domain' => null,
 
     /*
     |--------------------------------------------------------------------------
@@ -26,7 +28,7 @@ return [
     | affect the paths of its internal API that aren't exposed to users.
     |
     */
-    'path'          => '/doc',
+    'path' => '/docs/api',
 
     /*
     |--------------------------------------------------------------------------
@@ -38,7 +40,7 @@ return [
     | the existing middleware. Or, you can simply stick with this list.
     |
     */
-    'middleware'    => ['web', DocsAccess::class],
+    'middleware' => ['web', DocsAccess::class],
 
     /*
     |--------------------------------------------------------------------------
@@ -50,7 +52,7 @@ return [
     | Scalar Galaxy package. You can change this to use a custom OpenAPI file.
     |
     */
-    'url'           => '/docs/api.json',
+    'url' => '/docs/api.json',
 
     /*
     |--------------------------------------------------------------------------
@@ -62,7 +64,7 @@ return [
     | package. You can change this if you want to use a different CDN.
     |
     */
-    'cdn'           => '/js/scalar.js',
+    'cdn' => 'https://cdn.jsdelivr.net/npm/@scalar/api-reference@1.25.109',
 
     /*
     |--------------------------------------------------------------------------
@@ -76,7 +78,7 @@ return [
     */
     'configuration' => [
         /** A string to use one of the color presets */
-        'theme'                 =>
+        'theme' =>
         // 'alternate',
         // 'bluePlanet',
         // 'deepSpace',
@@ -91,23 +93,23 @@ return [
         // 'none',
 
         /** The layout to use for the references */
-        'layout'                => 'modern',
+        'layout' => 'modern',
 
         /** URL to a request proxy for the API client */
-        'proxyUrl'              => 'https://proxy.scalar.com',
+        'proxyUrl' => null,
 
         /** Whether to show the sidebar */
-        'showSidebar'           => true,
+        'showSidebar' => true,
 
         /**
          * Whether to show models in the sidebar, search, and content.
          */
-        'hideModels'            => false,
+        'hideModels' => false,
 
         /**
          * Whether to show the “Download OpenAPI Document” button
          */
-        'hideDownloadButton'    => false,
+        'hideDownloadButton' => false,
 
         /**
          * Whether to show the “Test Request” button
@@ -117,27 +119,27 @@ return [
         /**
          * Whether to show the sidebar search bar
          */
-        'hideSearch'            => false,
+        'hideSearch' => false,
 
         /** Whether dark mode is on or off initially (light mode) */
-        'darkMode'              => true,
+        'darkMode' => true,
 
         /** forceDarkModeState makes it always this state no matter what*/
-        'forceDarkModeState'    => 'dark',
+        'forceDarkModeState' => 'dark',
 
         /** Whether to show the dark mode toggle */
-        'hideDarkModeToggle'    => false,
+        'hideDarkModeToggle' => false,
 
         /** Key used with CTRL/CMD to open the search modal (defaults to 'k' e.g. CMD+k) */
-        'searchHotKey'          => 'k',
+        'searchHotKey' => 'k',
 
         /**
          * If used, passed data will be added to the HTML header
          *
          * @see https://unhead.unjs.io/usage/composables/use-seo-meta
          */
-        'metaData'              => [
-            'title' => config('app.name') . ' API Reference',
+        'metaData' => [
+            'title' => config('app.name').' API Reference',
         ],
 
         /**
@@ -145,19 +147,19 @@ return [
          *
          * @example '/favicon.svg'
          */
-        'favicon'               => '',
+        'favicon' => '',
 
         /**
          * List of httpsnippet clients to hide from the clients menu
          * By default hides Unirest, pass `[]` to show all clients
          */
-        'hiddenClients'         => [
+        'hiddenClients' => [
 
         ],
 
         /** Determine the HTTP client that’s selected by default */
-        'defaultHttpClient'     => [
-            'targetId'  => 'shell',
+        'defaultHttpClient' => [
+            'targetId' => 'shell',
             'clientKey' => 'curl',
         ],
 
@@ -165,9 +167,9 @@ return [
         // 'customCss' => '',
 
         /** Prefill authentication */
-        'authentication'        => [
+        'authentication' => [
             'preferredSecurityScheme' => 'bearer',
-            'apiKey'                  => [
+            'apiKey' => [
                 'token' => 'votre_token_jwt_ou_sanctum_ici',
             ],
         ],
@@ -182,9 +184,9 @@ return [
         /**
          * List of servers to override the openapi spec servers
          */
-        'servers'               => [
+        'servers' => [
             [
-                'url'         => config('app.url') . '/api',
+                'url' => config('app.url').'/api',
                 'description' => 'Production server',
             ],
         ],
@@ -192,12 +194,12 @@ return [
         /**
          * We’re using Inter and JetBrains Mono as the default fonts. If you want to use your own fonts, set this to false.
          */
-        'withDefaultFonts'      => true,
+        'withDefaultFonts' => true,
 
         /**
          * By default we only open the relevant tag based on the url, however if you want all the tags open by default then set this configuration option :)
          */
-        'defaultOpenAllTags'    => false,
+        'defaultOpenAllTags' => false,
     ],
 
 ];
