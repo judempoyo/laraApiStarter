@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 use App\Models\User;
-use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Str;
 
 beforeEach(function (): void {
-    $this->seed(RolesAndPermissionsSeeder::class);
+    $this->seed(DatabaseSeeder::class);
 });
 
 /**
@@ -17,12 +17,12 @@ beforeEach(function (): void {
 function createNotificationFor(User $user, bool $read = false): DatabaseNotification
 {
     return DatabaseNotification::create([
-        'id'              => Str::uuid(),
-        'type'            => 'App\Notifications\TestNotification',
-        'notifiable_id'   => $user->id,
+        'id' => Str::uuid(),
+        'type' => 'App\Notifications\TestNotification',
+        'notifiable_id' => $user->id,
         'notifiable_type' => User::class,
-        'data'            => ['message' => 'Hello'],
-        'read_at'         => $read ? now() : null,
+        'data' => ['message' => 'Hello'],
+        'read_at' => $read ? now() : null,
     ]);
 }
 
@@ -57,7 +57,7 @@ it('notifications are isolated per user', function (): void {
 // ─── POST /user/notifications/{id}/read ──────────────────────────────────────
 
 it('user can mark a notification as read', function (): void {
-    $user         = User::factory()->create();
+    $user = User::factory()->create();
     $notification = createNotificationFor($user);
 
     $this->withToken($user->createToken('test')->plainTextToken)
@@ -71,7 +71,7 @@ it('marking a non-existent notification returns 404', function (): void {
     $user = User::factory()->create();
 
     $this->withToken($user->createToken('test')->plainTextToken)
-        ->postJson('/api/v1/user/notifications/' . Str::uuid() . '/read')
+        ->postJson('/api/v1/user/notifications/'.Str::uuid().'/read')
         ->assertNotFound();
 });
 
@@ -94,7 +94,7 @@ it('user can mark all notifications as read', function (): void {
 // ─── DELETE /user/notifications/{id} ─────────────────────────────────────────
 
 it('user can delete a notification', function (): void {
-    $user         = User::factory()->create();
+    $user = User::factory()->create();
     $notification = createNotificationFor($user);
 
     $this->withToken($user->createToken('test')->plainTextToken)

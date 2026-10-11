@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\User;
 
@@ -23,7 +23,7 @@ class NotificationController extends Controller
             ->orderByDesc('created_at')
             ->paginate(config('api.pagination.default_per_page', 15));
 
-        return ApiResponse::paginated($notifications, __('api.notifications_retrieved'));
+        return ApiResponse::paginated($notifications, __('modules/notifications.notifications_retrieved'));
     }
 
     /**
@@ -42,7 +42,7 @@ class NotificationController extends Controller
 
         $notification->markAsRead();
 
-        return ApiResponse::noContent(__('api.notification_read'));
+        return ApiResponse::noContent(__('modules/notifications.notification_read'));
     }
 
     /**
@@ -52,7 +52,7 @@ class NotificationController extends Controller
     {
         $request->user()->unreadNotifications()->update(['read_at' => now()]);
 
-        return ApiResponse::noContent(__('api.notifications_all_read'));
+        return ApiResponse::noContent(__('modules/notifications.notifications_all_read'));
     }
 
     /**
@@ -69,6 +69,6 @@ class NotificationController extends Controller
             throw ApiException::notFound('Notification');
         }
 
-        return ApiResponse::noContent(__('api.notification_deleted'));
+        return ApiResponse::noContent(__('modules/notifications.notification_deleted'));
     }
 }
