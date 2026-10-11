@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\User;
 
@@ -22,9 +22,9 @@ class PreferenceController extends Controller
             ->preferences()
             ->orderBy('key')
             ->get(['key', 'value', 'updated_at'])
-            ->mapWithKeys(fn($pref) => [$pref->key => $pref->value]);
+            ->mapWithKeys(fn ($pref) => [$pref->key => $pref->value]);
 
-        return ApiResponse::success($preferences, __('api.preferences_retrieved'));
+        return ApiResponse::success($preferences, __('modules/preferences.preferences_retrieved'));
     }
 
     /**
@@ -40,7 +40,7 @@ class PreferenceController extends Controller
 
         return ApiResponse::success(
             [$key => $request->input('value')],
-            __('api.preference_set')
+            __('modules/preferences.preference_set')
         );
     }
 
@@ -55,6 +55,6 @@ class PreferenceController extends Controller
             throw ApiException::notFound("Preference '{$key}'");
         }
 
-        return ApiResponse::noContent(__('api.preference_deleted'));
+        return ApiResponse::noContent(__('modules/preferences.preference_deleted'));
     }
 }
