@@ -1,0 +1,69 @@
+{
+    "name": "export",
+    "version": "1.0.0",
+    "description": "Queued exports with media storage and completion notifications.",
+    "requires": [
+        "media"
+    ],
+    "composer": {},
+    "files": {
+        "app/Actions/Export/CreateExportAction.php": "app/Actions/Export/CreateExportAction.php",
+        "app/Contracts/ExportableInterface.php": "app/Contracts/ExportableInterface.php",
+        "app/DTOs/Export/CreateExportDTO.php": "app/DTOs/Export/CreateExportDTO.php",
+        "app/Enums/ExportFormat.php": "app/Enums/ExportFormat.php",
+        "app/Enums/ExportStatus.php": "app/Enums/ExportStatus.php",
+        "app/Events/ExportCompleted.php": "app/Events/ExportCompleted.php",
+        "app/Events/ExportFailed.php": "app/Events/ExportFailed.php",
+        "app/Exports/ApiKeysExport.php": "app/Exports/ApiKeysExport.php",
+        "app/Exports/NotificationExport.php": "app/Exports/NotificationExport.php",
+        "app/Exports/UserPreferenceExport.php": "app/Exports/UserPreferenceExport.php",
+        "app/Exports/UsersExport.php": "app/Exports/UsersExport.php",
+        "app/Http/Controllers/Api/V1/ExportController.php": "app/Http/Controllers/Api/V1/ExportController.php",
+        "app/Http/Requests/Export/StoreExportRequest.php": "app/Http/Requests/Export/StoreExportRequest.php",
+        "app/Http/Resources/ExportResource.php": "app/Http/Resources/ExportResource.php",
+        "app/Jobs/ProcessExportJob.php": "app/Jobs/ProcessExportJob.php",
+        "app/Models/Concerns/HasExports.php": "app/Models/Concerns/HasExports.php",
+        "app/Models/Export.php": "app/Models/Export.php",
+        "app/Notifications/ExportReadyNotification.php": "app/Notifications/ExportReadyNotification.php",
+        "app/Providers/Modules/ExportServiceProvider.php": "app/Providers/Modules/ExportServiceProvider.php",
+        "config/export.php": "config/export.php",
+        "database/factories/ExportFactory.php": "database/factories/ExportFactory.php",
+        "database/migrations/2026_07_30_000004_create_exports_table.php": "database/migrations/2026_07_30_000004_create_exports_table.php",
+        "routes/api/modules/export.php": "routes/api/modules/export.php",
+        "tests/Feature/ExportTest.php": "tests/Feature/ExportTest.php",
+        "ai/guidelines/export.md": ".ai/guidelines/modules/export.md",
+        "ai/skills/making-model-exportable/SKILL.md": ".ai/skills/making-model-exportable/SKILL.md",
+        "lang/en/modules/export.php": "lang/en/modules/export.php",
+        "lang/fr/modules/export.php": "lang/fr/modules/export.php",
+        "tests/Feature/ExportTranslationsTest.php": "tests/Feature/ExportTranslationsTest.php",
+        "app/Events/UserExportPreparing.php": "app/Events/UserExportPreparing.php"
+    },
+    "migrations": [
+        "database/migrations/2026_07_30_000004_create_exports_table.php"
+    ],
+    "env": {
+        "EXPORT_DISK": {
+            "default": "local",
+            "comment": "Storage disk for exported files"
+        },
+        "EXPORT_URL_TTL": {
+            "default": "60",
+            "comment": "Signed URL lifetime in minutes"
+        }
+    },
+    "patches": [
+        {
+            "type": "user-trait",
+            "trait": "App\\Models\\Concerns\\HasExports"
+        }
+    ],
+    "provider": "App\\Providers\\Modules\\ExportServiceProvider",
+    "ai": {
+        "guidelines": [
+            "ai/guidelines/export.md"
+        ],
+        "skills": [
+            "ai/skills/making-model-exportable/SKILL.md"
+        ]
+    }
+}
