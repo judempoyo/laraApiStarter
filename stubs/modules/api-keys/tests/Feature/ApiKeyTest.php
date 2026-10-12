@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Models\ApiKey;
 use App\Models\User;
-use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Str;
 
 beforeEach(function (): void {
-    $this->seed(RolesAndPermissionsSeeder::class);
+    $this->seed(DatabaseSeeder::class);
 });
 
 // ─── GET /user/api-keys ───────────────────────────────────────────────────────
@@ -18,7 +17,7 @@ it('user can list their api keys', function (): void {
 
     $user->apiKeys()->create([
         'name' => 'CI Pipeline',
-        'key'  => hash('sha256', Str::random(64)),
+        'key' => hash('sha256', Str::random(64)),
     ]);
 
     $this->withToken($user->createToken('test')->plainTextToken)
@@ -37,7 +36,7 @@ it('user cannot see other users api keys', function (): void {
 
     $user2->apiKeys()->create([
         'name' => 'Secret Key',
-        'key'  => hash('sha256', Str::random(64)),
+        'key' => hash('sha256', Str::random(64)),
     ]);
 
     $response = $this->withToken($user1->createToken('test')->plainTextToken)
@@ -54,7 +53,7 @@ it('user can create an api key and receives the plain key once', function (): vo
 
     $response = $this->withToken($user->createToken('test')->plainTextToken)
         ->postJson('/api/v1/user/api-keys', [
-            'name'      => 'My Automation Script',
+            'name' => 'My Automation Script',
             'abilities' => ['read'],
         ])
         ->assertCreated()
@@ -78,7 +77,7 @@ it('user can create an api key with expiry', function (): void {
 
     $response = $this->withToken($user->createToken('test')->plainTextToken)
         ->postJson('/api/v1/user/api-keys', [
-            'name'            => 'Expiring Key',
+            'name' => 'Expiring Key',
             'expires_in_days' => 30,
         ])
         ->assertCreated();
@@ -94,7 +93,7 @@ it('user can revoke their own api key', function (): void {
 
     $apiKey = $user->apiKeys()->create([
         'name' => 'Revokable Key',
-        'key'  => hash('sha256', Str::random(64)),
+        'key' => hash('sha256', Str::random(64)),
     ]);
 
     $this->withToken($user->createToken('test')->plainTextToken)
@@ -110,7 +109,7 @@ it('user cannot revoke api key belonging to another user', function (): void {
 
     $foreignKey = $user2->apiKeys()->create([
         'name' => 'Foreign Key',
-        'key'  => hash('sha256', Str::random(64)),
+        'key' => hash('sha256', Str::random(64)),
     ]);
 
     $this->withToken($user1->createToken('test')->plainTextToken)
@@ -121,12 +120,12 @@ it('user cannot revoke api key belonging to another user', function (): void {
 // ─── X-API-Key middleware ─────────────────────────────────────────────────────
 
 it('request with valid X-API-Key is authenticated', function (): void {
-    $user    = User::factory()->create();
-    $rawKey  = Str::random(64);
+    $user = User::factory()->create();
+    $rawKey = Str::random(64);
 
     $user->apiKeys()->create([
         'name' => 'Valid Key',
-        'key'  => hash('sha256', $rawKey),
+        'key' => hash('sha256', $rawKey),
     ]);
 
     $this->withHeader('X-API-Key', $rawKey)

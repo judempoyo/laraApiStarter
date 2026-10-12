@@ -1,0 +1,42 @@
+{
+    "name": "api-keys",
+    "version": "1.0.0",
+    "description": "Scoped API keys and an API key guard.",
+    "requires": [],
+    "composer": {},
+    "files": {
+        "app/Auth/ApiKeyGuard.php": "app/Auth/ApiKeyGuard.php",
+        "app/Events/ApiKeyCreated.php": "app/Events/ApiKeyCreated.php",
+        "app/Events/ApiKeyDeleted.php": "app/Events/ApiKeyDeleted.php",
+        "app/Http/Controllers/Api/V1/ApiKeyController.php": "app/Http/Controllers/Api/V1/ApiKeyController.php",
+        "app/Http/Middleware/AuthenticateWithApiKey.php": "app/Http/Middleware/AuthenticateWithApiKey.php",
+        "app/Models/ApiKey.php": "app/Models/ApiKey.php",
+        "app/Models/Concerns/HasApiKeys.php": "app/Models/Concerns/HasApiKeys.php",
+        "app/Providers/Modules/ApiKeysServiceProvider.php": "app/Providers/Modules/ApiKeysServiceProvider.php",
+        "config/api-keys.php": "config/api-keys.php",
+        "database/migrations/2026_07_24_000002_create_api_keys_table.php": "database/migrations/2026_07_24_000002_create_api_keys_table.php",
+        "routes/api/modules/api-keys.php": "routes/api/modules/api-keys.php",
+        "tests/Feature/ApiKeyTest.php": "tests/Feature/ApiKeyTest.php",
+        "ai/guidelines/api-keys.md": ".ai/guidelines/modules/api-keys.md",
+        "lang/en/modules/api-keys.php": "lang/en/modules/api-keys.php",
+        "lang/fr/modules/api-keys.php": "lang/fr/modules/api-keys.php",
+        "tests/Feature/ApiKeysTranslationsTest.php": "tests/Feature/ApiKeysTranslationsTest.php"
+    },
+    "migrations": [
+        "database/migrations/2026_07_24_000002_create_api_keys_table.php"
+    ],
+    "env": {},
+    "patches": [
+        {
+            "type": "user-trait",
+            "trait": "App\\Models\\Concerns\\HasApiKeys"
+        }
+    ],
+    "provider": "App\\Providers\\Modules\\ApiKeysServiceProvider",
+    "ai": {
+        "guidelines": [
+            "ai/guidelines/api-keys.md"
+        ],
+        "skills": []
+    }
+}

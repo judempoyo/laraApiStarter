@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Auth;
 
 use App\Models\ApiKey;
-use App\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\Request;
