@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Auth;
 
 use App\Http\Requests\ApiRequest;
@@ -22,9 +24,9 @@ class UploadAvatarRequest extends ApiRequest
     {
         return [
             'avatar.required' => 'Please select a profile picture.',
-            'avatar.image'    => 'The file must be an image.',
-            'avatar.mimes'    => 'The format must be: jpg, jpeg, png, or webp.',
-            'avatar.max'      => 'The photo must not exceed 2 MB.',
+            'avatar.image' => 'The file must be an image.',
+            'avatar.mimes' => 'The format must be: jpg, jpeg, png, or webp.',
+            'avatar.max' => 'The photo must not exceed 2 MB.',
         ];
     }
 }

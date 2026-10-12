@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 class Media extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'user_id',
         'disk',
@@ -83,13 +84,13 @@ class Media extends Model
     {
         $units = ['B', 'KB', 'MB', 'GB'];
         $bytes = $this->size;
-        $i     = 0;
+        $i = 0;
 
         while ($bytes >= 1024 && $i < count($units) - 1) {
             $bytes /= 1024;
             $i++;
         }
 
-        return round($bytes, 2) . ' ' . $units[$i];
+        return round($bytes, 2).' '.$units[$i];
     }
 }

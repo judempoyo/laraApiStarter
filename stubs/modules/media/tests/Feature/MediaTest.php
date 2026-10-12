@@ -36,7 +36,7 @@ class MediaTest extends TestCase
         $file = UploadedFile::fake()->create('document.pdf', 100, 'application/pdf');
 
         $response = $this->actingAsUser()->postJson('/api/v1/user/media', [
-            'file'       => $file,
+            'file' => $file,
             'collection' => 'documents',
         ]);
 
@@ -46,7 +46,7 @@ class MediaTest extends TestCase
             ->assertJsonPath('data.collection', 'documents');
 
         $this->assertDatabaseHas('media', [
-            'user_id'    => $this->user->id,
+            'user_id' => $this->user->id,
             'collection' => 'documents',
         ]);
     }
@@ -66,7 +66,7 @@ class MediaTest extends TestCase
         $file = UploadedFile::fake()->image('photo.jpg');
 
         $response = $this->actingAsUser()->postJson('/api/v1/user/media', [
-            'file'       => $file,
+            'file' => $file,
             'collection' => 'My Invalid Collection!',
         ]);
 
@@ -81,7 +81,7 @@ class MediaTest extends TestCase
         $image = UploadedFile::fake()->image('photo.jpg', 800, 600);
 
         $response = $this->actingAsUser()->postJson('/api/v1/user/media', [
-            'file'       => $image,
+            'file' => $image,
             'collection' => 'avatars',
         ]);
 
@@ -95,7 +95,7 @@ class MediaTest extends TestCase
     {
         Media::factory()->count(3)->create([
             'user_id' => $this->user->id,
-            'disk'    => 'local',
+            'disk' => 'local',
         ]);
 
         $response = $this->actingAsUser()->getJson('/api/v1/user/media');
@@ -121,8 +121,8 @@ class MediaTest extends TestCase
     {
         $media = Media::factory()->create([
             'user_id' => $this->user->id,
-            'disk'    => 'local',
-            'path'    => 'media/1/documents/test.pdf',
+            'disk' => 'local',
+            'path' => 'media/1/documents/test.pdf',
         ]);
 
         // Store a fake file so Storage::url() works.
@@ -151,8 +151,8 @@ class MediaTest extends TestCase
     {
         $media = Media::factory()->create([
             'user_id' => $this->user->id,
-            'disk'    => 'local',
-            'path'    => 'media/1/documents/test.pdf',
+            'disk' => 'local',
+            'path' => 'media/1/documents/test.pdf',
         ]);
 
         Storage::disk('local')->put($media->path, 'content');

@@ -28,7 +28,7 @@ class MediaController extends Controller
             ->latest()
             ->paginate(20);
 
-        return ApiResponse::paginated($media, __('api.media_retrieved'));
+        return ApiResponse::paginated($media, __('modules/media.media_retrieved'));
     }
 
     /**
@@ -44,7 +44,7 @@ class MediaController extends Controller
 
         return ApiResponse::created(
             new MediaResource($media),
-            __('api.media_uploaded')
+            __('modules/media.media_uploaded')
         );
     }
 
@@ -61,11 +61,11 @@ class MediaController extends Controller
 
         return ApiResponse::success(
             [
-                'url'        => $media->url(),
-                'thumbnail'  => $media->thumbnailUrl(),
+                'url' => $media->url(),
+                'thumbnail' => $media->thumbnailUrl(),
                 'expires_in' => '60 minutes',
             ],
-            __('api.media_url_generated')
+            __('modules/media.media_url_generated')
         );
     }
 
@@ -82,6 +82,6 @@ class MediaController extends Controller
 
         $action->execute($media);
 
-        return ApiResponse::noContent(__('api.media_deleted'));
+        return ApiResponse::noContent(__('modules/media.media_deleted'));
     }
 }

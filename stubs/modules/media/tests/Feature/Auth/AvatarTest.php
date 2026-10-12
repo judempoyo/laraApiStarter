@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\UploadAvatarAction;
 use App\Models\User;
-use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
-    $this->seed(RolesAndPermissionsSeeder::class);
+    $this->seed(DatabaseSeeder::class);
     Storage::fake('public');
 });
 
@@ -73,9 +75,9 @@ it('avatar_url wraps local path with Storage::url', function () {
 // ─── HTTP endpoints ───────────────────────────────────────────────────────────
 
 it('POST /profile/avatar uploads and returns avatar_url', function () {
-    $user  = User::factory()->create();
+    $user = User::factory()->create();
     $token = $user->createToken('test')->plainTextToken;
-    $file  = UploadedFile::fake()->image('photo.jpg', 100, 100);
+    $file = UploadedFile::fake()->image('photo.jpg', 100, 100);
 
     $this->withToken($token)
         ->postJson('/api/v1/auth/profile/avatar', ['avatar' => $file])
@@ -84,9 +86,9 @@ it('POST /profile/avatar uploads and returns avatar_url', function () {
 });
 
 it('POST /profile/avatar rejects non-image files', function () {
-    $user  = User::factory()->create();
+    $user = User::factory()->create();
     $token = $user->createToken('test')->plainTextToken;
-    $file  = UploadedFile::fake()->create('doc.pdf', 100, 'application/pdf');
+    $file = UploadedFile::fake()->create('doc.pdf', 100, 'application/pdf');
 
     $this->withToken($token)
         ->postJson('/api/v1/auth/profile/avatar', ['avatar' => $file])
@@ -96,7 +98,7 @@ it('POST /profile/avatar rejects non-image files', function () {
 it('DELETE /profile/avatar removes avatar', function () {
     Storage::disk('public')->put('avatars/remove-me.jpg', 'fake');
 
-    $user  = User::factory()->create(['avatar' => 'avatars/remove-me.jpg']);
+    $user = User::factory()->create(['avatar' => 'avatars/remove-me.jpg']);
     $token = $user->createToken('test')->plainTextToken;
 
     $this->withToken($token)
@@ -108,7 +110,7 @@ it('DELETE /profile/avatar removes avatar', function () {
 });
 
 it('DELETE /profile/avatar returns 404 when no avatar is set', function () {
-    $user  = User::factory()->create(['avatar' => null]);
+    $user = User::factory()->create(['avatar' => null]);
     $token = $user->createToken('test')->plainTextToken;
 
     $this->withToken($token)

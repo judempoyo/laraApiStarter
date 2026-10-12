@@ -18,34 +18,35 @@ class MediaService
      * If the file is an image, a thumbnail is automatically generated
      * and stored alongside the original (requires intervention/image-laravel).
      *
-     * @param  UploadedFile  $file        The file to upload.
-     * @param  User          $user        The owning user.
-     * @param  string        $collection  Logical grouping (e.g. 'documents', 'exports').
-     * @param  string|null   $disk        Override disk. Defaults to config('filesystems.default').
+     * @param  UploadedFile  $file  The file to upload.
+     * @param  User  $user  The owning user.
+     * @param  string  $collection  Logical grouping (e.g. 'documents', 'exports').
+     * @param  string|null  $disk  Override disk. Defaults to config('filesystems.default').
      */
     public function upload(UploadedFile $file, User $user, string $collection = 'documents', ?string $disk = null): Media
     {
-        $disk     = $disk ?? config('filesystems.default', 'local');
-        $folder   = "media/{$user->id}/{$collection}";
-        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-        $path     = $file->storeAs($folder, $filename, ['disk' => $disk]);
+        $disk = $disk ?? config('filesystems.default', 'local');
+        $folder = "media/{$user->id}/{$collection}";
+        $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
+        $path = $file->storeAs($folder, $filename, ['disk' => $disk]);
 
         $thumbnailPath = null;
 
         // Generate a thumbnail for images if intervention/image is installed.
-        if (str_starts_with($file->getMimeType(), 'image/') && class_exists(\Intervention\Image\Laravel\Facades\Image::class)) {
-            $thumbnailPath = $this->generateThumbnail($file, $user, $collection, $disk);
+        $driver = config('media.thumbnail_driver');
+        if (str_starts_with($file->getMimeType(), 'image/') && is_string($driver) && class_exists($driver)) {
+            $thumbnailPath = $this->generateThumbnail($file, $user, $collection, $disk, $driver);
         }
 
         return Media::create([
-            'user_id'        => $user->id,
-            'disk'           => $disk,
-            'path'           => $path,
+            'user_id' => $user->id,
+            'disk' => $disk,
+            'path' => $path,
             'thumbnail_path' => $thumbnailPath,
-            'original_name'  => $file->getClientOriginalName(),
-            'mime_type'      => $file->getMimeType(),
-            'size'           => $file->getSize(),
-            'collection'     => $collection,
+            'original_name' => $file->getClientOriginalName(),
+            'mime_type' => $file->getMimeType(),
+            'size' => $file->getSize(),
+            'collection' => $collection,
         ]);
     }
 
@@ -69,15 +70,15 @@ class MediaService
      * Generate a thumbnail for an uploaded image.
      * Resized to 300×300, maintaining aspect ratio.
      */
-    private function generateThumbnail(UploadedFile $file, User $user, string $collection, string $disk): ?string
+    private function generateThumbnail(UploadedFile $file, User $user, string $collection, string $disk, string $driver): ?string
     {
         try {
-            $image     = \Intervention\Image\Laravel\Facades\Image::read($file->getPathname());
+            $image = $driver::read($file->getPathname());
             $image->scaleDown(300, 300);
 
-            $folder          = "media/{$user->id}/{$collection}/thumbnails";
-            $thumbnailName   = Str::uuid() . '_thumb.' . $file->getClientOriginalExtension();
-            $thumbnailPath   = "{$folder}/{$thumbnailName}";
+            $folder = "media/{$user->id}/{$collection}/thumbnails";
+            $thumbnailName = Str::uuid().'_thumb.'.$file->getClientOriginalExtension();
+            $thumbnailPath = "{$folder}/{$thumbnailName}";
 
             Storage::disk($disk)->put($thumbnailPath, $image->encodeByMediaType());
 
