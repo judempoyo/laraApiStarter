@@ -1,6 +1,8 @@
 <?php
 
 declare(strict_types=1);
+use App\Imports\UserPreferenceImport;
+use App\Imports\UsersImport;
 
 return [
     /*
@@ -17,10 +19,10 @@ return [
     */
     'resources' => [
         // ── User-scoped (any authenticated user can import their own data) ──
-        'user_preferences' => \App\Imports\UserPreferenceImport::class,
+        'user_preferences' => UserPreferenceImport::class,
 
         // ── Admin-only (requires admin role) ────────────────────────────────
-        'users' => \App\Imports\UsersImport::class,
+        'users' => UsersImport::class,
     ],
 
     /*

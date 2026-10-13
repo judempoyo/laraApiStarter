@@ -6,11 +6,11 @@ namespace App\Jobs;
 
 use App\Contracts\ImportableInterface;
 use App\Enums\ImportStatus;
-use App\Enums\WebhookEvent;
+use App\Events\ImportCompleted;
+use App\Events\ImportFailed;
 use App\Models\Import;
 use App\Models\User;
 use App\Notifications\ImportCompletedNotification;
-use App\Services\WebhookDispatcher;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
@@ -44,7 +44,7 @@ class ProcessImportJob implements ShouldQueue
 
             // Retrieve the content from disk and write to temp file
             $content = Storage::disk($media->disk)->get($media->path);
-            $tempPath = sys_get_temp_dir() . '/import_' . $this->import->id . '_' . time();
+            $tempPath = sys_get_temp_dir().'/import_'.$this->import->id.'_'.time();
             file_put_contents($tempPath, $content);
 
             // Parse file into rows
@@ -72,7 +72,7 @@ class ProcessImportJob implements ShouldQueue
 
                 if ($validator->fails()) {
                     $errors[] = [
-                        'row'    => $rowIndex,
+                        'row' => $rowIndex,
                         'errors' => $validator->errors()->toArray(),
                     ];
                     $failed++;
@@ -86,7 +86,7 @@ class ProcessImportJob implements ShouldQueue
                             $success++;
                         } catch (Throwable $dbEx) {
                             $errors[] = [
-                                'row'    => $rowIndex,
+                                'row' => $rowIndex,
                                 'errors' => ['database' => [$dbEx->getMessage()]],
                             ];
                             $failed++;
@@ -101,38 +101,38 @@ class ProcessImportJob implements ShouldQueue
                 // Periodically update progress (every 50 rows)
                 if ($processed % 50 === 0 || $processed === $totalRows) {
                     $this->import->update([
-                        'processed_rows'  => $processed,
+                        'processed_rows' => $processed,
                         'successful_rows' => $success,
-                        'failed_rows'     => $failed,
-                        'errors'          => empty($errors) ? null : $errors,
+                        'failed_rows' => $failed,
+                        'errors' => empty($errors) ? null : $errors,
                     ]);
                 }
             }
 
             $this->import->update([
-                'status'          => ImportStatus::COMPLETED,
-                'processed_rows'  => $processed,
+                'status' => ImportStatus::COMPLETED,
+                'processed_rows' => $processed,
                 'successful_rows' => $success,
-                'failed_rows'     => $failed,
-                'errors'          => empty($errors) ? null : $errors,
+                'failed_rows' => $failed,
+                'errors' => empty($errors) ? null : $errors,
             ]);
 
             // Notify user
             $user->notify(new ImportCompletedNotification($this->import));
 
             // Dispatch webhook
-            WebhookDispatcher::dispatch(WebhookEvent::IMPORT_COMPLETED, [
-                'import_id'       => $this->import->id,
-                'resource'        => $this->import->resource,
-                'dry_run'         => $this->import->dry_run,
-                'total_rows'      => $totalRows,
+            ImportCompleted::dispatch([
+                'import_id' => $this->import->id,
+                'resource' => $this->import->resource,
+                'dry_run' => $this->import->dry_run,
+                'total_rows' => $totalRows,
                 'successful_rows' => $success,
-                'failed_rows'     => $failed,
+                'failed_rows' => $failed,
             ], $user->id);
 
         } catch (Throwable $e) {
             $this->import->update([
-                'status'        => ImportStatus::FAILED,
+                'status' => ImportStatus::FAILED,
                 'error_message' => $e->getMessage(),
             ]);
 
@@ -140,10 +140,10 @@ class ProcessImportJob implements ShouldQueue
             $this->import->user->notify(new ImportCompletedNotification($this->import));
 
             // Dispatch Webhook
-            WebhookDispatcher::dispatch(WebhookEvent::IMPORT_FAILED, [
+            ImportFailed::dispatch([
                 'import_id' => $this->import->id,
-                'resource'  => $this->import->resource,
-                'error'     => $e->getMessage(),
+                'resource' => $this->import->resource,
+                'error' => $e->getMessage(),
             ], $this->import->user_id);
 
             throw $e;
@@ -160,7 +160,7 @@ class ProcessImportJob implements ShouldQueue
     private function resolveImporter(): ImportableInterface
     {
         $resources = config('import.resources', []);
-        $class     = $resources[$this->import->resource] ?? null;
+        $class = $resources[$this->import->resource] ?? null;
 
         if (! $class || ! class_exists($class)) {
             throw new \RuntimeException("No importer registered for resource: [{$this->import->resource}]");
@@ -208,13 +208,13 @@ class ProcessImportJob implements ShouldQueue
         $missing = array_diff($required, $headers);
         if (! empty($missing)) {
             fclose($handle);
-            throw new \RuntimeException('Missing required CSV headers: ' . implode(', ', $missing));
+            throw new \RuntimeException('Missing required CSV headers: '.implode(', ', $missing));
         }
 
         $rows = [];
         while (($data = fgetcsv($handle)) !== false) {
             // Skip empty rows
-            if (empty($data) || (count($data) === 1 && $data[0] === null)) {
+            if (count($data) === 1 && $data[0] === null) {
                 continue;
             }
 
@@ -236,7 +236,7 @@ class ProcessImportJob implements ShouldQueue
 
         return [
             'headers' => $headers,
-            'rows'    => $rows,
+            'rows' => $rows,
         ];
     }
 
@@ -249,7 +249,7 @@ class ProcessImportJob implements ShouldQueue
         $data = json_decode($content, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \RuntimeException('Invalid JSON structure: ' . json_last_error_msg());
+            throw new \RuntimeException('Invalid JSON structure: '.json_last_error_msg());
         }
 
         // Support standard array of objects format: [ { "key": "value" }, ... ]
@@ -265,7 +265,7 @@ class ProcessImportJob implements ShouldQueue
         if (empty($data)) {
             return [
                 'headers' => $required,
-                'rows'    => [],
+                'rows' => [],
             ];
         }
 
@@ -274,12 +274,12 @@ class ProcessImportJob implements ShouldQueue
 
         $missing = array_diff($required, $headers);
         if (! empty($missing)) {
-            throw new \RuntimeException('Missing required JSON keys: ' . implode(', ', $missing));
+            throw new \RuntimeException('Missing required JSON keys: '.implode(', ', $missing));
         }
 
         return [
             'headers' => $headers,
-            'rows'    => $data,
+            'rows' => $data,
         ];
     }
 }

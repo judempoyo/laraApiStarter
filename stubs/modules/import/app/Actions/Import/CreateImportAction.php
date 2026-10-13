@@ -31,11 +31,11 @@ class CreateImportAction
 
         // 2. Create the Import tracking record
         $import = Import::create([
-            'user_id'  => $dto->userId,
+            'user_id' => $dto->userId,
             'resource' => $dto->resource,
-            'status'   => ImportStatus::PENDING,
+            'status' => ImportStatus::PENDING,
             'media_id' => $media->id,
-            'dry_run'  => $dto->dryRun,
+            'dry_run' => $dto->dryRun,
         ]);
 
         // 3. Dispatch the processing job

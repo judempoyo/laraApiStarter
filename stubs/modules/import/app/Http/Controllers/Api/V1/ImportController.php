@@ -13,6 +13,7 @@ use App\Http\Resources\ImportResource;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ImportController extends Controller
 {
@@ -27,7 +28,7 @@ class ImportController extends Controller
             ->latest()
             ->paginate(20);
 
-        return ApiResponse::paginated($imports, __('api.import_retrieved'));
+        return ApiResponse::paginated($imports, __('modules/import.import_retrieved'));
     }
 
     /**
@@ -37,7 +38,7 @@ class ImportController extends Controller
     public function store(StoreImportRequest $request, CreateImportAction $action): JsonResponse
     {
         // Guard admin-only resources
-        if ($request->resourceIsAdminOnly() && ! $request->user()->hasRole('admin')) {
+        if ($request->resourceIsAdminOnly() && ! Gate::forUser($request->user())->allows('api.admin')) {
             throw ApiException::forbidden('This import resource requires admin privileges.');
         }
 
@@ -48,7 +49,7 @@ class ImportController extends Controller
         );
 
         return ApiResponse::accepted(
-            __('api.import_queued'),
+            __('modules/import.import_queued'),
             new ImportResource($import->load('media'))
         );
     }
@@ -77,15 +78,15 @@ class ImportController extends Controller
     {
         $resources = collect(config('import.resources', []))
             ->map(fn ($class, $key) => [
-                'key'        => $key,
-                'label'      => app($class)->label(),
+                'key' => $key,
+                'label' => app($class)->label(),
                 'admin_only' => app($class)->isAdminOnly(),
             ])
             ->values();
 
         return ApiResponse::success(
             ['resources' => $resources],
-            __('api.import_resources_listed')
+            __('modules/import.import_resources_listed')
         );
     }
 }

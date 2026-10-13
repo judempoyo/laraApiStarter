@@ -30,9 +30,9 @@ class Import extends Model
     protected function casts(): array
     {
         return [
-            'status'  => ImportStatus::class,
+            'status' => ImportStatus::class,
             'dry_run' => 'boolean',
-            'errors'  => 'array',
+            'errors' => 'array',
         ];
     }
 

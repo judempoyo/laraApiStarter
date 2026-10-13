@@ -1,0 +1,57 @@
+{
+    "name": "import",
+    "version": "1.0.0",
+    "description": "Queued CSV/JSON imports with validation and media storage.",
+    "requires": [
+        "media"
+    ],
+    "composer": {},
+    "files": {
+        "app/Actions/Import/CreateImportAction.php": "app/Actions/Import/CreateImportAction.php",
+        "app/Contracts/ImportableInterface.php": "app/Contracts/ImportableInterface.php",
+        "app/DTOs/Import/CreateImportDTO.php": "app/DTOs/Import/CreateImportDTO.php",
+        "app/Enums/ImportStatus.php": "app/Enums/ImportStatus.php",
+        "app/Events/ImportCompleted.php": "app/Events/ImportCompleted.php",
+        "app/Events/ImportFailed.php": "app/Events/ImportFailed.php",
+        "app/Http/Controllers/Api/V1/ImportController.php": "app/Http/Controllers/Api/V1/ImportController.php",
+        "app/Http/Requests/Import/StoreImportRequest.php": "app/Http/Requests/Import/StoreImportRequest.php",
+        "app/Http/Resources/ImportResource.php": "app/Http/Resources/ImportResource.php",
+        "app/Imports/UserPreferenceImport.php": "app/Imports/UserPreferenceImport.php",
+        "app/Imports/UsersImport.php": "app/Imports/UsersImport.php",
+        "app/Jobs/ProcessImportJob.php": "app/Jobs/ProcessImportJob.php",
+        "app/Models/Concerns/HasImports.php": "app/Models/Concerns/HasImports.php",
+        "app/Models/Import.php": "app/Models/Import.php",
+        "app/Notifications/ImportCompletedNotification.php": "app/Notifications/ImportCompletedNotification.php",
+        "app/Providers/Modules/ImportServiceProvider.php": "app/Providers/Modules/ImportServiceProvider.php",
+        "config/import.php": "config/import.php",
+        "database/migrations/2026_07_30_000005_create_imports_table.php": "database/migrations/2026_07_30_000005_create_imports_table.php",
+        "routes/api/modules/import.php": "routes/api/modules/import.php",
+        "tests/Feature/ImportTest.php": "tests/Feature/ImportTest.php",
+        "ai/guidelines/import.md": ".ai/guidelines/modules/import.md",
+        "lang/en/modules/import.php": "lang/en/modules/import.php",
+        "lang/fr/modules/import.php": "lang/fr/modules/import.php",
+        "tests/Feature/ImportTranslationsTest.php": "tests/Feature/ImportTranslationsTest.php"
+    },
+    "migrations": [
+        "database/migrations/2026_07_30_000005_create_imports_table.php"
+    ],
+    "env": {
+        "IMPORT_DISK": {
+            "default": "local",
+            "comment": "Storage disk for uploaded import files"
+        }
+    },
+    "patches": [
+        {
+            "type": "user-trait",
+            "trait": "App\\Models\\Concerns\\HasImports"
+        }
+    ],
+    "provider": "App\\Providers\\Modules\\ImportServiceProvider",
+    "ai": {
+        "guidelines": [
+            "ai/guidelines/import.md"
+        ],
+        "skills": []
+    }
+}

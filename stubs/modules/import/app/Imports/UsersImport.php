@@ -19,8 +19,8 @@ class UsersImport implements ImportableInterface
     public function rules(array $row, int $rowIndex): array
     {
         return [
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
                 'required',
                 'email',
                 'max:255',
@@ -33,9 +33,9 @@ class UsersImport implements ImportableInterface
     public function import(array $row, ?User $user): void
     {
         User::create([
-            'name'              => $row['name'],
-            'email'             => $row['email'],
-            'password'          => Hash::make($row['password']),
+            'name' => $row['name'],
+            'email' => $row['email'],
+            'password' => Hash::make($row['password']),
             'email_verified_at' => now(), // Auto-verify imported users
         ]);
     }

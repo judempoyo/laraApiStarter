@@ -19,7 +19,7 @@ class ImportCompletedNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return config('notifications.channels', []);
     }
 
     public function toArray(object $notifiable): array
@@ -29,24 +29,24 @@ class ImportCompletedNotification extends Notification implements ShouldQueue
         $total = $this->import->total_rows;
 
         $msg = $this->import->isFailed()
-            ? __('api.import_failed_msg', ['resource' => $this->import->resource])
-            : __('api.import_completed_msg', [
+            ? __('modules/import.import_failed_msg', ['resource' => $this->import->resource])
+            : __('modules/import.import_completed_msg', [
                 'resource' => $this->import->resource,
-                'success'  => $success,
-                'failed'   => $failed,
-                'total'    => $total,
+                'success' => $success,
+                'failed' => $failed,
+                'total' => $total,
             ]);
 
         return [
-            'type'            => 'import_completed',
-            'import_id'       => $this->import->id,
-            'resource'        => $this->import->resource,
-            'dry_run'         => $this->import->dry_run,
-            'total_rows'      => $total,
+            'type' => 'import_completed',
+            'import_id' => $this->import->id,
+            'resource' => $this->import->resource,
+            'dry_run' => $this->import->dry_run,
+            'total_rows' => $total,
             'successful_rows' => $success,
-            'failed_rows'     => $failed,
-            'status'          => $this->import->status->value,
-            'message'         => $msg,
+            'failed_rows' => $failed,
+            'status' => $this->import->status->value,
+            'message' => $msg,
         ];
     }
 }

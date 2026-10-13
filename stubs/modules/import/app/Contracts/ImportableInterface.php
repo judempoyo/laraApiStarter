@@ -25,7 +25,7 @@ interface ImportableInterface
      * Return validation rules for a single row.
      *
      * @param  array<string, mixed>  $row
-     * @param  int                   $rowIndex  1-indexed row number.
+     * @param  int  $rowIndex  1-indexed row number.
      * @return array<string, mixed>
      */
     public function rules(array $row, int $rowIndex): array;
@@ -34,8 +34,7 @@ interface ImportableInterface
      * Process a single row and import it.
      *
      * @param  array<string, mixed>  $row
-     * @param  User|null             $user  The user executing the import (null for admin/all).
-     * @return void
+     * @param  User|null  $user  The user executing the import (null for admin/all).
      */
     public function import(array $row, ?User $user): void;
 
