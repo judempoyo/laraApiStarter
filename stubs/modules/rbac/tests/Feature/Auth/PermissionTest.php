@@ -1,10 +1,15 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Tests\Feature\Auth;
 
 use App\Enums\UserRole;
+use App\Http\Responses\ApiResponse;
 use App\Models\User;
-use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
 class PermissionTest extends TestCase
@@ -14,14 +19,15 @@ class PermissionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->seed(DatabaseSeeder::class);
     }
 
     public function test_admin_can_access_admin_stats()
     {
+        Route::middleware(['api', 'auth:sanctum', 'role:admin'])->get('/api/v1/admin/stats', fn () => ApiResponse::success(null, 'Admin stats access granted.'));
         $admin = User::factory()->create();
         $admin->assignRole(UserRole::ADMIN->value);
-        
+
         $response = $this->actingAs($admin, 'sanctum')
             ->getJson('/api/v1/admin/stats');
 
@@ -34,7 +40,7 @@ class PermissionTest extends TestCase
         $admin = User::firstOrCreate(
             ['email' => 'admin@test.com'],
             [
-                'name'     => 'Admin User',
+                'name' => 'Admin User',
                 'password' => bcrypt('password'),
             ]
         );
@@ -44,7 +50,7 @@ class PermissionTest extends TestCase
         }
 
         $response = $this->postJson('/api/v1/auth/login', [
-            'email'    => 'admin@test.com',
+            'email' => 'admin@test.com',
             'password' => 'password',
         ]);
 
