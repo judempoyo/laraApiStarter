@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Actions\Auth\SocialiteLoginAction;
@@ -46,20 +48,20 @@ class SocialiteController extends Controller
 
         if (($result['status'] ?? null) === LoginResult::TWO_FACTOR_REQUIRED) {
             return ApiResponse::success([
-                'auth_status'         => AuthStatus::TWO_FACTOR_REQUIRED->value,
+                'auth_status' => AuthStatus::TWO_FACTOR_REQUIRED->value,
                 'two_factor_required' => true,
-                'token'               => $result['token'],
-                'token_type'          => $result['token_type'],
+                'token' => $result['token'],
+                'token_type' => $result['token_type'],
             ], __('api.2fa_required') ?: 'Two-factor authentication required.');
         }
 
         return ApiResponse::success([
-            'auth_status'         => AuthStatus::AUTHENTICATED->value,
+            'auth_status' => AuthStatus::AUTHENTICATED->value,
             'two_factor_required' => false,
-            'user'                => AuthResource::make($result['user']),
-            'token'               => $result['token'],
-            'token_type'          => $result['token_type'],
-            'expires_at'          => $result['expires_at'],
+            'user' => AuthResource::make($result['user']),
+            'token' => $result['token'],
+            'token_type' => $result['token_type'],
+            'expires_at' => $result['expires_at'],
         ], 'Google login successful.');
     }
 }

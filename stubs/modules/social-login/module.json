@@ -1,0 +1,50 @@
+{
+    "name": "social-login",
+    "version": "1.0.0",
+    "description": "Google OAuth authentication.",
+    "requires": [],
+    "composer": {
+        "laravel/socialite": "^5.0"
+    },
+    "files": {
+        "app/Actions/Auth/SocialiteLoginAction.php": "app/Actions/Auth/SocialiteLoginAction.php",
+        "app/Http/Controllers/Api/Auth/SocialiteController.php": "app/Http/Controllers/Api/Auth/SocialiteController.php",
+        "app/Models/Concerns/HasSocialLogin.php": "app/Models/Concerns/HasSocialLogin.php",
+        "app/Providers/Modules/SocialLoginServiceProvider.php": "app/Providers/Modules/SocialLoginServiceProvider.php",
+        "config/social-login.php": "config/social-login.php",
+        "database/migrations/2026_07_08_000001_add_social_and_avatar_to_users_table.php": "database/migrations/2026_07_08_000001_add_social_and_avatar_to_users_table.php",
+        "routes/api/modules/social-login.php": "routes/api/modules/social-login.php",
+        "ai/guidelines/social-login.md": ".ai/guidelines/modules/social-login.md",
+        "tests/Feature/Auth/SocialiteLoginActionTest.php": "tests/Feature/Auth/SocialiteLoginActionTest.php"
+    },
+    "migrations": [
+        "database/migrations/2026_07_08_000001_add_social_and_avatar_to_users_table.php"
+    ],
+    "env": {
+        "GOOGLE_CLIENT_ID": {
+            "default": "",
+            "comment": "Google OAuth client ID"
+        },
+        "GOOGLE_CLIENT_SECRET": {
+            "default": "",
+            "comment": "Google OAuth client secret"
+        },
+        "GOOGLE_REDIRECT_URI": {
+            "default": "",
+            "comment": "Absolute callback URL; configure before enabling OAuth"
+        }
+    },
+    "patches": [
+        {
+            "type": "user-trait",
+            "trait": "App\\Models\\Concerns\\HasSocialLogin"
+        }
+    ],
+    "provider": "App\\Providers\\Modules\\SocialLoginServiceProvider",
+    "ai": {
+        "guidelines": [
+            "ai/guidelines/social-login.md"
+        ],
+        "skills": []
+    }
+}
