@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +17,7 @@ class UserSecurityLog extends Model
         'meta',
     ];
 
-      /**
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -25,6 +28,7 @@ class UserSecurityLog extends Model
             'meta' => 'array',
         ];
     }
+
     public function user()
     {
         return $this->belongsTo(User::class);

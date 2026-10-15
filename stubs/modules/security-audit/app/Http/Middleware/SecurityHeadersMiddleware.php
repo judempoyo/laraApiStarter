@@ -28,10 +28,10 @@ class SecurityHeadersMiddleware
         $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
         $response->headers->set('X-Download-Options', 'noopen');
 
-        $csp = config('api.security.csp', []);
+        $csp = config('security-audit.csp', []);
 
-        if (! empty($csp)) {
-            $response->headers->set('Content-Security-Policy', implode('; ', $csp) . ';');
+        if ($request->is('docs/*') && ! $response->headers->has('Content-Security-Policy') && ! empty($csp)) {
+            $response->headers->set('Content-Security-Policy', implode('; ', $csp).';');
         }
 
         return $response;
