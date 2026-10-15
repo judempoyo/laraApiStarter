@@ -1,11 +1,12 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Actions\Admin\StartImpersonationAction;
 use App\Contracts\Auth\TokenServiceInterface;
+use App\Enums\ErrorCode;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
@@ -29,8 +30,8 @@ class ImpersonationController extends Controller
 
         if ($request->user()->id === $target->id) {
             throw ApiException::unprocessable(
-                __('api.impersonation_self_error'),
-                \App\Enums\ErrorCode::IMPERSONATION_SELF
+                __('modules/impersonation.impersonation_self_error'),
+                ErrorCode::IMPERSONATION_SELF
             );
         }
 
@@ -41,11 +42,11 @@ class ImpersonationController extends Controller
         $result = $action->execute($request->user(), $target);
 
         return ApiResponse::success([
-            'user'       => UserResource::make($result['user']),
-            'token'      => $result['token'],
+            'user' => UserResource::make($result['user']),
+            'token' => $result['token'],
             'token_type' => $result['token_type'],
             'expires_at' => $result['expires_at'],
-        ], __('api.impersonation_started'));
+        ], __('modules/impersonation.impersonation_started'));
     }
 
     /**
@@ -55,6 +56,6 @@ class ImpersonationController extends Controller
     {
         $tokenService->revokeCurrentToken($request->user());
 
-        return ApiResponse::noContent(__('api.impersonation_stopped'));
+        return ApiResponse::noContent(__('modules/impersonation.impersonation_stopped'));
     }
 }

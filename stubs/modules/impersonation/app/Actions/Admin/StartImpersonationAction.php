@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Admin;
 
-use App\Actions\Security\LogSecurityEventAction;
 use App\Contracts\Auth\TokenServiceInterface;
-use App\Enums\SecurityEvent;
+use App\Enums\ErrorCode;
+use App\Events\SecurityEventOccurred;
 use App\Exceptions\ApiException;
 use App\Models\User;
 
@@ -14,7 +14,6 @@ class StartImpersonationAction
 {
     public function __construct(
         private readonly TokenServiceInterface $tokenService,
-        private readonly LogSecurityEventAction $logSecurityEvent,
     ) {}
 
     /**
@@ -26,7 +25,7 @@ class StartImpersonationAction
         if ($admin->id === $target->id) {
             throw ApiException::unprocessable(
                 'You cannot impersonate yourself.',
-                \App\Enums\ErrorCode::IMPERSONATION_SELF
+                ErrorCode::IMPERSONATION_SELF
             );
         }
 
@@ -36,15 +35,15 @@ class StartImpersonationAction
             ['*']
         );
 
-        $this->logSecurityEvent->execute(
+        SecurityEventOccurred::dispatch(
             $admin,
-            SecurityEvent::IMPERSONATION_STARTED->value,
+            'IMPERSONATION_STARTED',
             ['target_user_id' => $target->id, 'target_email' => $target->email]
         );
 
         return [
-            'user'       => $target,
-            'token'      => $token,
+            'user' => $target,
+            'token' => $token,
             'token_type' => 'Bearer',
             'expires_at' => $this->tokenService->getTokenExpiry(),
         ];

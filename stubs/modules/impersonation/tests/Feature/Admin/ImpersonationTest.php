@@ -3,16 +3,16 @@
 declare(strict_types=1);
 
 use App\Models\User;
-use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\DatabaseSeeder;
 
 beforeEach(function (): void {
-    $this->seed(RolesAndPermissionsSeeder::class);
+    $this->seed(DatabaseSeeder::class);
 });
 
 // ─── POST /admin/impersonate/{userId} ─────────────────────────────────────────
 
 it('admin can impersonate a regular user', function (): void {
-    $admin  = User::factory()->create();
+    $admin = User::factory()->create();
     $target = User::factory()->create();
 
     $admin->assignRole('admin');
@@ -61,7 +61,7 @@ it('impersonation returns 404 for non-existent user', function (): void {
 });
 
 it('non-admin user cannot access impersonation endpoint', function (): void {
-    $user   = User::factory()->create();
+    $user = User::factory()->create();
     $target = User::factory()->create();
 
     $user->assignRole('user');
@@ -74,7 +74,7 @@ it('non-admin user cannot access impersonation endpoint', function (): void {
 // ─── DELETE /admin/impersonate ────────────────────────────────────────────────
 
 it('admin can stop impersonation session', function (): void {
-    $admin  = User::factory()->create();
+    $admin = User::factory()->create();
     $target = User::factory()->create();
 
     $admin->assignRole('admin');
