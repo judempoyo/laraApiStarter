@@ -5,15 +5,13 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Contracts\Auth\TokenServiceInterface;
-use App\Services\Auth\PassportTokenService;
 use App\Services\Auth\SanctumTokenService;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
-use App\Auth\ApiKeyGuard;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -25,12 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(TokenServiceInterface::class, function (): TokenServiceInterface {
-            return match (config('api.auth_driver', 'sanctum')) {
-                'passport' => new PassportTokenService(),
-                default    => new SanctumTokenService(),
-            };
-        });
+        Scramble::ignoreDefaultRoutes();
+        $this->app->singleton(TokenServiceInterface::class, SanctumTokenService::class);
     }
 
     /**
@@ -39,26 +33,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if (app()->environment('local')) {
-            \Illuminate\Support\Facades\DB::enableQueryLog();
+            DB::enableQueryLog();
         }
 
         $this->configureRateLimiting();
         $this->configureGates();
         $this->configureApiDocs();
-        $this->registerApiKeyGuard();
-    }
-
-    /**
-     * Register the custom API Key guard driver.
-     *
-     * Allows routes to use auth:api-key natively, e.g.:
-     *   Route::middleware('auth:api-key,sanctum') or 'auth:api-key'
-     */
-    protected function registerApiKeyGuard(): void
-    {
-        Auth::extend('api-key', function ($app, string $name, array $config): ApiKeyGuard {
-            return new ApiKeyGuard($app['request']);
-        });
+        Scramble::registerJsonSpecificationRoute('/docs/api.json');
     }
 
     /**
@@ -71,9 +52,11 @@ class AppServiceProvider extends ServiceProvider
                 return true;
             }
 
-            $accessKey = config('app.docs_access_key', 'lara-api-starter-secret');
+            $accessKey = config('app.docs_access_key');
 
-            return request()->cookie('docs_access_key') === $accessKey;
+            $provided = request()->cookie('docs_access_key');
+
+            return is_string($accessKey) && $accessKey !== '' && is_string($provided) && hash_equals($accessKey, $provided);
         };
 
         Gate::define('viewApiDocs', $checkAccess);
@@ -112,7 +95,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('login', function (Request $request) use ($limits): Limit {
             return Limit::perMinute($limits['login'])
-                ->by(strtolower((string) $request->input('email')) . '|' . $request->ip());
+                ->by(strtolower((string) $request->input('email')).'|'.$request->ip());
         });
 
         RateLimiter::for('register', function (Request $request) use ($limits): Limit {
@@ -122,7 +105,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('password-reset', function (Request $request) use ($limits): Limit {
             return Limit::perHour($limits['password_reset'])
-                ->by(strtolower((string) $request->input('email')) . '|' . $request->ip());
+                ->by(strtolower((string) $request->input('email')).'|'.$request->ip());
         });
     }
 }

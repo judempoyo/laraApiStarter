@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 use App\Enums\ErrorCode;
 use App\Exceptions\ApiException;
+use App\Http\Middleware\EnsureEmailIsVerified;
+use App\Http\Middleware\ForceJsonResponse;
+use App\Http\Middleware\RequestIdMiddleware;
+use App\Http\Middleware\SetLocale;
 use App\Http\Responses\ApiResponse;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -19,27 +23,17 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        api: __DIR__ . '/../routes/api.php',
-        commands: __DIR__ . '/../routes/console.php',
+        api: __DIR__.'/../routes/api.php',
+        commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'admin'               => \App\Http\Middleware\AdminMiddleware::class,
-            'verified.email'      => \App\Http\Middleware\EnsureEmailIsVerified::class,
-            'optional.auth'       => \App\Http\Middleware\OptionalAuth::class,
-            'api.key'             => \App\Http\Middleware\AuthenticateWithApiKey::class,
-            'role'                => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission'          => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'role_or_permission'  => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-            '2fa.complete'        => \App\Http\Middleware\EnsureTwoFactorComplete::class,
+            'verified.email' => EnsureEmailIsVerified::class,
         ])->append([
-            \App\Http\Middleware\ForceJsonResponse::class,
-            \App\Http\Middleware\SetLocale::class,
-            \App\Http\Middleware\SecurityHeadersMiddleware::class,
-            \App\Http\Middleware\RequestIdMiddleware::class,
-            \App\Http\Middleware\RequestSizeLimitMiddleware::class,
-            \App\Http\Middleware\SuspiciousRequestMiddleware::class,
+            ForceJsonResponse::class,
+            SetLocale::class,
+            RequestIdMiddleware::class,
         ])->encryptCookies(except: [
             'docs_access_key',
         ]);
@@ -65,7 +59,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (AccessDeniedHttpException|\Illuminate\Auth\Access\AuthorizationException|\Spatie\Permission\Exceptions\UnauthorizedException $e, Request $request) use ($shouldRenderJson) {
+        $exceptions->render(function (AccessDeniedHttpException|AuthorizationException $e, Request $request) use ($shouldRenderJson) {
             if ($shouldRenderJson($request)) {
                 return ApiResponse::error(ErrorCode::FORBIDDEN, 'Access denied.', 403, 'You do not have permission to perform this action.');
             }
@@ -108,13 +102,19 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (\Throwable $e, Request $request) use ($shouldRenderJson) {
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e, Request $request) use ($shouldRenderJson) {
+            if ($shouldRenderJson($request) && $e->getStatusCode() === 403) {
+                return ApiResponse::error(ErrorCode::FORBIDDEN, 'Access denied.', 403, 'You do not have permission to perform this action.');
+            }
+        });
+
+        $exceptions->render(function (Throwable $e, Request $request) use ($shouldRenderJson) {
             if ($shouldRenderJson($request)) {
                 $metadata = config('app.debug') ? [
                     'exception' => get_class($e),
-                    'file'      => $e->getFile(),
-                    'line'      => $e->getLine(),
-                    'trace'     => array_slice($e->getTrace(), 0, 10),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => array_slice($e->getTrace(), 0, 10),
                 ] : [];
 
                 return ApiResponse::error(
