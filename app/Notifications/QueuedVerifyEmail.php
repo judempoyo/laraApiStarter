@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Notifications;
 
 use Illuminate\Auth\Notifications\VerifyEmail as BaseVerifyEmail;
@@ -22,12 +25,12 @@ class QueuedVerifyEmail extends BaseVerifyEmail implements ShouldQueue
 
         return (new MailMessage)
             ->subject('Vérifiez votre adresse e-mail')
-            ->greeting('Bonjour ' . $notifiable->name . ',')
-            ->line('Merci de vous être inscrit sur ' . config('app.name') . '. Veuillez cliquer sur le bouton ci-dessous pour vérifier votre adresse e-mail.')
+            ->greeting('Bonjour '.$notifiable->name.',')
+            ->line('Merci de vous être inscrit sur '.config('app.name').'. Veuillez cliquer sur le bouton ci-dessous pour vérifier votre adresse e-mail.')
             ->action('Vérifier mon adresse e-mail', $url)
-            ->line('Ce lien expirera dans ' . Config::get('auth.verification.expire', 60) . ' minutes.')
+            ->line('Ce lien expirera dans '.Config::get('auth.verification.expire', 60).' minutes.')
             ->line('Si vous n\'avez pas créé de compte, aucune action n\'est requise.')
-            ->salutation('Cordialement, l\'équipe ' . config('app.name'));
+            ->salutation('Cordialement, l\'équipe '.config('app.name'));
     }
 
     /**
@@ -44,10 +47,10 @@ class QueuedVerifyEmail extends BaseVerifyEmail implements ShouldQueue
         $parsed = parse_url($apiSignedUrl);
         parse_str($parsed['query'] ?? '', $params);
 
-        return rtrim(config('app.frontend_url'), '/') . '/auth/verify-email?' . http_build_query([
-            'id'        => $notifiable->getKey(),
-            'hash'      => sha1($notifiable->getEmailForVerification()),
-            'expires'   => $params['expires'] ?? '',
+        return rtrim(config('app.frontend_url'), '/').'/auth/verify-email?'.http_build_query([
+            'id' => $notifiable->getKey(),
+            'hash' => sha1($notifiable->getEmailForVerification()),
+            'expires' => $params['expires'] ?? '',
             'signature' => $params['signature'] ?? '',
         ]);
     }

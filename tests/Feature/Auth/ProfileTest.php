@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
@@ -17,7 +19,7 @@ class ProfileTest extends TestCase
         $token = $user->createToken('auth_token')->plainTextToken;
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->patchJson('/api/v1/auth/profile', [
             'name' => 'Updated Name',
         ]);
@@ -30,7 +32,7 @@ class ProfileTest extends TestCase
             ]);
 
         $this->assertDatabaseHas('users', [
-            'id'   => $user->id,
+            'id' => $user->id,
             'name' => 'Updated Name',
         ]);
     }
@@ -43,10 +45,10 @@ class ProfileTest extends TestCase
         $token = $user->createToken('auth_token')->plainTextToken;
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->putJson('/api/v1/auth/profile/password', [
-            'current_password'      => 'old_password',
-            'password'              => 'new_password',
+            'current_password' => 'old_password',
+            'password' => 'new_password',
             'password_confirmation' => 'new_password',
         ]);
 
@@ -63,10 +65,10 @@ class ProfileTest extends TestCase
         $token = $user->createToken('auth_token')->plainTextToken;
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->putJson('/api/v1/auth/profile/password', [
-            'current_password'      => 'wrong_password',
-            'password'              => 'new_password',
+            'current_password' => 'wrong_password',
+            'password' => 'new_password',
             'password_confirmation' => 'new_password',
         ]);
 

@@ -1,12 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Auth;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Http\Requests\ApiRequest;
 
 class UpdateProfileRequest extends ApiRequest
-
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -42,7 +42,7 @@ class UpdateProfileRequest extends ApiRequest
     {
         return [
             'name.required' => 'Please provide your name.',
-            'name.max'      => 'Your name cannot exceed 100 characters.',
+            'name.max' => 'Your name cannot exceed 100 characters.',
         ];
     }
 }

@@ -1,12 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Auth;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Http\Requests\ApiRequest;
 
 class ResetPasswordRequest extends ApiRequest
-
 {
     public function authorize(): bool
     {
@@ -26,11 +26,11 @@ class ResetPasswordRequest extends ApiRequest
     public function messages(): array
     {
         return [
-            'token.required'    => 'The password reset token is missing.',
-            'email.required'    => 'Please provide your email address.',
-            'email.email'       => 'Please provide a valid email address format.',
+            'token.required' => 'The password reset token is missing.',
+            'email.required' => 'Please provide your email address.',
+            'email.email' => 'Please provide a valid email address format.',
             'password.required' => 'A new password is required.',
-            'password.min'      => 'Your password must be at least 8 characters long.',
+            'password.min' => 'Your password must be at least 8 characters long.',
         ];
     }
 }

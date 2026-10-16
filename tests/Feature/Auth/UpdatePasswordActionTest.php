@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\UpdatePasswordAction;
 use App\DTOs\Auth\UpdatePasswordDTO;
+use App\Enums\Result\Auth\UpdatePasswordResult;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -18,8 +21,8 @@ it('updates password when current password is valid', function () {
     $action = app(UpdatePasswordAction::class);
 
     $result = $action->execute($user, $dto);
-    
-    expect($result['status'])->toBe(\App\Enums\Result\Auth\UpdatePasswordResult::SUCCESS);
+
+    expect($result['status'])->toBe(UpdatePasswordResult::SUCCESS);
     expect(Hash::check('new_password', $user->fresh()->password))->toBeTrue();
 });
 
@@ -37,5 +40,5 @@ it('fails password update when current password is invalid', function () {
 
     $result = $action->execute($user, $dto);
 
-    expect($result['status'])->toBe(\App\Enums\Result\Auth\UpdatePasswordResult::INVALID_CURRENT_PASSWORD);
+    expect($result['status'])->toBe(UpdatePasswordResult::INVALID_CURRENT_PASSWORD);
 });

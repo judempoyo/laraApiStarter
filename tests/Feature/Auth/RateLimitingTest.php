@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\RateLimiter;
 use Tests\TestCase;
 
 class RateLimitingTest extends TestCase
@@ -16,7 +17,7 @@ class RateLimitingTest extends TestCase
         // We can't easily test the actual throttle without making many requests,
         // but we can verify the middleware is applied by checking the response headers
         // if they include X-RateLimit-Limit (Note: default throttle does this).
-        
+
         $user = User::factory()->create();
 
         // Login route
@@ -26,7 +27,7 @@ class RateLimitingTest extends TestCase
         ]);
 
         $response->assertHeader('X-RateLimit-Limit');
-        
+
         // Let's verify it hits 429 if we loop (if we want to be thorough)
         // But for a starter kit, verifying the headers exist is usually enough proof the middleware is active.
     }

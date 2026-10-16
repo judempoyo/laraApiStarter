@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\Auth;
 
 use Illuminate\Http\Request;
@@ -14,11 +16,11 @@ class ResolveDeviceNameAction
 {
     private const PATTERNS = [
         'Android' => '/android/i',
-        'iOS'     => '/iphone|ipad|ipod/i',
-        'Chrome'  => '/chrome/i',
+        'iOS' => '/iphone|ipad|ipod/i',
+        'Chrome' => '/chrome/i',
         'Firefox' => '/firefox/i',
-        'Edge'    => '/edg(e|\/)/i',
-        'Safari'  => '/safari/i',
+        'Edge' => '/edg(e|\/)/i',
+        'Safari' => '/safari/i',
     ];
 
     public function execute(?Request $request = null): string

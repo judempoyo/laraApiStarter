@@ -5,23 +5,23 @@ declare(strict_types=1);
 namespace App\Actions\Auth;
 
 use App\DTOs\Auth\UpdateProfileDTO;
+use App\Enums\Result\Auth\UpdateProfileResult;
+use App\Events\ActivityRecorded;
 use App\Models\User;
 
 class UpdateProfileAction
 {
-    use \App\Traits\LogsActivity;
-
     public function execute(User $user, UpdateProfileDTO $dto): array
     {
         $user->update([
             'name' => $dto->name,
         ]);
 
-        $this->logActivity('auth.profile.updated', "User profile updated.", $user->id);
+        ActivityRecorded::dispatch('auth.profile.updated', 'User profile updated.', $user->id);
 
         return [
-            'status' => \App\Enums\Result\Auth\UpdateProfileResult::SUCCESS,
-            'user'   => $user,
+            'status' => UpdateProfileResult::SUCCESS,
+            'user' => $user,
         ];
     }
 }
