@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 abstract class QueryFilter
 {
     protected Request $request;
+
     protected Builder $builder;
 
     public function __construct(Request $request)
@@ -55,7 +56,7 @@ abstract class QueryFilter
     {
         $sort = $this->request->query('sort');
 
-        if (!$sort) {
+        if (! $sort) {
             return $builder;
         }
 

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use App\Http\Responses\ApiResponse;
 use App\Enums\ErrorCode;
+use App\Http\Responses\ApiResponse;
 
 // ─── ApiResponse::success ─────────────────────────────────────────────────────
 
 it('success response has expected structure', function (): void {
     $response = ApiResponse::success(['foo' => 'bar'], 'OK');
-    $body     = $response->getData(true);
+    $body = $response->getData(true);
 
     expect($body['success'])->toBeTrue();
     expect($body['code'])->toBe(200);
@@ -22,7 +22,7 @@ it('success response has expected structure', function (): void {
 
 it('created response returns 201', function (): void {
     $response = ApiResponse::created(['id' => 1], 'Created.');
-    $body     = $response->getData(true);
+    $body = $response->getData(true);
 
     expect($body['code'])->toBe(201);
     expect($body['success'])->toBeTrue();
@@ -33,7 +33,7 @@ it('created response returns 201', function (): void {
 
 it('accepted response returns 202', function (): void {
     $response = ApiResponse::accepted('Queued.');
-    $body     = $response->getData(true);
+    $body = $response->getData(true);
 
     expect($body['code'])->toBe(202);
     expect($body['success'])->toBeTrue();
@@ -51,7 +51,7 @@ it('noContent response returns 204', function (): void {
 
 it('error response has expected structure', function (): void {
     $response = ApiResponse::error(ErrorCode::FORBIDDEN, 'Access denied.', 403, 'User message.');
-    $body     = $response->getData(true);
+    $body = $response->getData(true);
 
     expect($body['success'])->toBeFalse();
     expect($body['code'])->toBe(403);

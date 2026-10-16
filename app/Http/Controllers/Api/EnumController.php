@@ -18,12 +18,12 @@ class EnumController extends Controller
         description: 'Enum public exposé par l’API',
         type: 'string',
         examples: [
-            'error_code'                    => new Example(value: 'error-code'),
-            'security_event'                => new Example(value: 'security-event'),
-            'user_role'                     => new Example(value: 'user-role'),
-            'user_status'                     => new Example(value: 'user-status'),
-           
-           /* 
+            'error_code' => new Example(value: 'error-code'),
+            'security_event' => new Example(value: 'security-event'),
+            'user_role' => new Example(value: 'user-role'),
+            'user_status' => new Example(value: 'user-status'),
+
+            /*
             'result_login'                  => new Example(value: 'result-login'),
             'result_password_reset'         => new Example(value: 'result-password-reset'),
             'result_update_email'           => new Example(value: 'result-update-email'),
@@ -46,6 +46,10 @@ class EnumController extends Controller
         }
 
         $enumClass = $publicEnum->class();
+
+        if (! enum_exists($enumClass)) {
+            abort(404);
+        }
 
         return ApiResponse::success(
             array_column($enumClass::cases(), 'value'),
