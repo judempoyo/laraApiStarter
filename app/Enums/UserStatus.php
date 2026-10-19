@@ -1,7 +1,11 @@
-<?php 
+<?php
+
+declare(strict_types=1);
+
 namespace App\Enums;
 
-enum UserStatus: string {
-    case ACTIVE   = 'ACTIVE';
+enum UserStatus: string
+{
+    case ACTIVE = 'ACTIVE';
     case DISABLED = 'DISABLED';
 }

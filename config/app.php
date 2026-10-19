@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     /*
@@ -28,11 +30,11 @@ return [
 
     'env' => env('APP_ENV', 'production'),
 
-     /* Api version */
-    'api_version' => env('API_VERSION','V1'),
+    /* Api version */
+    'api_version' => env('API_VERSION', 'V1'),
 
     /* docs documentation access key */
-    'docs_access_key' => env('DOCS_ACCESS_KEY', 'lara-api-starter-secret'),
+    'docs_access_key' => env('DOCS_ACCESS_KEY'),
 
     /*
     |--------------------------------------------------------------------------
@@ -101,7 +103,6 @@ return [
     */
     'supported_locales' => ['en', 'fr'],
 
-
     /*
     |--------------------------------------------------------------------------
     | Encryption Key
@@ -140,8 +141,5 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
-
-   
-
 
 ];

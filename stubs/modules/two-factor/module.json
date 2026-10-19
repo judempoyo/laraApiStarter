@@ -1,0 +1,64 @@
+{
+    "name": "two-factor",
+    "version": "1.0.0",
+    "description": "TOTP challenges, recovery codes and reset flows.",
+    "requires": [],
+    "composer": {
+        "pragmarx/google2fa": "^8.0"
+    },
+    "files": {
+        "app/Actions/Auth/TwoFactor/ConfirmTwoFactorAction.php": "app/Actions/Auth/TwoFactor/ConfirmTwoFactorAction.php",
+        "app/Actions/Auth/TwoFactor/DisableTwoFactorAction.php": "app/Actions/Auth/TwoFactor/DisableTwoFactorAction.php",
+        "app/Actions/Auth/TwoFactor/EnableTwoFactorAction.php": "app/Actions/Auth/TwoFactor/EnableTwoFactorAction.php",
+        "app/Actions/Auth/TwoFactor/GenerateTwoFactorRecoveryCodesAction.php": "app/Actions/Auth/TwoFactor/GenerateTwoFactorRecoveryCodesAction.php",
+        "app/Actions/Auth/TwoFactor/RegenerateTwoFactorRecoveryCodesAction.php": "app/Actions/Auth/TwoFactor/RegenerateTwoFactorRecoveryCodesAction.php",
+        "app/Actions/Auth/TwoFactor/ResetTwoFactorViaSignedLinkAction.php": "app/Actions/Auth/TwoFactor/ResetTwoFactorViaSignedLinkAction.php",
+        "app/Actions/Auth/TwoFactor/ResetTwoFactorWithRecoveryCodeAction.php": "app/Actions/Auth/TwoFactor/ResetTwoFactorWithRecoveryCodeAction.php",
+        "app/Actions/Auth/TwoFactor/SendTwoFactorResetLinkAction.php": "app/Actions/Auth/TwoFactor/SendTwoFactorResetLinkAction.php",
+        "app/Actions/Auth/TwoFactor/ShowTwoFactorRecoveryCodesAction.php": "app/Actions/Auth/TwoFactor/ShowTwoFactorRecoveryCodesAction.php",
+        "app/Actions/Auth/TwoFactor/VerifyTwoFactorAction.php": "app/Actions/Auth/TwoFactor/VerifyTwoFactorAction.php",
+        "app/Enums/Result/Auth/TwoFactorResult.php": "app/Enums/Result/Auth/TwoFactorResult.php",
+        "app/Http/Controllers/Api/Auth/TwoFactorController.php": "app/Http/Controllers/Api/Auth/TwoFactorController.php",
+        "app/Http/Middleware/EnsureTwoFactorComplete.php": "app/Http/Middleware/EnsureTwoFactorComplete.php",
+        "app/Http/Requests/Auth/TwoFactor/ConfirmTwoFactorRequest.php": "app/Http/Requests/Auth/TwoFactor/ConfirmTwoFactorRequest.php",
+        "app/Http/Requests/Auth/TwoFactor/DisableTwoFactorRequest.php": "app/Http/Requests/Auth/TwoFactor/DisableTwoFactorRequest.php",
+        "app/Http/Requests/Auth/TwoFactor/RegenerateTwoFactorRecoveryCodesRequest.php": "app/Http/Requests/Auth/TwoFactor/RegenerateTwoFactorRecoveryCodesRequest.php",
+        "app/Http/Requests/Auth/TwoFactor/ResetTwoFactorViaLinkRequest.php": "app/Http/Requests/Auth/TwoFactor/ResetTwoFactorViaLinkRequest.php",
+        "app/Http/Requests/Auth/TwoFactor/ResetTwoFactorWithRecoveryCodeRequest.php": "app/Http/Requests/Auth/TwoFactor/ResetTwoFactorWithRecoveryCodeRequest.php",
+        "app/Http/Requests/Auth/TwoFactor/SendTwoFactorResetLinkRequest.php": "app/Http/Requests/Auth/TwoFactor/SendTwoFactorResetLinkRequest.php",
+        "app/Http/Requests/Auth/TwoFactor/ShowTwoFactorRecoveryCodesRequest.php": "app/Http/Requests/Auth/TwoFactor/ShowTwoFactorRecoveryCodesRequest.php",
+        "app/Http/Requests/Auth/TwoFactor/VerifyTwoFactorRequest.php": "app/Http/Requests/Auth/TwoFactor/VerifyTwoFactorRequest.php",
+        "app/Models/Concerns/HasTwoFactor.php": "app/Models/Concerns/HasTwoFactor.php",
+        "app/Notifications/TwoFactorResetByAdminNotification.php": "app/Notifications/TwoFactorResetByAdminNotification.php",
+        "app/Notifications/TwoFactorResetLinkNotification.php": "app/Notifications/TwoFactorResetLinkNotification.php",
+        "app/Providers/Modules/TwoFactorServiceProvider.php": "app/Providers/Modules/TwoFactorServiceProvider.php",
+        "config/two-factor.php": "config/two-factor.php",
+        "database/migrations/2026_07_24_000001_add_two_factor_to_users_table.php": "database/migrations/2026_07_24_000001_add_two_factor_to_users_table.php",
+        "routes/api/modules/two-factor.php": "routes/api/modules/two-factor.php",
+        "tests/Feature/Auth/TwoFactorTest.php": "tests/Feature/Auth/TwoFactorTest.php",
+        "ai/guidelines/two-factor.md": ".ai/guidelines/modules/two-factor.md",
+        "ai/skills/adding-two-factor-to-flow/SKILL.md": ".ai/skills/adding-two-factor-to-flow/SKILL.md",
+        "lang/en/modules/two-factor.php": "lang/en/modules/two-factor.php",
+        "lang/fr/modules/two-factor.php": "lang/fr/modules/two-factor.php",
+        "tests/Feature/TwoFactorTranslationsTest.php": "tests/Feature/TwoFactorTranslationsTest.php"
+    },
+    "migrations": [
+        "database/migrations/2026_07_24_000001_add_two_factor_to_users_table.php"
+    ],
+    "env": {},
+    "patches": [
+        {
+            "type": "user-trait",
+            "trait": "App\\Models\\Concerns\\HasTwoFactor"
+        }
+    ],
+    "provider": "App\\Providers\\Modules\\TwoFactorServiceProvider",
+    "ai": {
+        "guidelines": [
+            "ai/guidelines/two-factor.md"
+        ],
+        "skills": [
+            "ai/skills/adding-two-factor-to-flow/SKILL.md"
+        ]
+    }
+}

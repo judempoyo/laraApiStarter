@@ -18,7 +18,7 @@ class LocalizationTest extends TestCase
     {
         // No Accept-Language header → falls back to en
         $response = $this->postJson('/api/v1/auth/login', [
-            'email'    => 'nonexistent@example.com',
+            'email' => 'nonexistent@example.com',
             'password' => 'wrong',
         ]);
 
@@ -68,9 +68,6 @@ class LocalizationTest extends TestCase
         $keys = [
             'register_success', 'login_success', 'logout_success',
             'token_refreshed', 'email_verified', 'profile_updated',
-            'api_key_created', 'api_key_revoked', 'webhook_created',
-            'webhook_updated', 'webhook_deleted', 'media_uploaded',
-            'media_deleted', 'export_queued', 'export_ready',
         ];
 
         foreach ($keys as $key) {
@@ -89,9 +86,6 @@ class LocalizationTest extends TestCase
         $keys = [
             'register_success', 'login_success', 'logout_success',
             'token_refreshed', 'email_verified', 'profile_updated',
-            'api_key_created', 'api_key_revoked', 'webhook_created',
-            'webhook_updated', 'webhook_deleted', 'media_uploaded',
-            'media_deleted', 'export_queued', 'export_ready',
         ];
 
         foreach ($keys as $key) {

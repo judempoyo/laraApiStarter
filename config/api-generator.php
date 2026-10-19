@@ -10,17 +10,17 @@ return [
     |--------------------------------------------------------------------------
     |
     | Define the root namespaces for each generated component.
-    | These are used by the las:* commands to resolve proper namespaces.
+    | These are used by the make:api-* commands to resolve proper namespaces.
     |
     */
 
     'namespaces' => [
-        'dto'        => 'App\\DTOs',
-        'action'     => 'App\\Actions',
-        'request'    => 'App\\Http\\Requests',
-        'resource'   => 'App\\Http\\Resources',
-        'controller' => 'App\\Http\\Controllers\\Api\\v1',
-        'model'      => 'App\\Models',
+        'dto' => 'App\\DTOs',
+        'action' => 'App\\Actions',
+        'request' => 'App\\Http\\Requests',
+        'resource' => 'App\\Http\\Resources',
+        'controller' => 'App\\Http\\Controllers\\Api\\V1',
+        'model' => 'App\\Models',
     ],
 
     /*
@@ -33,12 +33,12 @@ return [
     */
 
     'paths' => [
-        'dto'        => 'DTOs',
-        'action'     => 'Actions',
-        'request'    => 'Http/Requests',
-        'resource'   => 'Http/Resources',
-        'controller' => 'Http/Controllers/Api/v1',
-        'stub'       => 'stubs',
+        'dto' => 'DTOs',
+        'action' => 'Actions',
+        'request' => 'Http/Requests',
+        'resource' => 'Http/Resources',
+        'controller' => 'Http/Controllers/Api/V1',
+        'stub' => 'stubs',
     ],
 
     /*

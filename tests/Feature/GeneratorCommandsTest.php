@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
@@ -39,9 +39,9 @@ function deleteIfExists(string ...$paths): void
     }
 }
 
-// ─── las:dto ────────────────────────────────────────────────────────────────
+// ─── make:api-dto ────────────────────────────────────────────────────────────────
 
-describe('las:dto', function () {
+describe('make:api-dto', function () {
     afterEach(function () {
         deleteIfExists(generatedPath('DTOs/Test/TestDTO.php'));
     });
@@ -49,7 +49,7 @@ describe('las:dto', function () {
     it('generates a DTO with correct namespace and placeholders', function () {
         $path = generatedPath('DTOs/Test/TestDTO.php');
 
-        Artisan::call('las:dto', ['name' => 'Test/TestDTO']);
+        Artisan::call('make:api-dto', ['name' => 'Test/TestDTO']);
 
         assertFileGeneratedAndClean($path);
 
@@ -62,18 +62,18 @@ describe('las:dto', function () {
 
     it('fails with a clear error when name is empty', function () {
         // GeneratorCommand requires name — it will throw or return non-zero
-        $exitCode = Artisan::call('las:dto', ['name' => '']);
+        $exitCode = Artisan::call('make:api-dto', ['name' => '']);
         expect($exitCode)->toBe(1); // failure
     });
 
     it('does not overwrite an existing file without --force', function () {
         $path = generatedPath('DTOs/Test/TestDTO.php');
 
-        Artisan::call('las:dto', ['name' => 'Test/TestDTO']);
+        Artisan::call('make:api-dto', ['name' => 'Test/TestDTO']);
         $firstModified = filemtime($path);
         sleep(1);
 
-        Artisan::call('las:dto', ['name' => 'Test/TestDTO']);
+        Artisan::call('make:api-dto', ['name' => 'Test/TestDTO']);
         $secondModified = filemtime($path);
 
         expect($firstModified)->toBe($secondModified);
@@ -82,20 +82,20 @@ describe('las:dto', function () {
     it('overwrites an existing file with --force', function () {
         $path = generatedPath('DTOs/Test/TestDTO.php');
 
-        Artisan::call('las:dto', ['name' => 'Test/TestDTO']);
+        Artisan::call('make:api-dto', ['name' => 'Test/TestDTO']);
         $firstModified = filemtime($path);
         sleep(1);
 
-        Artisan::call('las:dto', ['name' => 'Test/TestDTO', '--force' => true]);
+        Artisan::call('make:api-dto', ['name' => 'Test/TestDTO', '--force' => true]);
         $secondModified = filemtime($path);
 
         expect($secondModified)->toBeGreaterThan($firstModified);
     });
 });
 
-// ─── las:action ─────────────────────────────────────────────────────────────
+// ─── make:api-action ─────────────────────────────────────────────────────────────
 
-describe('las:action', function () {
+describe('make:api-action', function () {
     afterEach(function () {
         deleteIfExists(generatedPath('Actions/Test/TestAction.php'));
     });
@@ -103,7 +103,7 @@ describe('las:action', function () {
     it('generates an Action with execute() method', function () {
         $path = generatedPath('Actions/Test/TestAction.php');
 
-        Artisan::call('las:action', ['name' => 'Test/TestAction']);
+        Artisan::call('make:api-action', ['name' => 'Test/TestAction']);
 
         assertFileGeneratedAndClean($path);
 
@@ -117,8 +117,8 @@ describe('las:action', function () {
     it('wires the DTO import when --dto is provided', function () {
         $path = generatedPath('Actions/Test/TestAction.php');
 
-        Artisan::call('las:action', [
-            'name'  => 'Test/TestAction',
+        Artisan::call('make:api-action', [
+            'name' => 'Test/TestAction',
             '--dto' => 'Test/TestDTO',
         ]);
 
@@ -129,14 +129,14 @@ describe('las:action', function () {
     });
 
     it('fails with a clear error when name is empty', function () {
-        $exitCode = Artisan::call('las:action', ['name' => '']);
+        $exitCode = Artisan::call('make:api-action', ['name' => '']);
         expect($exitCode)->toBe(1);
     });
 });
 
-// ─── las:request ────────────────────────────────────────────────────────
+// ─── make:api-request ────────────────────────────────────────────────────────
 
-describe('las:request', function () {
+describe('make:api-request', function () {
     afterEach(function () {
         deleteIfExists(generatedPath('Http/Requests/Test/TestRequest.php'));
     });
@@ -144,7 +144,7 @@ describe('las:request', function () {
     it('generates a Request extending ApiRequest', function () {
         $path = generatedPath('Http/Requests/Test/TestRequest.php');
 
-        Artisan::call('las:request', ['name' => 'Test/TestRequest']);
+        Artisan::call('make:api-request', ['name' => 'Test/TestRequest']);
 
         assertFileGeneratedAndClean($path);
 
@@ -158,14 +158,14 @@ describe('las:request', function () {
     });
 
     it('fails with a clear error when name is empty', function () {
-        $exitCode = Artisan::call('las:request', ['name' => '']);
+        $exitCode = Artisan::call('make:api-request', ['name' => '']);
         expect($exitCode)->toBe(1);
     });
 });
 
-// ─── las:resource ───────────────────────────────────────────────────────
+// ─── make:api-resource ───────────────────────────────────────────────────────
 
-describe('las:resource', function () {
+describe('make:api-resource', function () {
     afterEach(function () {
         deleteIfExists(generatedPath('Http/Resources/TestResource.php'));
     });
@@ -173,7 +173,7 @@ describe('las:resource', function () {
     it('generates a Resource extending JsonResource', function () {
         $path = generatedPath('Http/Resources/TestResource.php');
 
-        Artisan::call('las:resource', ['name' => 'TestResource']);
+        Artisan::call('make:api-resource', ['name' => 'TestResource']);
 
         assertFileGeneratedAndClean($path);
 
@@ -185,23 +185,23 @@ describe('las:resource', function () {
     });
 
     it('fails with a clear error when name is empty', function () {
-        $exitCode = Artisan::call('las:resource', ['name' => '']);
+        $exitCode = Artisan::call('make:api-resource', ['name' => '']);
         expect($exitCode)->toBe(1);
     });
 });
 
-// ─── las:controller ─────────────────────────────────────────────────────
+// ─── make:api-controller ─────────────────────────────────────────────────────
 
-describe('las:controller', function () {
+describe('make:api-controller', function () {
     afterEach(function () {
-        deleteIfExists(generatedPath('Http/Controllers/Api/v1/TestController.php'));
+        deleteIfExists(generatedPath('Http/Controllers/Api/V1/TestController.php'));
     });
 
     it('generates a Controller with CRUD methods in the v1 namespace', function () {
-        $path = generatedPath('Http/Controllers/Api/v1/TestController.php');
+        $path = generatedPath('Http/Controllers/Api/V1/TestController.php');
 
-        Artisan::call('las:controller', [
-            'name'     => 'TestController',
+        Artisan::call('make:api-controller', [
+            'name' => 'TestController',
             '--entity' => 'Test',
         ]);
 
@@ -209,7 +209,7 @@ describe('las:controller', function () {
 
         $content = File::get($path);
         expect($content)
-            ->toContain('namespace App\\Http\\Controllers\\Api\\v1')
+            ->toContain('namespace App\\Http\\Controllers\\Api\\V1')
             ->toContain('class TestController')
             ->toContain('extends Controller')
             ->toContain('public function index()')
@@ -220,9 +220,9 @@ describe('las:controller', function () {
     });
 
     it('resolves entity name from controller name when --entity is omitted', function () {
-        $path = generatedPath('Http/Controllers/Api/v1/TestController.php');
+        $path = generatedPath('Http/Controllers/Api/V1/TestController.php');
 
-        Artisan::call('las:controller', ['name' => 'TestController']);
+        Artisan::call('make:api-controller', ['name' => 'TestController']);
 
         $content = File::get($path);
         // imports should reference "Test" entity
@@ -230,25 +230,25 @@ describe('las:controller', function () {
     });
 
     it('fails with a clear error when name is empty', function () {
-        $exitCode = Artisan::call('las:controller', ['name' => '']);
+        $exitCode = Artisan::call('make:api-controller', ['name' => '']);
         expect($exitCode)->toBe(1);
     });
 });
 
-// ─── las:all ─────────────────────────────────────────────────
+// ─── make:api-stack ─────────────────────────────────────────────────
 
-describe('las:all', function () {
+describe('make:api-stack', function () {
     $entity = 'Dummy';
 
-    $allFiles = fn(string $e): array=> [
+    $allFiles = fn (string $e): array => [
         generatedPath("Actions/{$e}/{$e}Action.php"),
         generatedPath("DTOs/{$e}/{$e}DTO.php"),
         generatedPath("Http/Requests/{$e}/{$e}Request.php"),
         generatedPath("Http/Resources/{$e}Resource.php"),
-        generatedPath("Http/Controllers/Api/v1/{$e}Controller.php"),
+        generatedPath("Http/Controllers/Api/V1/{$e}Controller.php"),
     ];
 
-    $crudFiles = fn(string $e): array=> [
+    $crudFiles = fn (string $e): array => [
         generatedPath("Actions/{$e}/Create{$e}Action.php"),
         generatedPath("Actions/{$e}/Update{$e}Action.php"),
         generatedPath("Actions/{$e}/Delete{$e}Action.php"),
@@ -257,7 +257,7 @@ describe('las:all', function () {
         generatedPath("Http/Requests/{$e}/{$e}StoreRequest.php"),
         generatedPath("Http/Requests/{$e}/{$e}UpdateRequest.php"),
         generatedPath("Http/Resources/{$e}Resource.php"),
-        generatedPath("Http/Controllers/Api/v1/{$e}Controller.php"),
+        generatedPath("Http/Controllers/Api/V1/{$e}Controller.php"),
     ];
 
     afterEach(function () use ($entity, $allFiles, $crudFiles) {
@@ -266,7 +266,7 @@ describe('las:all', function () {
     });
 
     it('generates 5 files in simple mode', function () use ($entity, $allFiles) {
-        Artisan::call('las:all', ['name' => $entity]);
+        Artisan::call('make:api-stack', ['name' => $entity]);
 
         foreach ($allFiles($entity) as $path) {
             assertFileGeneratedAndClean($path);
@@ -274,7 +274,7 @@ describe('las:all', function () {
     });
 
     it('generates 9 files in --crud mode', function () use ($entity, $crudFiles) {
-        Artisan::call('las:all', ['name' => $entity, '--crud' => true]);
+        Artisan::call('make:api-stack', ['name' => $entity, '--crud' => true]);
 
         foreach ($crudFiles($entity) as $path) {
             assertFileGeneratedAndClean($path);
@@ -282,7 +282,23 @@ describe('las:all', function () {
     });
 
     it('fails with a clear error when name is invalid', function () {
-        $exitCode = Artisan::call('las:all', ['name' => '123invalid!']);
+        $exitCode = Artisan::call('make:api-stack', ['name' => '123invalid!']);
         expect($exitCode)->toBe(1);
     });
+});
+
+it('generates a scaffold controller that loads through PSR-4 on Linux', function (): void {
+    $entity = 'ScaffoldAutoloadProbe';
+    $paths = [
+        "Http/Controllers/Api/V1/{$entity}Controller.php", "Actions/{$entity}", "DTOs/{$entity}",
+        "Http/Requests/{$entity}", "Http/Resources/{$entity}Resource.php",
+    ];
+    try {
+        expect(Artisan::call('make:api-scaffold', ['entity' => $entity, '--no-model' => true, '--no-migration' => true]))->toBe(0);
+        expect(class_exists('App\\Http\\Controllers\\Api\\V1\\'.$entity.'Controller'))->toBeTrue();
+    } finally {
+        foreach ($paths as $path) {
+            File::isDirectory(app_path($path)) ? File::deleteDirectory(app_path($path)) : File::delete(app_path($path));
+        }
+    }
 });

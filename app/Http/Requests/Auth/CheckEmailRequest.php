@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Auth;
 
 use App\Http\Requests\ApiRequest;
@@ -22,7 +24,7 @@ class CheckEmailRequest extends ApiRequest
     {
         return [
             'email.required' => 'Please provide an email address to check.',
-            'email.email'    => 'The email address must be a valid format.',
+            'email.email' => 'The email address must be a valid format.',
         ];
     }
 }

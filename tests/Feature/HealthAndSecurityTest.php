@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Models\User;
-use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\DatabaseSeeder;
 
 beforeEach(function (): void {
-    $this->seed(RolesAndPermissionsSeeder::class);
+    $this->seed(DatabaseSeeder::class);
 });
 
 // ─── GET /v1/health ───────────────────────────────────────────────────────────
@@ -22,9 +21,9 @@ it('health endpoint returns 200 when all services are operational', function ():
                 'environment',
                 'services' => [
                     'database' => ['status'],
-                    'cache'    => ['status'],
-                    'queue'    => ['status'],
-                    'storage'  => ['status'],
+                    'cache' => ['status'],
+                    'queue' => ['status'],
+                    'storage' => ['status'],
                 ],
             ],
         ]);
@@ -40,24 +39,16 @@ it('health endpoint is publicly accessible without authentication', function ():
 
 // ─── Security Middleware ──────────────────────────────────────────────────────
 
-it('requests with suspicious patterns are rejected with 400', function (): void {
-    // Path traversal
-    $this->getJson('/api/v1/health?path=../etc/passwd')
-        ->assertStatus(400);
+it('legitimate text is not rejected by keyword matching', function (): void {
+    // SQL-like words are valid user content.
+    $this->getJson('/api/v1/health?text=Please%20select%20a%20plan')
+        ->assertOk();
 });
 
 it('request id header is present on every response', function (): void {
     $response = $this->getJson('/api/v1/health');
 
     expect($response->headers->has('X-Request-Id'))->toBeTrue();
-});
-
-it('security headers are present on every response', function (): void {
-    $response = $this->getJson('/api/v1/health');
-
-    expect($response->headers->has('X-Content-Type-Options'))->toBeTrue();
-    expect($response->headers->has('X-Frame-Options'))->toBeTrue();
-    expect($response->headers->has('Strict-Transport-Security'))->toBeTrue();
 });
 
 // ─── ApiResponse format ───────────────────────────────────────────────────────

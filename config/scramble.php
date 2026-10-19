@@ -1,7 +1,8 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Middleware\DocsAccess;
-use Dedoc\Scramble\Http\Middleware\RestrictedDocsAccess;
 
 return [
     /*
@@ -130,9 +131,9 @@ return [
      */
     'flatten_deep_query_parameters' => true,
 
-     'middleware' => [
+    'middleware' => [
         'web',
-        DocsAccess::class
+        DocsAccess::class,
     ],
 
     'extensions' => [],

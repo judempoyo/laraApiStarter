@@ -1,12 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Auth;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Http\Requests\ApiRequest;
 
 class LoginRequest extends ApiRequest
-
 {
     public function authorize(): bool
     {
@@ -25,9 +25,8 @@ class LoginRequest extends ApiRequest
     {
         return [
             'email.required' => 'Please provide your email address.',
-            'email.email'    => 'The email address must be a valid format.',
+            'email.email' => 'The email address must be a valid format.',
             'password.required' => 'Your password is required to log in.',
         ];
     }
-
 }

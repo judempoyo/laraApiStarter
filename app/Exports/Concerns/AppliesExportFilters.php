@@ -25,17 +25,15 @@ trait AppliesExportFilters
      *   - date_from (string)     Lower bound on created_at (ISO 8601).
      *   - date_to  (string)      Upper bound on created_at (ISO 8601).
      *
-     * @param  Builder             $query
-     * @param  array<string, mixed> $filters
-     * @param  string              $idColumn     Column to use for ID filtering (default: 'id').
-     * @param  string              $dateColumn   Column to use for date filtering (default: 'created_at').
-     * @return Builder
+     * @param  array<string, mixed>  $filters
+     * @param  string  $idColumn  Column to use for ID filtering (default: 'id').
+     * @param  string  $dateColumn  Column to use for date filtering (default: 'created_at').
      */
     protected function applyFilters(
         Builder $query,
-        array   $filters,
-        string  $idColumn   = 'id',
-        string  $dateColumn = 'created_at',
+        array $filters,
+        string $idColumn = 'id',
+        string $dateColumn = 'created_at',
     ): Builder {
         // Specific IDs — overrides id_from/id_to when present.
         if (! empty($filters['ids'])) {

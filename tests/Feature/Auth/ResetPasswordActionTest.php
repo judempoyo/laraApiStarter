@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\ResetPasswordAction;
+use App\Enums\Result\Auth\PasswordResetResult;
 use App\Models\User;
 use Illuminate\Support\Facades\Password;
 
@@ -14,11 +17,11 @@ it('resets password successfully', function () {
     $action = app(ResetPasswordAction::class);
 
     $result = $action->execute([
-        'email'                 => $user->email,
-        'password'              => 'new_password',
+        'email' => $user->email,
+        'password' => 'new_password',
         'password_confirmation' => 'new_password',
-        'token'                 => $token,
+        'token' => $token,
     ]);
 
-    expect($result['status'])->toBe(\App\Enums\Result\Auth\PasswordResetResult::RESET_SUCCESS);
+    expect($result['status'])->toBe(PasswordResetResult::RESET_SUCCESS);
 });

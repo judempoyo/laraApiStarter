@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Auth;
 
@@ -21,12 +21,12 @@ class SessionController extends Controller
             ->orderByDesc('last_used_at')
             ->get()
             ->map(fn ($token) => [
-                'id'           => $token->id,
-                'name'         => $token->name,
+                'id' => $token->id,
+                'name' => $token->name,
                 'last_used_at' => $token->last_used_at?->toIso8601String(),
-                'created_at'   => $token->created_at->toIso8601String(),
-                'expires_at'   => $token->expires_at?->toIso8601String(),
-                'is_current'   => $token->id === $request->user()->currentAccessToken()->id,
+                'created_at' => $token->created_at->toIso8601String(),
+                'expires_at' => $token->expires_at?->toIso8601String(),
+                'is_current' => $token->id === $request->user()->currentAccessToken()->id,
             ]);
 
         return ApiResponse::success($tokens, 'Active sessions retrieved.');

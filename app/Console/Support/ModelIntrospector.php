@@ -24,11 +24,11 @@ class ModelIntrospector
 
     public function __construct(string $modelClass)
     {
-        if (!class_exists($modelClass)) {
+        if (! class_exists($modelClass)) {
             throw new \InvalidArgumentException("Model class [{$modelClass}] does not exist.");
         }
 
-        $this->model = new $modelClass();
+        $this->model = new $modelClass;
         $this->fillable = $this->model->getFillable();
         $this->casts = $this->model->getCasts();
         $this->hidden = $this->model->getHidden();
@@ -41,7 +41,7 @@ class ModelIntrospector
     public static function resolveModelClass(string $name): ?string
     {
         $namespace = config('api-generator.namespaces.model', 'App\\Models');
-        $fqcn = $namespace . '\\' . $name;
+        $fqcn = $namespace.'\\'.$name;
 
         return class_exists($fqcn) ? $fqcn : null;
     }
@@ -69,7 +69,7 @@ class ModelIntrospector
         // Always include id at the beginning
         $result = ['id'];
         foreach ($fields as $field) {
-            if (!in_array($field, $this->excludedFields) && $field !== 'id') {
+            if (! in_array($field, $this->excludedFields) && $field !== 'id') {
                 $result[] = $field;
             }
         }
@@ -90,7 +90,7 @@ class ModelIntrospector
         $fields = $this->getFields();
 
         if (empty($fields)) {
-            return "        // TODO: define your properties";
+            return '        // TODO: define your properties';
         }
 
         $lines = [];
@@ -110,7 +110,7 @@ class ModelIntrospector
         $fields = $this->getFields();
 
         if (empty($fields)) {
-            return "            // TODO: map validated data to properties";
+            return '            // TODO: map validated data to properties';
         }
 
         $lines = [];
@@ -129,7 +129,7 @@ class ModelIntrospector
         $fields = $this->getFields();
 
         if (empty($fields)) {
-            return "            // TODO: define validation rules";
+            return '            // TODO: define validation rules';
         }
 
         $lines = [];
@@ -150,7 +150,7 @@ class ModelIntrospector
         $fields = $this->getFields();
 
         if (empty($fields)) {
-            return "            // TODO: define validation messages";
+            return '            // TODO: define validation messages';
         }
 
         $lines = [];
@@ -162,16 +162,16 @@ class ModelIntrospector
 
             foreach ($rules as $rule) {
                 $message = match ($rule) {
-                    'required'   => "The {$humanName} field is required.",
-                    'string'     => "The {$humanName} must be a valid string.",
-                    'integer'    => "The {$humanName} must be a valid integer.",
-                    'numeric'    => "The {$humanName} must be a valid number.",
-                    'boolean'    => "The {$humanName} must be true or false.",
-                    'email'      => "The {$humanName} must be a valid email address.",
-                    'date'       => "The {$humanName} must be a valid date.",
-                    'max:255'    => "The {$humanName} may not be greater than 255 characters.",
-                    'array'      => "The {$humanName} must be an array.",
-                    default      => null,
+                    'required' => "The {$humanName} field is required.",
+                    'string' => "The {$humanName} must be a valid string.",
+                    'integer' => "The {$humanName} must be a valid integer.",
+                    'numeric' => "The {$humanName} must be a valid number.",
+                    'boolean' => "The {$humanName} must be true or false.",
+                    'email' => "The {$humanName} must be a valid email address.",
+                    'date' => "The {$humanName} must be a valid date.",
+                    'max:255' => "The {$humanName} may not be greater than 255 characters.",
+                    'array' => "The {$humanName} must be an array.",
+                    default => null,
                 };
 
                 if ($message !== null) {
@@ -191,7 +191,7 @@ class ModelIntrospector
         $fields = $this->getResourceFields();
 
         if (empty($fields)) {
-            return "            // TODO: define resource fields";
+            return '            // TODO: define resource fields';
         }
 
         $maxLen = max(array_map('strlen', $fields));
@@ -230,15 +230,15 @@ class ModelIntrospector
         }
 
         return match (true) {
-            $cast === 'integer', $cast === 'int'          => 'int',
-            $cast === 'float', $cast === 'double'         => 'float',
-            $cast === 'boolean', $cast === 'bool'         => 'bool',
-            $cast === 'array', $cast === 'json'           => 'array',
-            $cast === 'datetime', $cast === 'date'        => 'string',
-            $cast === 'hashed'                            => 'string',
-            str_contains($cast, 'decimal:')               => 'float',
-            enum_exists($cast)                            => 'string',
-            default                                       => 'string',
+            $cast === 'integer', $cast === 'int' => 'int',
+            $cast === 'float', $cast === 'double' => 'float',
+            $cast === 'boolean', $cast === 'bool' => 'bool',
+            $cast === 'array', $cast === 'json' => 'array',
+            $cast === 'datetime', $cast === 'date' => 'string',
+            $cast === 'hashed' => 'string',
+            str_contains($cast, 'decimal:') => 'float',
+            enum_exists($cast) => 'string',
+            default => 'string',
         };
     }
 
@@ -273,13 +273,13 @@ class ModelIntrospector
         // Cast-based rules
         if ($cast !== null) {
             return match (true) {
-                $cast === 'integer', $cast === 'int'                => [...$rules, 'integer'],
+                $cast === 'integer', $cast === 'int' => [...$rules, 'integer'],
                 $cast === 'float', $cast === 'double',
-                str_contains($cast, 'decimal:')                     => [...$rules, 'numeric'],
-                $cast === 'datetime', $cast === 'date'              => [...$rules, 'date'],
-                $cast === 'array', $cast === 'json'                 => [...$rules, 'array'],
-                enum_exists($cast)                                  => [...$rules, 'string'],
-                default                                             => [...$rules, 'string', 'max:255'],
+                str_contains($cast, 'decimal:') => [...$rules, 'numeric'],
+                $cast === 'datetime', $cast === 'date' => [...$rules, 'date'],
+                $cast === 'array', $cast === 'json' => [...$rules, 'array'],
+                enum_exists($cast) => [...$rules, 'string'],
+                default => [...$rules, 'string', 'max:255'],
             };
         }
 

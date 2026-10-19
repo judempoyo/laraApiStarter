@@ -1,13 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Auth;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Http\Requests\ApiRequest;
 
-
 class ForgotPasswordRequest extends ApiRequest
-
 {
     public function authorize(): bool
     {
@@ -25,8 +24,8 @@ class ForgotPasswordRequest extends ApiRequest
     {
         return [
             'email.required' => 'Please provide your email address.',
-            'email.email'    => 'Please provide a valid email address format.',
-            'email.exists'   => 'We could not find an account with that email address.',
+            'email.email' => 'Please provide a valid email address format.',
+            'email.exists' => 'We could not find an account with that email address.',
         ];
     }
 }

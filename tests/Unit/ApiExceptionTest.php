@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Exceptions\ApiException;
 use App\Enums\ErrorCode;
+use App\Exceptions\ApiException;
 
 // ─── Factory methods ──────────────────────────────────────────────────────────
 

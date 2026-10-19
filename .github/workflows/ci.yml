@@ -1,0 +1,72 @@
+name: API starter
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, sqlite3, pdo_sqlite, dom, xml, curl
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist
+      - run: cp .env.example .env
+      - run: php artisan api:install --preset=minimal --database=sqlite --migrate --no-interaction
+      - run: composer check-all
+      - run: php artisan api:doctor --database
+  modules:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [preferences, notifications, api-keys, media, export, import, webhooks, two-factor, social-login, rbac, impersonation, security-audit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, sqlite3, pdo_sqlite, dom, xml, curl
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist
+      - run: cp .env.example .env
+      - run: php artisan api:install --preset=minimal --database=sqlite --no-interaction
+      - run: php artisan api:add '${{ matrix.module }}' --no-interaction
+      - run: php artisan api:add '${{ matrix.module }}' --no-interaction
+      - run: php artisan migrate --force
+      - run: composer check-all
+      - run: php artisan api:doctor --database
+      - run: php artisan api:remove '${{ matrix.module }}' --no-interaction
+      - run: php scripts/remove-all-modules.php
+      - run: composer test
+      - run: php artisan api:doctor
+  full:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, sqlite3, pdo_sqlite, dom, xml, curl
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist
+      - run: cp .env.example .env
+      - run: php artisan api:install --preset=full --database=sqlite --migrate --seed --no-interaction
+      - run: composer check-all
+      - run: php artisan api:doctor --database
+      - run: php artisan route:list --json > routes-full.json
+      - run: php artisan scramble:export
+      - uses: actions/upload-artifact@v4
+        with:
+          name: full-api-specification
+          path: |
+            api.json
+            routes-full.json
