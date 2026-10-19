@@ -7,21 +7,21 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Actions\Auth\UpdateEmailAction;
 use App\Actions\Auth\UpdatePasswordAction;
 use App\Actions\Auth\UpdateProfileAction;
-use App\Actions\Auth\UploadAvatarAction;
 use App\DTOs\Auth\UpdateEmailDTO;
 use App\DTOs\Auth\UpdatePasswordDTO;
 use App\DTOs\Auth\UpdateProfileDTO;
+use App\Enums\ErrorCode;
+use App\Enums\Result\Auth\UpdateEmailResult;
+use App\Enums\Result\Auth\UpdatePasswordResult;
+use App\Enums\Result\Auth\UpdateProfileResult;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\UpdateEmailRequest;
 use App\Http\Requests\Auth\UpdatePasswordRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
-use App\Http\Requests\Auth\UploadAvatarRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -36,8 +36,7 @@ class ProfileController extends Controller
         );
 
         return match ($result['status']) {
-            \App\Enums\Result\Auth\UpdateProfileResult::SUCCESS =>
-            ApiResponse::success(UserResource::make($result['user']), __('api.profile_updated')),
+            UpdateProfileResult::SUCCESS => ApiResponse::success(UserResource::make($result['user']), __('api.profile_updated')),
         };
     }
 
@@ -52,8 +51,7 @@ class ProfileController extends Controller
         );
 
         return match ($result['status']) {
-            \App\Enums\Result\Auth\UpdateEmailResult::SUCCESS =>
-            ApiResponse::success(UserResource::make($result['user']), __('api.email_changed')),
+            UpdateEmailResult::SUCCESS => ApiResponse::success(UserResource::make($result['user']), __('api.email_changed')),
         };
     }
 
@@ -68,13 +66,11 @@ class ProfileController extends Controller
         );
 
         return match ($result['status']) {
-            \App\Enums\Result\Auth\UpdatePasswordResult::SUCCESS =>
-            ApiResponse::noContent(__('api.password_updated')),
+            UpdatePasswordResult::SUCCESS => ApiResponse::noContent(__('api.password_updated')),
 
-            \App\Enums\Result\Auth\UpdatePasswordResult::INVALID_CURRENT_PASSWORD =>
-            throw ApiException::unprocessable(
+            UpdatePasswordResult::INVALID_CURRENT_PASSWORD => throw ApiException::unprocessable(
                 __('api.wrong_current_password'),
-                \App\Enums\ErrorCode::PASSWORD_MISMATCH
+                ErrorCode::PASSWORD_MISMATCH
             ),
         };
     }
@@ -82,33 +78,8 @@ class ProfileController extends Controller
     /**
      * Upload or replace the user avatar.
      */
-    public function uploadAvatar(UploadAvatarRequest $request, UploadAvatarAction $action): JsonResponse
-    {
-        $user = $action->execute($request->user(), $request->file('avatar'));
-
-        return ApiResponse::success(
-            ['avatar_url' => $user->avatar_url],
-            __('api.avatar_updated')
-        );
-    }
 
     /**
      * Delete the user avatar.
      */
-    public function deleteAvatar(Request $request): JsonResponse
-    {
-        $user = $request->user();
-
-        if (! $user->avatar) {
-            throw ApiException::notFound('Avatar');
-        }
-
-        if (! str_starts_with($user->avatar, 'http')) {
-            Storage::disk('public')->delete($user->avatar);
-        }
-
-        $user->update(['avatar' => null]);
-
-        return ApiResponse::noContent(__('api.avatar_deleted'));
-    }
 }

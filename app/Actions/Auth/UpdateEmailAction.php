@@ -1,27 +1,30 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Actions\Auth;
 
 use App\DTOs\Auth\UpdateEmailDTO;
+use App\Enums\Result\Auth\UpdateEmailResult;
+use App\Events\ActivityRecorded;
 use App\Models\User;
 
 class UpdateEmailAction
 {
-    use \App\Traits\LogsActivity;
-
     public function execute(User $user, UpdateEmailDTO $dto): array
     {
         $user->update([
             'email' => $dto->email,
         ]);
 
-        $user->email_verified_at === null;
+        $user->email_verified_at = null;
         $user->sendEmailVerificationNotification();
 
-        $this->logActivity('auth.email.updated', "User email updated.", $user->id);
+        ActivityRecorded::dispatch('auth.email.updated', 'User email updated.', $user->id);
 
         return [
-            'status' => \App\Enums\Result\Auth\UpdateEmailResult::SUCCESS,
-            'user'   => $user,
+            'status' => UpdateEmailResult::SUCCESS,
+            'user' => $user,
         ];
     }
 }

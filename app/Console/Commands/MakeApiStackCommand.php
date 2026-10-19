@@ -1,20 +1,18 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Console\Commands;
 
 use App\Console\Support\ModelIntrospector;
 use Illuminate\Console\Command;
-use Symfony\Component\Console\Attribute\AsCommand;
 
-#[AsCommand(name: 'las:all')]
 class MakeApiStackCommand extends Command
 {
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'las:all
+    protected $signature = 'make:api-stack
         {name? : The entity name in PascalCase (e.g. Product, BlogPost)}
         {--crud : Generate full CRUD stack (Create/Update/Delete actions, Store/Update DTOs and Requests)}
         {--model= : Introspect this model for auto-filling properties, rules, and resource fields}
@@ -38,24 +36,25 @@ class MakeApiStackCommand extends Command
 
         if (empty($rawName) || ! preg_match('/^[A-Za-z][A-Za-z0-9]*$/', $rawName)) {
             $this->components->error('Invalid entity name. Use a simple PascalCase identifier (e.g. Product, BlogPost).');
+
             return self::FAILURE;
         }
 
-        $entity    = ucfirst($rawName);
-        $crud      = $this->option('crud');
-        $force     = $this->option('force');
+        $entity = ucfirst($rawName);
+        $crud = $this->option('crud');
+        $force = $this->option('force');
         $modelName = $this->option('model') ?? $entity;
 
         // Check if model exists for introspection
         $modelClass = ModelIntrospector::resolveModelClass($modelName);
-        $modelArgs  = $modelClass ? ['--model' => $modelName] : [];
-        $forceArgs  = $force ? ['--force' => true] : [];
+        $modelArgs = $modelClass ? ['--model' => $modelName] : [];
+        $forceArgs = $force ? ['--force' => true] : [];
 
         $this->newLine();
         $this->components->info("Generating API resource stack for [{$entity}]");
 
         if ($modelClass) {
-            $this->components->twoColumnDetail('Model', $modelClass . ' (introspected)');
+            $this->components->twoColumnDetail('Model', $modelClass.' (introspected)');
         } else {
             $this->components->twoColumnDetail('Model', 'None detected — using empty placeholders');
         }
@@ -64,49 +63,49 @@ class MakeApiStackCommand extends Command
         $this->newLine();
 
         $generated = 0;
-        $failed    = 0;
+        $failed = 0;
 
         if ($crud) {
             $this->writeSectionHeader('Actions');
 
-            $generated += $this->generate('las:action', "{$entity}/Create{$entity}Action", array_merge(
+            $generated += $this->generate('make:api-action', "{$entity}/Create{$entity}Action", array_merge(
                 ['--dto' => "{$entity}/{$entity}StoreDTO"],
                 $forceArgs
             ), $failed);
 
-            $generated += $this->generate('las:action', "{$entity}/Update{$entity}Action", array_merge(
+            $generated += $this->generate('make:api-action', "{$entity}/Update{$entity}Action", array_merge(
                 ['--dto' => "{$entity}/{$entity}UpdateDTO"],
                 $forceArgs
             ), $failed);
 
-            $generated += $this->generate('las:action', "{$entity}/Delete{$entity}Action", $forceArgs, $failed);
+            $generated += $this->generate('make:api-action', "{$entity}/Delete{$entity}Action", $forceArgs, $failed);
 
             $this->writeSectionHeader('DTOs');
-            $generated += $this->generate('las:dto', "{$entity}/{$entity}StoreDTO", array_merge($modelArgs, $forceArgs), $failed);
-            $generated += $this->generate('las:dto', "{$entity}/{$entity}UpdateDTO", array_merge($modelArgs, $forceArgs), $failed);
+            $generated += $this->generate('make:api-dto', "{$entity}/{$entity}StoreDTO", array_merge($modelArgs, $forceArgs), $failed);
+            $generated += $this->generate('make:api-dto', "{$entity}/{$entity}UpdateDTO", array_merge($modelArgs, $forceArgs), $failed);
 
             $this->writeSectionHeader('Form Requests');
-            $generated += $this->generate('las:request', "{$entity}/{$entity}StoreRequest", array_merge($modelArgs, $forceArgs), $failed);
-            $generated += $this->generate('las:request', "{$entity}/{$entity}UpdateRequest", array_merge($modelArgs, $forceArgs), $failed);
+            $generated += $this->generate('make:api-request', "{$entity}/{$entity}StoreRequest", array_merge($modelArgs, $forceArgs), $failed);
+            $generated += $this->generate('make:api-request', "{$entity}/{$entity}UpdateRequest", array_merge($modelArgs, $forceArgs), $failed);
         } else {
             $this->writeSectionHeader('Action');
-            $generated += $this->generate('las:action', "{$entity}/{$entity}Action", array_merge(
+            $generated += $this->generate('make:api-action', "{$entity}/{$entity}Action", array_merge(
                 ['--dto' => "{$entity}/{$entity}DTO"],
                 $forceArgs
             ), $failed);
 
             $this->writeSectionHeader('DTO');
-            $generated += $this->generate('las:dto', "{$entity}/{$entity}DTO", array_merge($modelArgs, $forceArgs), $failed);
+            $generated += $this->generate('make:api-dto', "{$entity}/{$entity}DTO", array_merge($modelArgs, $forceArgs), $failed);
 
             $this->writeSectionHeader('Form Request');
-            $generated += $this->generate('las:request', "{$entity}/{$entity}Request", array_merge($modelArgs, $forceArgs), $failed);
+            $generated += $this->generate('make:api-request', "{$entity}/{$entity}Request", array_merge($modelArgs, $forceArgs), $failed);
         }
 
         $this->writeSectionHeader('Resource');
-        $generated += $this->generate('las:resource', "{$entity}Resource", array_merge($modelArgs, $forceArgs), $failed);
+        $generated += $this->generate('make:api-resource', "{$entity}Resource", array_merge($modelArgs, $forceArgs), $failed);
 
         $this->writeSectionHeader('Controller');
-        $generated += $this->generate('las:controller', "{$entity}Controller", array_merge(
+        $generated += $this->generate('make:api-controller', "{$entity}Controller", array_merge(
             ['--entity' => $entity],
             $forceArgs
         ), $failed);
@@ -124,12 +123,12 @@ class MakeApiStackCommand extends Command
         $this->line('  Next step — register your routes in <fg=cyan>routes/api.php</>:');
         $this->newLine();
 
-        $plural = strtolower($entity) . 's';
+        $plural = strtolower($entity).'s';
 
         if ($crud) {
-            $this->line("  Route::apiResource('{$plural}', \\App\\Http\\Controllers\\Api\\v1\\{$entity}Controller::class);");
+            $this->line("  Route::apiResource('{$plural}', \\App\\Http\\Controllers\\Api\\V1\\{$entity}Controller::class);");
         } else {
-            $this->line("  Route::get('{$plural}', [\\App\\Http\\Controllers\\Api\\v1\\{$entity}Controller::class, 'index']);");
+            $this->line("  Route::get('{$plural}', [\\App\\Http\\Controllers\\Api\\V1\\{$entity}Controller::class, 'index']);");
         }
 
         $this->newLine();
@@ -146,6 +145,7 @@ class MakeApiStackCommand extends Command
 
         if ($exitCode !== self::SUCCESS) {
             $failed++;
+
             return 0;
         }
 

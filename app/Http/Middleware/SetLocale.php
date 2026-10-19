@@ -24,7 +24,7 @@ class SetLocale
     public function handle(Request $request, Closure $next): Response
     {
         $supported = config('app.supported_locales', ['en']);
-        $default   = config('app.locale', 'en');
+        $default = config('app.locale', 'en');
 
         $header = $request->header('Accept-Language', $default);
 
@@ -39,9 +39,9 @@ class SetLocale
     /**
      * Parse the Accept-Language header value and return the best-matching supported locale.
      *
-     * @param  string        $header    Raw Accept-Language header value.
-     * @param  list<string>  $supported List of supported locale codes.
-     * @param  string        $default   Fallback locale code.
+     * @param  string  $header  Raw Accept-Language header value.
+     * @param  list<string>  $supported  List of supported locale codes.
+     * @param  string  $default  Fallback locale code.
      */
     private function resolveLocale(string $header, array $supported, string $default): string
     {

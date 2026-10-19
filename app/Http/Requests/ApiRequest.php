@@ -14,7 +14,7 @@ abstract class ApiRequest extends FormRequest
 {
     protected function failedValidation(Validator $validator)
     {
-        $errors = $validator->errors()->messages(); 
+        $errors = $validator->errors()->messages();
 
         $formattedErrors = [];
         foreach ($errors as $field => $messages) {
@@ -27,7 +27,7 @@ abstract class ApiRequest extends FormRequest
                 'Validation failed',
                 422,
                 $validator->errors()->first(),
-                $formattedErrors 
+                $formattedErrors
             )
         );
 

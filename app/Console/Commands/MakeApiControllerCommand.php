@@ -1,18 +1,16 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Console\Commands;
 
 use Illuminate\Console\GeneratorCommand;
-use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
-#[AsCommand(name: 'las:controller')]
 class MakeApiControllerCommand extends GeneratorCommand
 {
-    protected $name = 'las:controller';
+    protected $name = 'make:api-controller';
 
     protected $description = 'Create an API Controller with CRUD methods wired to Actions, DTOs and Resources';
 
@@ -26,7 +24,8 @@ class MakeApiControllerCommand extends GeneratorCommand
         $name = $this->argument('name');
 
         if (empty($name)) {
-            $this->components->error('The name argument is required. Usage: php artisan las:controller ProductController --entity=Product');
+            $this->components->error('The name argument is required. Usage: php artisan make:api-controller ProductController --entity=Product');
+
             return self::FAILURE;
         }
 
@@ -35,12 +34,12 @@ class MakeApiControllerCommand extends GeneratorCommand
 
     protected function getStub(): string
     {
-        return base_path(config('api-generator.paths.stub', 'stubs') . '/controller.api.stub');
+        return base_path(config('api-generator.paths.stub', 'stubs').'/controller.api.stub');
     }
 
     protected function getDefaultNamespace($rootNamespace): string
     {
-        return config('api-generator.namespaces.controller', $rootNamespace . '\\Http\\Controllers\\Api\\v1');
+        return config('api-generator.namespaces.controller', $rootNamespace.'\\Http\\Controllers\\Api\\V1');
     }
 
     protected function buildClass($name): string
@@ -49,16 +48,16 @@ class MakeApiControllerCommand extends GeneratorCommand
 
         // Derive entity name: explicit option, or strip "Controller" suffix from class basename
         $baseName = class_basename($name);
-        $entity   = $this->option('entity') ?? preg_replace('/Controller$/i', '', $baseName);
+        $entity = $this->option('entity') ?? preg_replace('/Controller$/i', '', $baseName);
 
         if (empty($entity)) {
             $entity = $baseName;
         }
 
-        $modelNamespace    = config('api-generator.namespaces.model', 'App\\Models');
-        $dtoNamespace      = config('api-generator.namespaces.dto', 'App\\DTOs');
-        $actionNamespace   = config('api-generator.namespaces.action', 'App\\Actions');
-        $requestNamespace  = config('api-generator.namespaces.request', 'App\\Http\\Requests');
+        $modelNamespace = config('api-generator.namespaces.model', 'App\\Models');
+        $dtoNamespace = config('api-generator.namespaces.dto', 'App\\DTOs');
+        $actionNamespace = config('api-generator.namespaces.action', 'App\\Actions');
+        $requestNamespace = config('api-generator.namespaces.request', 'App\\Http\\Requests');
         $resourceNamespace = config('api-generator.namespaces.resource', 'App\\Http\\Resources');
 
         $modelVariable = lcfirst($entity);
@@ -78,18 +77,18 @@ class MakeApiControllerCommand extends GeneratorCommand
         ];
 
         $replacements = [
-            '{{ imports }}'            => implode("\n", $imports),
-            '{{ modelClass }}'         => $entity,
-            '{{ modelVariable }}'      => $modelVariable,
-            '{{ modelLabel }}'         => $modelLabel,
-            '{{ resourceClass }}'      => $entity . 'Resource',
-            '{{ storeActionClass }}'   => 'Create' . $entity . 'Action',
-            '{{ updateActionClass }}'  => 'Update' . $entity . 'Action',
-            '{{ deleteActionClass }}'  => 'Delete' . $entity . 'Action',
-            '{{ storeDtoClass }}'      => $entity . 'StoreDTO',
-            '{{ updateDtoClass }}'     => $entity . 'UpdateDTO',
-            '{{ storeRequestClass }}'  => $entity . 'StoreRequest',
-            '{{ updateRequestClass }}' => $entity . 'UpdateRequest',
+            '{{ imports }}' => implode("\n", $imports),
+            '{{ modelClass }}' => $entity,
+            '{{ modelVariable }}' => $modelVariable,
+            '{{ modelLabel }}' => $modelLabel,
+            '{{ resourceClass }}' => $entity.'Resource',
+            '{{ storeActionClass }}' => 'Create'.$entity.'Action',
+            '{{ updateActionClass }}' => 'Update'.$entity.'Action',
+            '{{ deleteActionClass }}' => 'Delete'.$entity.'Action',
+            '{{ storeDtoClass }}' => $entity.'StoreDTO',
+            '{{ updateDtoClass }}' => $entity.'UpdateDTO',
+            '{{ storeRequestClass }}' => $entity.'StoreRequest',
+            '{{ updateRequestClass }}' => $entity.'UpdateRequest',
         ];
 
         return str_replace(array_keys($replacements), array_values($replacements), $stub);

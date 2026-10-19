@@ -1,19 +1,17 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Console\Commands;
 
 use App\Console\Support\ModelIntrospector;
 use Illuminate\Console\GeneratorCommand;
-use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
-#[AsCommand(name: 'las:dto')]
 class MakeDtoCommand extends GeneratorCommand
 {
-    protected $name = 'las:dto';
+    protected $name = 'make:api-dto';
 
     protected $description = 'Create a new DTO (Data Transfer Object) class';
 
@@ -27,7 +25,8 @@ class MakeDtoCommand extends GeneratorCommand
         $name = $this->argument('name');
 
         if (empty($name)) {
-            $this->components->error('The name argument is required. Usage: php artisan las:dto User/UserStoreDTO');
+            $this->components->error('The name argument is required. Usage: php artisan make:api-dto User/UserStoreDTO');
+
             return self::FAILURE;
         }
 
@@ -36,12 +35,12 @@ class MakeDtoCommand extends GeneratorCommand
 
     protected function getStub(): string
     {
-        return base_path(config('api-generator.paths.stub', 'stubs') . '/dto.stub');
+        return base_path(config('api-generator.paths.stub', 'stubs').'/dto.stub');
     }
 
     protected function getDefaultNamespace($rootNamespace): string
     {
-        return config('api-generator.namespaces.dto', $rootNamespace . '\\DTOs');
+        return config('api-generator.namespaces.dto', $rootNamespace.'\\DTOs');
     }
 
     protected function buildClass($name): string
@@ -49,12 +48,12 @@ class MakeDtoCommand extends GeneratorCommand
         $stub = parent::buildClass($name);
 
         $modelOption = $this->option('model');
-        $modelClass  = $modelOption ? ModelIntrospector::resolveModelClass($modelOption) : null;
+        $modelClass = $modelOption ? ModelIntrospector::resolveModelClass($modelOption) : null;
 
         if ($modelClass) {
             $introspector = new ModelIntrospector($modelClass);
-            $stub         = str_replace('{{ properties }}', $introspector->generateDtoProperties(), $stub);
-            $stub         = str_replace('{{ fromRequestMapping }}', $introspector->generateFromRequestMapping(), $stub);
+            $stub = str_replace('{{ properties }}', $introspector->generateDtoProperties(), $stub);
+            $stub = str_replace('{{ fromRequestMapping }}', $introspector->generateFromRequestMapping(), $stub);
         } else {
             $stub = str_replace('{{ properties }}', '        // TODO: define your readonly properties', $stub);
             $stub = str_replace('{{ fromRequestMapping }}', '            // TODO: map validated fields', $stub);

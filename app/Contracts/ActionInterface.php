@@ -8,9 +8,6 @@ interface ActionInterface
 {
     /**
      * Execute the action.
-     *
-     * @param  mixed  ...$args
-     * @return mixed
      */
     public function execute(mixed ...$args): mixed;
 }

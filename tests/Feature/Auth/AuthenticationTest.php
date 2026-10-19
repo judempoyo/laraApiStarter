@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
@@ -12,7 +15,9 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_register()
     {
-        \Spatie\Permission\Models\Role::create(['name' => 'user', 'guard_name' => 'api']);
+        if (method_exists(User::class, 'hasRole')) {
+            Role::firstOrCreate(['name' => 'user', 'guard_name' => 'api']);
+        }
 
         $response = $this->postJson('/api/v1/auth/register', [
             'name' => 'Test User',
@@ -58,7 +63,6 @@ class AuthenticationTest extends TestCase
             ]);
     }
 
-
     public function test_users_cannot_login_with_invalid_password()
     {
         $user = User::factory()->create();
@@ -67,10 +71,10 @@ class AuthenticationTest extends TestCase
             'email' => $user->email,
             'password' => 'wrong-password',
         ])->assertStatus(401)
-          ->assertJsonFragment([
-              'code' => 401,
-              'success' => false,
-          ]);
+            ->assertJsonFragment([
+                'code' => 401,
+                'success' => false,
+            ]);
     }
 
     public function test_authenticated_users_can_logout()
@@ -102,6 +106,4 @@ class AuthenticationTest extends TestCase
                 ],
             ]);
     }
-
-
 }

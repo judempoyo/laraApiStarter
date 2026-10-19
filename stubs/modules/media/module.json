@@ -1,0 +1,51 @@
+{
+    "name": "media",
+    "version": "1.0.0",
+    "description": "Media uploads, collections, URLs and profile avatars.",
+    "requires": [],
+    "composer": {},
+    "files": {
+        "app/Actions/Auth/UploadAvatarAction.php": "app/Actions/Auth/UploadAvatarAction.php",
+        "app/Actions/Media/DeleteMediaAction.php": "app/Actions/Media/DeleteMediaAction.php",
+        "app/Actions/Media/UploadMediaAction.php": "app/Actions/Media/UploadMediaAction.php",
+        "app/DTOs/Media/UploadMediaDTO.php": "app/DTOs/Media/UploadMediaDTO.php",
+        "app/Http/Controllers/Api/Auth/AvatarController.php": "app/Http/Controllers/Api/Auth/AvatarController.php",
+        "app/Http/Controllers/Api/V1/MediaController.php": "app/Http/Controllers/Api/V1/MediaController.php",
+        "app/Http/Requests/Auth/UploadAvatarRequest.php": "app/Http/Requests/Auth/UploadAvatarRequest.php",
+        "app/Http/Requests/Media/UploadMediaRequest.php": "app/Http/Requests/Media/UploadMediaRequest.php",
+        "app/Http/Resources/MediaResource.php": "app/Http/Resources/MediaResource.php",
+        "app/Models/Concerns/HasMedia.php": "app/Models/Concerns/HasMedia.php",
+        "app/Models/Media.php": "app/Models/Media.php",
+        "app/Providers/Modules/MediaServiceProvider.php": "app/Providers/Modules/MediaServiceProvider.php",
+        "app/Services/MediaService.php": "app/Services/MediaService.php",
+        "config/media.php": "config/media.php",
+        "database/factories/MediaFactory.php": "database/factories/MediaFactory.php",
+        "database/migrations/2026_07_08_000002_add_avatar_to_users_table.php": "database/migrations/2026_07_08_000002_add_avatar_to_users_table.php",
+        "database/migrations/2026_07_30_000003_create_media_table.php": "database/migrations/2026_07_30_000003_create_media_table.php",
+        "routes/api/modules/media.php": "routes/api/modules/media.php",
+        "tests/Feature/Auth/AvatarTest.php": "tests/Feature/Auth/AvatarTest.php",
+        "tests/Feature/MediaTest.php": "tests/Feature/MediaTest.php",
+        "ai/guidelines/media.md": ".ai/guidelines/modules/media.md",
+        "lang/en/modules/media.php": "lang/en/modules/media.php",
+        "lang/fr/modules/media.php": "lang/fr/modules/media.php",
+        "tests/Feature/MediaTranslationsTest.php": "tests/Feature/MediaTranslationsTest.php"
+    },
+    "migrations": [
+        "database/migrations/2026_07_08_000002_add_avatar_to_users_table.php",
+        "database/migrations/2026_07_30_000003_create_media_table.php"
+    ],
+    "env": {},
+    "patches": [
+        {
+            "type": "user-trait",
+            "trait": "App\\Models\\Concerns\\HasMedia"
+        }
+    ],
+    "provider": "App\\Providers\\Modules\\MediaServiceProvider",
+    "ai": {
+        "guidelines": [
+            "ai/guidelines/media.md"
+        ],
+        "skills": []
+    }
+}

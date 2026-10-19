@@ -1,0 +1,43 @@
+{
+    "name": "security-audit",
+    "version": "1.0.0",
+    "description": "Activity logs, security events and response headers.",
+    "requires": [],
+    "composer": {},
+    "files": {
+        "app/Actions/Security/LogSecurityEventAction.php": "app/Actions/Security/LogSecurityEventAction.php",
+        "app/Actions/Security/SuspiciousLoginAction.php": "app/Actions/Security/SuspiciousLoginAction.php",
+        "app/Enums/SecurityEvent.php": "app/Enums/SecurityEvent.php",
+        "app/Http/Middleware/SecurityHeadersMiddleware.php": "app/Http/Middleware/SecurityHeadersMiddleware.php",
+        "app/Models/AuditLog.php": "app/Models/AuditLog.php",
+        "app/Models/Concerns/HasSecurityAudit.php": "app/Models/Concerns/HasSecurityAudit.php",
+        "app/Models/UserSecurityLog.php": "app/Models/UserSecurityLog.php",
+        "app/Providers/Modules/SecurityAuditServiceProvider.php": "app/Providers/Modules/SecurityAuditServiceProvider.php",
+        "app/Traits/LogsActivity.php": "app/Traits/LogsActivity.php",
+        "config/security-audit.php": "config/security-audit.php",
+        "database/migrations/2025_12_30_025900_create_audit_logs_table.php": "database/migrations/2025_12_30_025900_create_audit_logs_table.php",
+        "database/migrations/2025_12_30_235456_add_performance_indices_to_audit_logs.php": "database/migrations/2025_12_30_235456_add_performance_indices_to_audit_logs.php",
+        "database/migrations/2026_01_28_214932_user_security_logs.php": "database/migrations/2026_01_28_214932_user_security_logs.php",
+        "ai/guidelines/security-audit.md": ".ai/guidelines/modules/security-audit.md",
+        "tests/Feature/SecurityHeadersTest.php": "tests/Feature/SecurityHeadersTest.php"
+    },
+    "migrations": [
+        "database/migrations/2025_12_30_025900_create_audit_logs_table.php",
+        "database/migrations/2025_12_30_235456_add_performance_indices_to_audit_logs.php",
+        "database/migrations/2026_01_28_214932_user_security_logs.php"
+    ],
+    "env": {},
+    "patches": [
+        {
+            "type": "user-trait",
+            "trait": "App\\Models\\Concerns\\HasSecurityAudit"
+        }
+    ],
+    "provider": "App\\Providers\\Modules\\SecurityAuditServiceProvider",
+    "ai": {
+        "guidelines": [
+            "ai/guidelines/security-audit.md"
+        ],
+        "skills": []
+    }
+}

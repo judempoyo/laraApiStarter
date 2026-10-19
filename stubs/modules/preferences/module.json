@@ -1,0 +1,39 @@
+{
+    "name": "preferences",
+    "version": "1.0.0",
+    "description": "User preferences stored as key/value pairs.",
+    "requires": [],
+    "composer": {},
+    "files": {
+        "app/Http/Controllers/Api/V1/User/PreferenceController.php": "app/Http/Controllers/Api/V1/User/PreferenceController.php",
+        "app/Http/Requests/User/UpdatePreferenceRequest.php": "app/Http/Requests/User/UpdatePreferenceRequest.php",
+        "app/Models/Concerns/HasPreferences.php": "app/Models/Concerns/HasPreferences.php",
+        "app/Models/UserPreference.php": "app/Models/UserPreference.php",
+        "app/Providers/Modules/PreferencesServiceProvider.php": "app/Providers/Modules/PreferencesServiceProvider.php",
+        "config/preferences.php": "config/preferences.php",
+        "database/migrations/2026_07_24_000003_create_user_preferences_table.php": "database/migrations/2026_07_24_000003_create_user_preferences_table.php",
+        "routes/api/modules/preferences.php": "routes/api/modules/preferences.php",
+        "tests/Feature/UserPreferenceTest.php": "tests/Feature/UserPreferenceTest.php",
+        "ai/guidelines/preferences.md": ".ai/guidelines/modules/preferences.md",
+        "lang/en/modules/preferences.php": "lang/en/modules/preferences.php",
+        "lang/fr/modules/preferences.php": "lang/fr/modules/preferences.php",
+        "tests/Feature/PreferencesTranslationsTest.php": "tests/Feature/PreferencesTranslationsTest.php"
+    },
+    "migrations": [
+        "database/migrations/2026_07_24_000003_create_user_preferences_table.php"
+    ],
+    "env": {},
+    "patches": [
+        {
+            "type": "user-trait",
+            "trait": "App\\Models\\Concerns\\HasPreferences"
+        }
+    ],
+    "provider": "App\\Providers\\Modules\\PreferencesServiceProvider",
+    "ai": {
+        "guidelines": [
+            "ai/guidelines/preferences.md"
+        ],
+        "skills": []
+    }
+}

@@ -1,12 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Auth;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Http\Requests\ApiRequest;
 
 class UpdatePasswordRequest extends ApiRequest
-
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -31,8 +31,8 @@ class UpdatePasswordRequest extends ApiRequest
     {
         return [
             'current_password.required' => 'You must provide your current password.',
-            'password.required'         => 'A new password is required.',
-            'password.min'              => 'Your new password must be at least 8 characters long.',
+            'password.required' => 'A new password is required.',
+            'password.min' => 'Your new password must be at least 8 characters long.',
         ];
     }
 }

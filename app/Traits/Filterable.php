@@ -16,7 +16,6 @@ trait Filterable
      *   Product::filter($filter)->paginate();
      *
      * @param  Builder<static>  $builder
-     * @param  QueryFilter  $filter
      * @return Builder<static>
      */
     public function scopeFilter(Builder $builder, QueryFilter $filter): Builder

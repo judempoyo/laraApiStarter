@@ -1,0 +1,58 @@
+{
+    "name": "webhooks",
+    "version": "1.0.0",
+    "description": "Signed webhook delivery, retries and delivery history.",
+    "requires": [],
+    "composer": {},
+    "files": {
+        "app/Actions/Webhook/CreateWebhookAction.php": "app/Actions/Webhook/CreateWebhookAction.php",
+        "app/Actions/Webhook/DeleteWebhookAction.php": "app/Actions/Webhook/DeleteWebhookAction.php",
+        "app/Actions/Webhook/UpdateWebhookAction.php": "app/Actions/Webhook/UpdateWebhookAction.php",
+        "app/DTOs/Webhook/CreateWebhookDTO.php": "app/DTOs/Webhook/CreateWebhookDTO.php",
+        "app/DTOs/Webhook/UpdateWebhookDTO.php": "app/DTOs/Webhook/UpdateWebhookDTO.php",
+        "app/Enums/WebhookEvent.php": "app/Enums/WebhookEvent.php",
+        "app/Http/Controllers/Api/V1/WebhookController.php": "app/Http/Controllers/Api/V1/WebhookController.php",
+        "app/Http/Requests/Webhook/StoreWebhookRequest.php": "app/Http/Requests/Webhook/StoreWebhookRequest.php",
+        "app/Http/Requests/Webhook/UpdateWebhookRequest.php": "app/Http/Requests/Webhook/UpdateWebhookRequest.php",
+        "app/Http/Resources/WebhookDeliveryResource.php": "app/Http/Resources/WebhookDeliveryResource.php",
+        "app/Http/Resources/WebhookResource.php": "app/Http/Resources/WebhookResource.php",
+        "app/Jobs/WebhookDeliveryJob.php": "app/Jobs/WebhookDeliveryJob.php",
+        "app/Models/Concerns/HasWebhooks.php": "app/Models/Concerns/HasWebhooks.php",
+        "app/Models/Webhook.php": "app/Models/Webhook.php",
+        "app/Models/WebhookDelivery.php": "app/Models/WebhookDelivery.php",
+        "app/Providers/Modules/WebhooksServiceProvider.php": "app/Providers/Modules/WebhooksServiceProvider.php",
+        "app/Services/WebhookDispatcher.php": "app/Services/WebhookDispatcher.php",
+        "config/webhooks.php": "config/webhooks.php",
+        "database/factories/WebhookDeliveryFactory.php": "database/factories/WebhookDeliveryFactory.php",
+        "database/factories/WebhookFactory.php": "database/factories/WebhookFactory.php",
+        "database/migrations/2026_07_30_000001_create_webhooks_table.php": "database/migrations/2026_07_30_000001_create_webhooks_table.php",
+        "database/migrations/2026_07_30_000002_create_webhook_deliveries_table.php": "database/migrations/2026_07_30_000002_create_webhook_deliveries_table.php",
+        "routes/api/modules/webhooks.php": "routes/api/modules/webhooks.php",
+        "tests/Feature/WebhookTest.php": "tests/Feature/WebhookTest.php",
+        "ai/guidelines/webhooks.md": ".ai/guidelines/modules/webhooks.md",
+        "ai/skills/adding-webhook-event/SKILL.md": ".ai/skills/adding-webhook-event/SKILL.md",
+        "lang/en/modules/webhooks.php": "lang/en/modules/webhooks.php",
+        "lang/fr/modules/webhooks.php": "lang/fr/modules/webhooks.php",
+        "tests/Feature/WebhooksTranslationsTest.php": "tests/Feature/WebhooksTranslationsTest.php"
+    },
+    "migrations": [
+        "database/migrations/2026_07_30_000001_create_webhooks_table.php",
+        "database/migrations/2026_07_30_000002_create_webhook_deliveries_table.php"
+    ],
+    "env": {},
+    "patches": [
+        {
+            "type": "user-trait",
+            "trait": "App\\Models\\Concerns\\HasWebhooks"
+        }
+    ],
+    "provider": "App\\Providers\\Modules\\WebhooksServiceProvider",
+    "ai": {
+        "guidelines": [
+            "ai/guidelines/webhooks.md"
+        ],
+        "skills": [
+            "ai/skills/adding-webhook-event/SKILL.md"
+        ]
+    }
+}

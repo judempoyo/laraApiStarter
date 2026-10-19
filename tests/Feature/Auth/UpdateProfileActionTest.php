@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\UpdateProfileAction;
 use App\DTOs\Auth\UpdateProfileDTO;
+use App\Enums\Result\Auth\UpdateProfileResult;
 use App\Models\User;
 
 it('updates user profile', function () {
@@ -16,6 +19,6 @@ it('updates user profile', function () {
     $result = $action->execute($user, $dto);
     $updatedUser = $result['user'];
 
-    expect($result['status'])->toBe(\App\Enums\Result\Auth\UpdateProfileResult::SUCCESS);
+    expect($result['status'])->toBe(UpdateProfileResult::SUCCESS);
     expect($updatedUser->name)->toBe('New Name');
 });

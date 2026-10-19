@@ -1,15 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\RegisterUserAction;
 use App\DTOs\Auth\RegisterDTO;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
-
+use Database\Seeders\DatabaseSeeder;
 
 beforeEach(function () {
-    $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
+    $this->seed(DatabaseSeeder::class);
 });
-
 
 it('registers a new user', function () {
     $dto = new RegisterDTO(

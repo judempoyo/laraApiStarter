@@ -1,0 +1,42 @@
+{
+    "name": "rbac",
+    "version": "1.0.0",
+    "description": "Roles, permissions and protected admin routes.",
+    "requires": [],
+    "composer": {
+        "spatie/laravel-permission": "^6.24"
+    },
+    "files": {
+        "app/Enums/UserRole.php": "app/Enums/UserRole.php",
+        "app/Models/Concerns/HasRbac.php": "app/Models/Concerns/HasRbac.php",
+        "app/Providers/Modules/RbacServiceProvider.php": "app/Providers/Modules/RbacServiceProvider.php",
+        "config/permission.php": "config/permission.php",
+        "config/rbac.php": "config/rbac.php",
+        "database/migrations/2026_01_05_003241_create_permission_tables.php": "database/migrations/2026_01_05_003241_create_permission_tables.php",
+        "database/seeders/RolesAndPermissionsSeeder.php": "database/seeders/RolesAndPermissionsSeeder.php",
+        "routes/api/admin.php": "routes/api/admin.php",
+        "routes/api/modules/rbac.php": "routes/api/modules/rbac.php",
+        "tests/Feature/Auth/PermissionTest.php": "tests/Feature/Auth/PermissionTest.php",
+        "ai/guidelines/rbac.md": ".ai/guidelines/modules/rbac.md",
+        "ai/skills/adding-role-permission/SKILL.md": ".ai/skills/adding-role-permission/SKILL.md"
+    },
+    "migrations": [
+        "database/migrations/2026_01_05_003241_create_permission_tables.php"
+    ],
+    "env": {},
+    "patches": [
+        {
+            "type": "user-trait",
+            "trait": "App\\Models\\Concerns\\HasRbac"
+        }
+    ],
+    "provider": "App\\Providers\\Modules\\RbacServiceProvider",
+    "ai": {
+        "guidelines": [
+            "ai/guidelines/rbac.md"
+        ],
+        "skills": [
+            "ai/skills/adding-role-permission/SKILL.md"
+        ]
+    }
+}

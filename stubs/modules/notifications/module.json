@@ -1,0 +1,31 @@
+{
+    "name": "notifications",
+    "version": "1.0.0",
+    "description": "Read and manage database notifications.",
+    "requires": [],
+    "composer": {},
+    "files": {
+        "app/Http/Controllers/Api/V1/User/NotificationController.php": "app/Http/Controllers/Api/V1/User/NotificationController.php",
+        "app/Providers/Modules/NotificationsServiceProvider.php": "app/Providers/Modules/NotificationsServiceProvider.php",
+        "config/notifications.php": "config/notifications.php",
+        "database/migrations/2026_07_24_042611_create_notifications_table.php": "database/migrations/2026_07_24_042611_create_notifications_table.php",
+        "routes/api/modules/notifications.php": "routes/api/modules/notifications.php",
+        "tests/Feature/NotificationTest.php": "tests/Feature/NotificationTest.php",
+        "ai/guidelines/notifications.md": ".ai/guidelines/modules/notifications.md",
+        "lang/en/modules/notifications.php": "lang/en/modules/notifications.php",
+        "lang/fr/modules/notifications.php": "lang/fr/modules/notifications.php",
+        "tests/Feature/NotificationsTranslationsTest.php": "tests/Feature/NotificationsTranslationsTest.php"
+    },
+    "migrations": [
+        "database/migrations/2026_07_24_042611_create_notifications_table.php"
+    ],
+    "env": {},
+    "patches": [],
+    "provider": "App\\Providers\\Modules\\NotificationsServiceProvider",
+    "ai": {
+        "guidelines": [
+            "ai/guidelines/notifications.md"
+        ],
+        "skills": []
+    }
+}

@@ -1,0 +1,32 @@
+{
+    "name": "impersonation",
+    "version": "1.0.0",
+    "description": "Audited administrator impersonation.",
+    "requires": [
+        "rbac",
+        "security-audit"
+    ],
+    "composer": {},
+    "files": {
+        "app/Actions/Admin/StartImpersonationAction.php": "app/Actions/Admin/StartImpersonationAction.php",
+        "app/Http/Controllers/Api/V1/Admin/ImpersonationController.php": "app/Http/Controllers/Api/V1/Admin/ImpersonationController.php",
+        "app/Providers/Modules/ImpersonationServiceProvider.php": "app/Providers/Modules/ImpersonationServiceProvider.php",
+        "config/impersonation.php": "config/impersonation.php",
+        "routes/api/modules/impersonation.php": "routes/api/modules/impersonation.php",
+        "tests/Feature/Admin/ImpersonationTest.php": "tests/Feature/Admin/ImpersonationTest.php",
+        "ai/guidelines/impersonation.md": ".ai/guidelines/modules/impersonation.md",
+        "lang/en/modules/impersonation.php": "lang/en/modules/impersonation.php",
+        "lang/fr/modules/impersonation.php": "lang/fr/modules/impersonation.php",
+        "tests/Feature/ImpersonationTranslationsTest.php": "tests/Feature/ImpersonationTranslationsTest.php"
+    },
+    "migrations": [],
+    "env": {},
+    "patches": [],
+    "provider": "App\\Providers\\Modules\\ImpersonationServiceProvider",
+    "ai": {
+        "guidelines": [
+            "ai/guidelines/impersonation.md"
+        ],
+        "skills": []
+    }
+}

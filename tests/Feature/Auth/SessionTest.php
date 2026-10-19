@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
-use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\DatabaseSeeder;
+use Illuminate\Support\Facades\Auth;
 
 beforeEach(function () {
-    $this->seed(RolesAndPermissionsSeeder::class);
+    $this->seed(DatabaseSeeder::class);
 });
 
 // ─── GET /auth/sessions ───────────────────────────────────────────────────────
@@ -26,8 +29,8 @@ it('authenticated user can list their active sessions', function () {
 });
 
 it('session list marks current session correctly', function () {
-    $user   = User::factory()->create();
-    $token  = $user->createToken('Android')->plainTextToken;
+    $user = User::factory()->create();
+    $token = $user->createToken('Android')->plainTextToken;
     $user->createToken('Chrome');
 
     $response = $this->withToken($token)
@@ -35,7 +38,7 @@ it('session list marks current session correctly', function () {
         ->assertOk();
 
     $sessions = $response->json('data');
-    $current  = collect($sessions)->firstWhere('is_current', true);
+    $current = collect($sessions)->firstWhere('is_current', true);
 
     expect($current)->not->toBeNull();
     expect($current['name'])->toBe('Android');
@@ -44,9 +47,9 @@ it('session list marks current session correctly', function () {
 // ─── DELETE /auth/sessions/{id} ───────────────────────────────────────────────
 
 it('user can revoke a specific session', function () {
-    $user   = User::factory()->create();
-    $main   = $user->createToken('Main');
-    $other  = $user->createToken('Other');
+    $user = User::factory()->create();
+    $main = $user->createToken('Main');
+    $other = $user->createToken('Other');
 
     $this->withToken($main->plainTextToken)
         ->deleteJson("/api/v1/auth/sessions/{$other->accessToken->id}")
@@ -56,8 +59,8 @@ it('user can revoke a specific session', function () {
 });
 
 it('user cannot revoke a session belonging to another user', function () {
-    $user1  = User::factory()->create();
-    $user2  = User::factory()->create();
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
 
     $token1 = $user1->createToken('Main');
     $token2 = $user2->createToken('Other');
@@ -89,7 +92,7 @@ it('user can revoke all sessions except the current one', function () {
 // ─── POST /auth/refresh ───────────────────────────────────────────────────────
 
 it('refresh rotates the token and keeps device name', function () {
-    $user  = User::factory()->create();
+    $user = User::factory()->create();
     $token = $user->createToken('Firefox')->plainTextToken;
 
     $response = $this->withToken($token)
@@ -97,9 +100,9 @@ it('refresh rotates the token and keeps device name', function () {
         ->assertOk()
         ->assertJsonStructure(['data' => ['token', 'token_type', 'expires_at']]);
 
-    $this->flushHeaders(); 
+    $this->flushHeaders();
 
-    \Illuminate\Support\Facades\Auth::forgetUser();
+    Auth::forgetUser();
 
     // Old token is revoked
     $this->withToken($token)

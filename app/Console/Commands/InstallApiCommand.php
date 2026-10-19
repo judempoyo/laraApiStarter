@@ -4,114 +4,110 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
+use App\Support\Modules\ModuleManager;
+use Illuminate\Support\Facades\File;
+use Symfony\Component\Process\Process;
 
-class InstallApiCommand extends Command
+use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\multiselect;
+use function Laravel\Prompts\select;
+
+class InstallApiCommand extends ModuleCommand
 {
-    protected $signature   = 'las:install';
-    protected $description = 'Interactive setup for LaraApiStarter — configure auth driver, database, and run migrations.';
+    protected $signature = 'api:install
+        {--preset= : minimal, standard or full}
+        {--modules= : Additional comma-separated modules}
+        {--database= : sqlite, mysql or pgsql}
+        {--migrate : Run pending migrations}
+        {--seed : Run installed module seeders}
+        {--storage-link : Create the public storage link}
+        {--ai : Launch the interactive Boost agent installer}';
 
-    public function handle(): int
+    protected $description = 'Install the Sanctum API core and selected optional modules';
+
+    public function handle(ModuleManager $manager): int
     {
-        $this->displayBanner();
-
-        // ── Auth Driver ────────────────────────────────────────────────────
-        $driver = $this->choice(
-            'Which authentication driver do you want to use?',
-            ['sanctum', 'passport'],
-            0
-        );
-
-        $guard = $driver === 'passport' ? 'api' : 'sanctum';
-
-        $this->writeEnvValue('AUTH_DRIVER', $driver);
-        $this->writeEnvValue('AUTH_GUARD', $guard);
-
-        if ($driver === 'passport') {
-            $this->displayPassportInstructions();
-        }
-
-        // ── App Key ────────────────────────────────────────────────────────
-        if ($this->confirm('Generate a new application key?', true)) {
-            Artisan::call('key:generate', ['--ansi' => true]);
-            $this->info('Application key generated.');
-        }
-
-        // ── Migrations ─────────────────────────────────────────────────────
-        if ($this->confirm('Run database migrations now?', true)) {
-            Artisan::call('migrate', ['--ansi' => true]);
-            $this->info('Migrations completed.');
-        }
-
-        // ── Seeders ────────────────────────────────────────────────────────
-        if ($this->confirm('Run database seeders?', false)) {
-            Artisan::call('db:seed', ['--ansi' => true]);
-            $this->info('Seeders completed.');
-        }
-
-        // ── Storage Link ───────────────────────────────────────────────────
-        if ($this->confirm('Create the storage symlink?', true)) {
-            Artisan::call('storage:link', ['--ansi' => true]);
-            $this->info('Storage link created.');
-        }
-
-        $this->newLine();
-        $this->displaySummary($driver, $guard);
-
-        return self::SUCCESS;
+        return $this->safely(function () use ($manager): void {
+            $interactive = $this->input->isInteractive();
+            $this->line('LaraApiStarter — jump/lara-api-starter');
+            $presets = config('api-starter.presets');
+            $preset = $this->option('preset') ?: ($interactive ? select('Choose a preset', array_keys($presets), 'standard') : 'minimal');
+            if (! array_key_exists($preset, $presets)) {
+                throw new \InvalidArgumentException('Unknown preset: '.$preset);
+            }
+            $database = $this->option('database') ?: ($interactive ? select('Database', ['sqlite', 'mysql', 'pgsql'], 'sqlite') : null);
+            if ($database !== null && ! in_array($database, ['sqlite', 'mysql', 'pgsql'], true)) {
+                throw new \InvalidArgumentException('Unsupported database driver.');
+            }
+            $modules = array_values(array_filter(explode(',', (string) $this->option('modules'))));
+            $modules = array_unique([...$presets[$preset], ...$modules]);
+            if ($interactive) {
+                $options = [];
+                foreach ($manager->catalog() as $name => $manifest) {
+                    $options[$name] = $name.' — '.$manifest['description'];
+                }
+                $modules = multiselect('Choose optional modules', $options, $modules);
+            }
+            $resolved = array_keys($manager->resolve($modules));
+            $dependencies = array_diff($resolved, $modules);
+            if ($dependencies !== []) {
+                $this->line('Required dependencies included: '.implode(', ', $dependencies));
+            }
+            if (! File::exists(base_path('.env'))) {
+                File::copy(base_path('.env.example'), base_path('.env'));
+            }
+            if ($database !== null) {
+                $this->writeEnv('DB_CONNECTION', $database);
+                if ($database === 'sqlite') {
+                    $this->writeEnv('DB_DATABASE', 'database/database.sqlite');
+                    if (! File::exists(database_path('database.sqlite'))) {
+                        File::put(database_path('database.sqlite'), '');
+                    }
+                } else {
+                    $this->line('Configure DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME and DB_PASSWORD in .env before migrating.');
+                }
+            }
+            $env = File::get(base_path('.env'));
+            if (! preg_match('/^APP_KEY=.+$/m', $env)) {
+                $this->runArtisan(['key:generate', '--force']);
+            }
+            $this->installModules($manager, $resolved);
+            if ($this->option('migrate') || ($interactive && confirm('Run pending migrations?', true))) {
+                $this->runArtisan(['migrate', '--force']);
+            }
+            if ($this->option('seed') || ($interactive && confirm('Run installed module seeders?', false))) {
+                $this->runArtisan(['db:seed', '--force']);
+            }
+            if ($this->option('storage-link') || ($interactive && confirm('Create the storage link?', true))) {
+                if (! is_link(public_path('storage'))) {
+                    $this->runArtisan(['storage:link']);
+                }
+            }
+            if ($this->option('ai') || ($interactive && confirm('Configure AI agents with Laravel Boost?', true))) {
+                if (! $interactive) {
+                    throw new \RuntimeException('Boost 2.1 selects agents interactively. Run php artisan boost:install in a terminal.');
+                }
+                // Boost owns agent selection and generated AGENTS.md / CLAUDE.md files.
+                $this->call('boost:install');
+            }
+            $this->info('Installed '.$preset.'. Health: /api/'.strtolower(config('api.version')).'/health; docs: /docs/api');
+        });
     }
 
-    private function displayBanner(): void
+    private function runArtisan(array $arguments): void
     {
-        $this->newLine();
-        $this->line('  <fg=blue>LaraApiStarter</> — Production API Starter');
-        $this->line('  <fg=gray>github.com/judempoyo/lara-api-starter</>');
-        $this->newLine();
+        $process = new Process([PHP_BINARY, 'artisan', ...$arguments, '--no-interaction'], base_path());
+        $process->setTimeout(180);
+        $process->mustRun(fn ($type, $buffer) => $this->output->write($buffer));
     }
 
-    private function displayPassportInstructions(): void
+    private function writeEnv(string $key, string $value): void
     {
-        $this->newLine();
-        $this->warn('Passport requires manual steps:');
-        $this->line('  1. Add <comment>laravel/passport</comment> to composer.json and run <comment>composer update</comment>');
-        $this->line('  2. In <comment>app/Models/User.php</comment>, replace:');
-        $this->line('       <comment>use Laravel\Sanctum\HasApiTokens;</comment>');
-        $this->line('     with:');
-        $this->line('       <comment>use Laravel\Passport\HasApiTokens;</comment>');
-        $this->line('  3. Run: <comment>php artisan passport:install</comment>');
-        $this->line('  4. In <comment>config/auth.php</comment>, set the <comment>api</comment> guard driver to <comment>passport</comment>.');
-        $this->newLine();
-    }
-
-    private function displaySummary(string $driver, string $guard): void
-    {
-        $this->line('  <fg=green>Setup complete!</>');
-        $this->newLine();
-        $this->line("  Auth driver : <comment>{$driver}</comment>");
-        $this->line("  Auth guard  : <comment>{$guard}</comment>");
-        $this->newLine();
-        $this->line('  Next steps:');
-        $this->line('    php artisan serve');
-        $this->line('    Visit /api/v1/health to verify the installation');
-        $this->line('    Visit /docs/api for scramble API documentation  or  /doc for scalar API documentation');
-        $this->newLine();
-    }
-
-    /**
-     * Write or update a key-value pair in the .env file.
-     */
-    private function writeEnvValue(string $key, string $value): void
-    {
-        $path    = base_path('.env');
-        $content = file_get_contents($path);
-
-        if (preg_match("/^{$key}=.*/m", $content)) {
-            $content = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $content);
-        } else {
-            $content .= PHP_EOL . "{$key}={$value}";
-        }
-
-        file_put_contents($path, $content);
+        $path = base_path('.env');
+        $content = File::get($path);
+        $pattern = '/^'.preg_quote($key, '/').'=.*$/m';
+        $line = $key.'='.$value;
+        $content = preg_match($pattern, $content) ? preg_replace_callback($pattern, fn () => $line, $content) : $content."\n".$line."\n";
+        File::put($path, $content);
     }
 }

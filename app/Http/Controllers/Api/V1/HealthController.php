@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
@@ -23,23 +23,23 @@ class HealthController extends Controller
     {
         $services = [
             'database' => $this->checkDatabase(),
-            'cache'    => $this->checkCache(),
-            'queue'    => $this->checkQueue(),
-            'storage'  => $this->checkStorage(),
+            'cache' => $this->checkCache(),
+            'queue' => $this->checkQueue(),
+            'storage' => $this->checkStorage(),
         ];
 
-        $isHealthy = collect($services)->every(fn(array $s): bool => $s['status'] === 'up');
+        $isHealthy = collect($services)->every(fn (array $s): bool => $s['status'] === 'up');
 
         $health = [
-            'status'      => $isHealthy ? 'healthy' : 'degraded',
-            'timestamp'   => now()->toIso8601String(),
-            'version'     => config('api.version', 'v1'),
+            'status' => $isHealthy ? 'healthy' : 'degraded',
+            'timestamp' => now()->toIso8601String(),
+            'version' => config('api.version', 'v1'),
             'environment' => app()->environment(),
-            'services'    => $services,
+            'services' => $services,
         ];
 
         $statusCode = $isHealthy ? 200 : 503;
-        $message    = $isHealthy ? 'All systems operational.' : 'Some services are degraded.';
+        $message = $isHealthy ? 'All systems operational.' : 'Some services are degraded.';
 
         $response = ApiResponse::success($health, $message, $statusCode);
 
@@ -72,7 +72,7 @@ class HealthController extends Controller
     protected function checkCache(): array
     {
         try {
-            $key = 'health_check_' . time();
+            $key = 'health_check_'.time();
             Cache::put($key, true, 5);
             $result = Cache::get($key);
             Cache::forget($key);
