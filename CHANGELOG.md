@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.0.0-rc.1] - Unreleased
+
+### Breaking changes
+- Ship a minimal Sanctum core and twelve independently installable module templates with minimal/standard/full presets.
+- Move optional routes, migrations, User traits, providers, configuration, tests and translations into modules. See UPGRADING.md for existing database migration history and avatar/2FA handling.
+- Remove Passport support and the public check-email, test-api-key, example admin stats and duplicate authenticated recovery-reset routes.
+- Unify docs at /docs/api with Scramble JSON at /docs/api.json; remove /doc, the handwritten API reference and vendored Scalar asset.
+- Remove suspicious keyword rejection and public default documentation secrets. Restrict documentation outside local; move security headers to security-audit.
+- Rename generators to make:api-* and installer to api:install; remove all las:* aliases without a deprecation period. Update existing scripts to the new command names. Correct generated namespaces to Api/V1.
+- Move module translations into their own dictionaries and make optional integrations event-driven.
+- Align PHP 8.2 tooling with Pest 3, Laravel >=12.41.1 and Boost 2; introduce Larastan/PHPStan. Replace npm/Vite development scripts with PHP processes.
+
+### Added
+- Transactional module file manager, dependency resolution, checksum tracking, rollback, removal safeguards and api:doctor.
+- Interactive database/module selection and noninteractive presets; module-specific Boost guidelines and skills.
+- Core and module CI matrix, short bilingual README files, module documentation and dependency decisions.
+
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
