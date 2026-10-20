@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        Scramble::ignoreDefaultRoutes();
+        // Scramble::ignoreDefaultRoutes();
         $this->app->singleton(TokenServiceInterface::class, SanctumTokenService::class);
     }
 
@@ -39,7 +39,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
         $this->configureGates();
         $this->configureApiDocs();
-        Scramble::registerJsonSpecificationRoute('/docs/api.json');
+        // Scramble::registerJsonSpecificationRoute('/docs/api.json');
     }
 
     /**
