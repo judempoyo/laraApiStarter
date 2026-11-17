@@ -46,3 +46,23 @@ Générateurs complémentaires : `make:api-action`, `make:api-dto`, `make:api-re
 Les dépendances sont ajoutées automatiquement. Changer de preset ne retire aucun module installé. Le retrait refuse les fichiers modifiés et conserve les données en base et les packages Composer. Retirez d’abord les modules dépendants. Consultez [UPGRADING.md](UPGRADING.md).
 
 Les consignes IA du noyau se trouvent dans `.ai/`. Celles des modules suivent leur installation et leur retrait. `php artisan boost:install` permet de choisir les agents ; Boost génère leurs fichiers. Les modifications de modules lancent `boost:update` lorsque Boost est configuré.
+
+Consultez [architecture](docs/architecture.md), [décisions de dépendances](docs/dependencies.md) et le [changelog](CHANGELOG.md).
+
+## Docker
+
+Image de conteneur prête pour la production basée sur `jkaninda/nginx-php-fpm:8.4`, conçue comme socle de déploiement pour cette API Laravel.
+
+- Image Docker Hub : [judempoyo/lara-api-starter](https://hub.docker.com/r/judempoyo/lara-api-starter)
+
+```sh
+docker pull judempoyo/lara-api-starter:latest
+docker run -d -p 8080:80 --env-file .env judempoyo/lara-api-starter:latest
+```
+
+### Tags de version
+
+- `latest` : Dernière version stable publiée depuis un tag Git (`v*`).
+- `<version>` (ex. `1.2.0`) : Version immuable publiée via tag Git ou workflow manuel.
+- `sha-<hash>` : Snapshot associé au SHA d'un commit spécifique.
+

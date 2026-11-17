@@ -16,6 +16,13 @@
 - Transactional module file manager, dependency resolution, checksum tracking, rollback, removal safeguards and api:doctor.
 - Interactive database/module selection and noninteractive presets; module-specific Boost guidelines and skills.
 - Core and module CI matrix, short bilingual README files, module documentation and dependency decisions.
+- Production Docker packaging with `jkaninda/nginx-php-fpm:8.4`, BuildKit Composer cache, OCI metadata labels, and build-arg traceability (`VERSION`, `VCS_REF`, `BUILD_DATE`).
+- Docker Hub publication workflow (`.github/workflows/docker-publish.yml`) with manual tag dispatch and automated `v*` tag releases.
+- Project `.dockerignore` and explicit root MIT `LICENSE`.
+- Miabi deployment pipeline (`.miabi/pipeline.yml`) and Supervisor worker/scheduler configuration (`conf/worker/supervisor.conf`).
+
+### Fixed
+- Content Security Policy (CSP) header handling and Vite nonce generation for documentation access (`/docs/api` and `/doc`).
 
 
 All notable changes to this project will be documented in this file.
