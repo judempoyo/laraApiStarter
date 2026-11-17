@@ -7,3 +7,4 @@
 - Packagist metadata checked through `https://repo.packagist.org/p2/jump/lara-api-starter.json` (200). The equivalent judempoyo package returned 404. Keep the published Composer name `jump/lara-api-starter`; this does not imply that the GitHub repository was renamed.
 
 - **Pest 3 / Laravel plugin 3** replace Pest 4 because the existing Pest 4 dependency requires PHP 8.3. Composer resolves against PHP 8.2.0 so the starter and its developer tooling match the declared PHP 8.2+ support.
+- **Docker base `jkaninda/nginx-php-fpm:8.4`**: selected for single-container production deployment bundling Nginx, PHP-FPM 8.4, and Composer with Supervisor process management.
