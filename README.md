@@ -48,3 +48,21 @@ The installer adds dependencies automatically and never removes existing modules
 Core AI guidelines and skills live in `.ai/`. Module instructions are installed and removed with the module. Run `php artisan boost:install` to select your AI agents; Boost generates their configuration. Subsequent module changes run `boost:update` when Boost has been configured.
 
 See [architecture](docs/architecture.md), [dependency decisions](docs/dependencies.md), and [changelog](CHANGELOG.md).
+
+## Docker
+
+Production-ready container image based on `jkaninda/nginx-php-fpm:8.4`, designed as a deployment base for this Laravel API.
+
+- Docker Hub image: [judempoyo/lara-api-starter](https://hub.docker.com/r/judempoyo/lara-api-starter)
+
+```sh
+docker pull judempoyo/lara-api-starter:latest
+docker run -d -p 8080:80 --env-file .env judempoyo/lara-api-starter:latest
+```
+
+### Version tags
+
+- `latest`: Latest stable release published from a Git release tag (`v*`).
+- `<version>` (e.g. `1.2.0`): Immutable version published via Git tag or manual workflow dispatch.
+- `sha-<hash>`: Snapshot tied to a specific commit SHA.
+
