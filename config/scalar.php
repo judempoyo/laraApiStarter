@@ -28,7 +28,7 @@ return [
     | affect the paths of its internal API that aren't exposed to users.
     |
     */
-    'path' => '/docs/api',
+    'path' => '/doc',
 
     /*
     |--------------------------------------------------------------------------
@@ -64,7 +64,7 @@ return [
     | package. You can change this if you want to use a different CDN.
     |
     */
-    'cdn' => 'https://cdn.jsdelivr.net/npm/@scalar/api-reference@1.25.109',
+    'cdn' => 'https://cdn.jsdelivr.net/npm/@scalar/api-reference',
 
     /*
     |--------------------------------------------------------------------------

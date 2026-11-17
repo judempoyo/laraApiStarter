@@ -19,12 +19,20 @@ it('accepts only the configured nonempty documentation key', function (): void {
     expect(Gate::allows('viewApiDocs'))->toBeTrue();
 });
 
-it('serves Scalar with a nonce when the configured key is presented', function (): void {
+it('serves documentation with a nonce when the configured key is presented', function (): void {
     config(['app.docs_access_key' => 'configured-test-secret']);
-    $response = $this->withUnencryptedCookies(['docs_access_key' => 'configured-test-secret'])
+
+    $scrambleResponse = $this->withUnencryptedCookies(['docs_access_key' => 'configured-test-secret'])
         ->get('/docs/api')
         ->assertOk();
-    expect($response->headers->get('Content-Type'))->toContain('text/html');
-    expect($response->headers->get('Content-Security-Policy'))->toContain("'nonce-");
-    expect($response->getContent())->toContain('nonce="');
+    expect($scrambleResponse->headers->get('Content-Type'))->toContain('text/html');
+    expect($scrambleResponse->headers->get('Content-Security-Policy'))->toContain("'nonce-");
+    expect($scrambleResponse->getContent())->toContain('nonce="');
+
+    $scalarResponse = $this->withUnencryptedCookies(['docs_access_key' => 'configured-test-secret'])
+        ->get('/doc')
+        ->assertOk();
+    expect($scalarResponse->headers->get('Content-Type'))->toContain('text/html');
+    expect($scalarResponse->headers->get('Content-Security-Policy'))->toContain("'nonce-");
+    expect($scalarResponse->getContent())->toContain('nonce="');
 });

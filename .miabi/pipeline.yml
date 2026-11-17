@@ -1,0 +1,12 @@
+apiVersion: miabi.io/v1
+kind: Pipeline
+metadata: { name: laraapistarter }
+on:
+  push: { branches: [main] }
+  #manual: true
+steps:
+  - name: build
+    uses: build
+    dockerfile: Dockerfile
+  - name: deploy
+    uses: deploy
