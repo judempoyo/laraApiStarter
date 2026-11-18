@@ -26,6 +26,17 @@ class SetLocale
         $supported = config('app.supported_locales', ['en']);
         $default = config('app.locale', 'en');
 
+        // Check query parameters (?lang=fr, ?locale=fr)
+        $queryLocale = $request->query('lang') ?? $request->query('locale');
+        if (is_string($queryLocale)) {
+            $normalized = strtolower(trim($queryLocale));
+            if (in_array($normalized, $supported, true)) {
+                app()->setLocale($normalized);
+
+                return $next($request);
+            }
+        }
+
         $header = $request->header('Accept-Language', $default);
 
         // Parse the Accept-Language header and find the first supported locale.
