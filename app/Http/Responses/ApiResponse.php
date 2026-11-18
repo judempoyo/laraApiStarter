@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Http\Responses;
 
@@ -8,6 +8,7 @@ use App\Enums\ErrorCode;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ApiResponse
 {
@@ -17,10 +18,10 @@ class ApiResponse
     public static function success($data = null, ?string $message = null, int $code = 200, array $meta = []): JsonResponse
     {
         $response = [
-            'code' => $code,
+            'code'    => $code,
             'success' => true,
-            'data' => $data,
-            'error' => null,
+            'data'    => $data,
+            'error'   => null,
         ];
 
         if ($message !== null) {
@@ -59,21 +60,32 @@ class ApiResponse
     }
 
     /**
-     * Send an error response.
+     * Send an RFC 7807 compliant error response.
      */
-    public static function error(ErrorCode|string $error_code, ?string $error_message = null, int $code = 400, ?string $message = null, ?array $errors = null): JsonResponse
+    public static function error(ErrorCode | string $error_code, ?string $error_message = null, int $code = 400, ?string $message = null, ?array $errors = null): JsonResponse
     {
+        $errorCodeValue = $error_code instanceof ErrorCode ? $error_code->value : (string) $error_code;
+        $title          = Str::headline(str_replace('_', ' ', strtolower($errorCodeValue)));
+        $detail         = $message ?? $error_message ?? $title;
+
         return response()->json([
-            'code' => $code,
-            'success' => false,
-            'error' => [
-                'code' => $error_code instanceof ErrorCode ? $error_code->value : $error_code,
-                'message' => $error_message ?? $error_code,
+            'type' => url("/docs/errors#{$errorCodeValue}"),
+            'title'    => $title,
+            'status'   => $code,
+            'detail'   => $detail,
+            'instance' => request()?->getRequestUri() ?? '/',
+            'code'     => $code,
+            'success'  => false,
+            'error'    => [
+                'code'    => $errorCodeValue,
+                'message' => $error_message ?? $errorCodeValue,
             ],
-            'message' => $message,
-            'errors' => $errors,
-            'data' => null,
-        ], $code);
+            'message'  => $message,
+            'errors'   => $errors,
+            'data'     => null,
+        ], $code, [
+            'Content-Type' => 'application/problem+json',
+        ]);
     }
 
     /**
@@ -84,20 +96,20 @@ class ApiResponse
         $items = $paginator->items();
 
         $meta = [
-            'api_version' => config('api.version'),
-            'current_page' => $paginator->currentPage(),
-            'per_page' => $paginator->perPage(),
-            'total_items' => $paginator->total(),
-            'total_pages' => $paginator->lastPage(),
-            'count' => count($items),
-            'is_empty' => count($items) === 0,
+            'api_version'    => config('api.version'),
+            'current_page'   => $paginator->currentPage(),
+            'per_page'       => $paginator->perPage(),
+            'total_items'    => $paginator->total(),
+            'total_pages'    => $paginator->lastPage(),
+            'count'          => count($items),
+            'is_empty'       => count($items) === 0,
             'has_more_pages' => $paginator->hasMorePages(),
         ];
 
         if (app()->environment('local')) {
             $meta['debug'] = [
                 'memory_usage' => memory_get_peak_usage(true),
-                'query_count' => DB::getQueryLog() ? count(DB::getQueryLog()) : 0,
+                'query_count'  => DB::getQueryLog() ? count(DB::getQueryLog()) : 0,
             ];
         }
 
