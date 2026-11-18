@@ -1,6 +1,25 @@
 # Changelog
 
-## [2.0.0-rc.1] - Unreleased
+## [2.0.1] - 2026-11-18
+
+### Added
+- Interactive RFC 7807 Error Catalogue at `/docs/errors` with live search, filters by HTTP status and category, one-click copy (code, anchor, JSON payload), and dark/light mode toggle.
+- Bilingual localization (English / French) for all error titles, descriptions, and catalogue UI with dynamic switcher via query parameter (`?lang=fr`) and `Accept-Language` header.
+- Automatic redirection of unknown web requests to `/docs/errors`, eliminating default Laravel 404 HTML pages.
+- Standard RFC 7807 Problem Details fields (`type`, `title`, `status`, `detail`, `instance`) added to `ApiResponse::error()` with `JSON_UNESCAPED_SLASHES`.
+- OpenAPI component schema registration for `ProblemDetails` in Scramble / Scalar specification.
+- Local development environment in `docker-compose.yml` with PostgreSQL 17, Redis, Mailpit (SMTP & web UI), and local source volume mounting.
+- Developer Experience `Makefile` with styled colored help, Docker shortcuts (`make up`, `make down`, `make ps`, `make logs`), Laravel lifecycle (`make setup`, `make test`, `make seed`), and starter module commands (`make modules`, `make module-add`, `make scaffold`).
+- Soft deletes support on `User` model (`SoftDeletes` trait and migration) to ensure referential integrity for tokens, webhooks, and media.
+- `DefaultUserSeeder` for automated administrative user creation from `.env` (`DEFAULT_ADMIN_EMAIL` and `DEFAULT_ADMIN_PASSWORD`), assigned Spatie admin role when RBAC module is active.
+- Miabi Marketplace deployment template (`.miabi/template.yml`) adhering to `miabi.io/v1` specification.
+- Enhanced Docker publication workflow supporting manual `workflow_dispatch` without required tag (defaulting to version `2.0.1` and `latest`), git tag triggers, and Docker Hub metadata auto-sync.
+
+### Changed
+- Streamlined health check probes to `/api/v1/health` (full diagnostic) and `/api/v1/health/live` (lightweight orchestrator probe), removing redundant `/api/v1/health/ready`.
+- Exhaustive mapping on `ErrorCode` enum (`httpStatus()`, `category()`, `title()`, `description()`, and `examplePayload()`) backed by Pest tests.
+
+## [2.0.0] - 2026-11-17
 
 ### Breaking changes
 - Ship a minimal Sanctum core and twelve independently installable module templates with minimal/standard/full presets.
