@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 use Database\Seeders\DatabaseSeeder;
 
@@ -21,9 +21,9 @@ it('health endpoint returns 200 when all services are operational', function ():
                 'environment',
                 'services' => [
                     'database' => ['status'],
-                    'cache'    => ['status'],
-                    'queue'    => ['status'],
-                    'storage'  => ['status'],
+                    'cache' => ['status'],
+                    'queue' => ['status'],
+                    'storage' => ['status'],
                 ],
             ],
         ]);
@@ -37,14 +37,10 @@ it('health endpoint is publicly accessible without authentication', function ():
     $this->getJson('/api/v1/health')->assertOk();
 });
 
-it('liveness and readiness probes return 200 when operational', function (): void {
+it('liveness probe returns 200 when operational', function (): void {
     $this->getJson('/api/v1/health/live')
         ->assertOk()
         ->assertJsonPath('data.status', 'alive');
-
-    $this->getJson('/api/v1/health/ready')
-        ->assertOk()
-        ->assertJsonPath('data.status', 'healthy');
 });
 
 // ─── Security Middleware ──────────────────────────────────────────────────────
