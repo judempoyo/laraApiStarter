@@ -45,13 +45,19 @@ class RolesAndPermissionsSeeder extends Seeder
         $userRole->givePermissionTo(Permission::where('name', 'profile.update')->where('guard_name', 'api')->first());
 
         // Create initial Admin User
-        $admin = User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@test.com',
-            'password' => bcrypt('password'),
-            'password_updated_at' => now(),
-            'email_verified_at' => now(),
-        ]);
+        $email = (string) env('DEFAULT_ADMIN_EMAIL', 'admin@test.com');
+        $password = (string) (env('DEFAULT_ADMIN_PASSWORD') ?: 'password');
+
+        $admin = User::firstOrCreate(
+            ['email' => $email],
+            [
+                'name' => 'Admin User',
+                'password' => bcrypt($password),
+                'password_updated_at' => now(),
+                'email_verified_at' => now(),
+                'status' => \App\Enums\UserStatus::ACTIVE,
+            ]
+        );
         $admin->assignRole($adminRole);
 
     }

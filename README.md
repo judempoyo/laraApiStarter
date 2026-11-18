@@ -20,7 +20,16 @@ php artisan api:install --preset=standard --modules=webhooks --no-interaction
 php artisan serve
 ```
 
-Health: `/api/v1/health`. Scalar: `/docs/api`. Scramble specification: `/docs/api.json`; export with `php artisan scramble:export`. Documentation is accessible locally; elsewhere it is denied unless a nonempty `DOCS_ACCESS_KEY` is configured and presented in the `docs_access_key` cookie. Replace the gate with your organization's authentication policy when appropriate.
+Health: `/api/v1/health` (live probe: `/api/v1/health/live`). Scalar: `/docs/api`. RFC 7807 Error Catalogue: `/docs/errors`. Scramble specification: `/docs/api.json`; export with `php artisan scramble:export`. Documentation is accessible locally; elsewhere it is denied unless a nonempty `DOCS_ACCESS_KEY` is configured and presented in the `docs_access_key` cookie. Replace the gate with your organization's authentication policy when appropriate.
+
+Quick developer commands (`make help`):
+```sh
+make setup        # Interactive installation
+make up           # Start PostgreSQL, Redis, Mailpit and App with Docker Compose
+make test         # Run static analysis and tests (Pint, PHPStan, Pest)
+make seed         # Fresh database reset and seeding (includes default admin)
+make modules      # List available starter modules
+```
 
 | Preset | Modules |
 | --- | --- |

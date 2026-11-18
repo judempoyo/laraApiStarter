@@ -4,9 +4,15 @@ on:
     workflow_dispatch:
         inputs:
             tag:
-                description: "Image version tag (e.g. 2.0.0)"
-                required: true
+                description: "Image version tag (e.g. 2.0.1, or leave empty for latest only)"
+                required: false
+                default: "2.0.1"
                 type: string
+            push_latest:
+                description: "Also tag and push as latest"
+                required: false
+                default: true
+                type: boolean
     push:
         tags:
             - "v*"
@@ -46,10 +52,10 @@ jobs:
                   flavor: |
                       latest=false
                   tags: |
-                      type=raw,value=${{ inputs.tag }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.tag != '' }}
+                      type=raw,value=${{ inputs.tag }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.tag != '' && inputs.tag != 'latest' }}
                       type=semver,pattern={{version}},enable=${{ github.event_name == 'push' }}
                       type=sha,format=short,prefix=sha-
-                      type=raw,value=latest,enable=${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+                      type=raw,value=latest,enable=${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'workflow_dispatch' && (inputs.push_latest == true || inputs.tag == 'latest' || inputs.tag == '')) }}
 
             - name: Build and push
               uses: docker/build-push-action@v6
@@ -59,7 +65,7 @@ jobs:
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}
                   build-args: |
-                      VERSION=${{ steps.meta.outputs.version || inputs.tag }}
+                      VERSION=${{ inputs.tag != '' && inputs.tag || steps.meta.outputs.version || '2.0.1' }}
                       VCS_REF=${{ github.sha }}
                       BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).created }}
                   cache-from: type=gha

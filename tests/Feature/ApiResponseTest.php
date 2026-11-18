@@ -59,4 +59,11 @@ it('error response has expected structure', function (): void {
     expect($body['error']['message'])->toBe('Access denied.');
     expect($body['message'])->toBe('User message.');
     expect($body['data'])->toBeNull();
+
+    // RFC 7807 Problem Details
+    expect($body['status'])->toBe(403);
+    expect($body['title'])->toBe('Forbidden');
+    expect($body['detail'])->toBe('User message.');
+    expect($body['type'])->toContain('/docs/errors#FORBIDDEN');
+    expect($body)->toHaveKey('instance');
 });

@@ -65,4 +65,186 @@ enum ErrorCode: string
     case EXPORT_NOT_FOUND = 'EXPORT_NOT_FOUND';
     case EXPORT_FAILED = 'EXPORT_FAILED';
 
+    /**
+     * Map each error code strictly to its standard HTTP status code.
+     */
+    public function httpStatus(): int
+    {
+        return match ($this) {
+            self::UNAUTHENTICATED,
+            self::INVALID_CREDENTIALS,
+            self::API_KEY_INVALID,
+            self::API_KEY_EXPIRED,
+            self::API_KEY_REVOKED => 401,
+
+            self::UNAUTHORIZED,
+            self::FORBIDDEN,
+            self::NEED_TO_BE_ADMIN,
+            self::ACCOUNT_DISABLED,
+            self::EMAIL_NOT_VERIFIED,
+            self::TWO_FACTOR_REQUIRED,
+            self::ACTION_NOT_ALLOWED,
+            self::IMPERSONATION_NOT_ALLOWED,
+            self::IMPERSONATION_SELF => 403,
+
+            self::USER_NOT_FOUND,
+            self::RESOURCE_NOT_FOUND,
+            self::NOT_FOUND,
+            self::ENUM_NOT_FOUND,
+            self::WEBHOOK_NOT_FOUND,
+            self::MEDIA_NOT_FOUND,
+            self::EXPORT_NOT_FOUND => 404,
+
+            self::METHOD_NOT_ALLOWED => 405,
+
+            self::CONFLICT,
+            self::EMAIL_ALREADY_VERIFIED,
+            self::TWO_FACTOR_ALREADY_ENABLED => 409,
+
+            self::GONE => 410,
+
+            self::REQUEST_TOO_LARGE => 413,
+
+            self::VALIDATION_FAILED,
+            self::PASSWORD_MISMATCH,
+            self::INVALID_VALIDATION_LINK,
+            self::RESET_PASSWORD_FAILED,
+            self::TWO_FACTOR_NOT_ENABLED,
+            self::TWO_FACTOR_INVALID_CODE,
+            self::TWO_FACTOR_NOT_CONFIRMED,
+            self::TWO_FACTOR_INVALID_RECOVERY_CODE,
+            self::SUSPICIOUS_REQUEST,
+            self::UNPROCESSABLE => 422,
+
+            self::RATE_LIMIT_EXCEEDED,
+            self::TOO_MANY_REQUESTS => 429,
+
+            self::SERVICE_UNAVAILABLE => 503,
+
+            self::SERVER_ERROR,
+            self::WEBHOOK_DELIVERY_FAILED,
+            self::MEDIA_UPLOAD_FAILED,
+            self::EXPORT_FAILED => 500,
+        };
+    }
+
+    /**
+     * Group error codes into logical categories for developers and API clients.
+     */
+    public function category(): string
+    {
+        return match ($this) {
+            self::UNAUTHENTICATED,
+            self::UNAUTHORIZED,
+            self::FORBIDDEN,
+            self::INVALID_CREDENTIALS,
+            self::NEED_TO_BE_ADMIN,
+            self::ACCOUNT_DISABLED,
+            self::EMAIL_NOT_VERIFIED,
+            self::EMAIL_ALREADY_VERIFIED,
+            self::INVALID_VALIDATION_LINK,
+            self::PASSWORD_MISMATCH,
+            self::RESET_PASSWORD_FAILED => 'Authentication & Access',
+
+            self::TWO_FACTOR_ALREADY_ENABLED,
+            self::TWO_FACTOR_NOT_ENABLED,
+            self::TWO_FACTOR_INVALID_CODE,
+            self::TWO_FACTOR_NOT_CONFIRMED,
+            self::TWO_FACTOR_INVALID_RECOVERY_CODE,
+            self::TWO_FACTOR_REQUIRED => 'Two-Factor Authentication (2FA)',
+
+            self::API_KEY_INVALID,
+            self::API_KEY_EXPIRED,
+            self::API_KEY_REVOKED => 'API Keys',
+
+            self::RATE_LIMIT_EXCEEDED,
+            self::TOO_MANY_REQUESTS => 'Rate Limiting & Quotas',
+
+            self::SUSPICIOUS_REQUEST,
+            self::REQUEST_TOO_LARGE,
+            self::IMPERSONATION_NOT_ALLOWED,
+            self::IMPERSONATION_SELF => 'Security & Guard',
+
+            self::VALIDATION_FAILED,
+            self::UNPROCESSABLE => 'Validation & Request',
+
+            self::USER_NOT_FOUND,
+            self::RESOURCE_NOT_FOUND,
+            self::NOT_FOUND,
+            self::ENUM_NOT_FOUND,
+            self::CONFLICT,
+            self::GONE,
+            self::ACTION_NOT_ALLOWED,
+            self::METHOD_NOT_ALLOWED => 'Resources & Routing',
+
+            self::WEBHOOK_NOT_FOUND,
+            self::WEBHOOK_DELIVERY_FAILED => 'Webhooks',
+
+            self::MEDIA_NOT_FOUND,
+            self::MEDIA_UPLOAD_FAILED => 'Media & Storage',
+
+            self::EXPORT_NOT_FOUND,
+            self::EXPORT_FAILED => 'Data Exports',
+
+            self::SERVER_ERROR,
+            self::SERVICE_UNAVAILABLE => 'Server & System',
+        };
+    }
+
+    /**
+     * Get the localized human-readable title.
+     */
+    public function title(?string $locale = null): string
+    {
+        $loc = $locale ?? app()->getLocale();
+        $key = "errors.codes.{$this->value}.title";
+        $translated = __($key, [], $loc);
+
+        if ($translated !== $key && is_string($translated)) {
+            return $translated;
+        }
+
+        return \Illuminate\Support\Str::headline(str_replace('_', ' ', strtolower($this->value)));
+    }
+
+    /**
+     * Get the localized detailed description.
+     */
+    public function description(?string $locale = null): string
+    {
+        $loc = $locale ?? app()->getLocale();
+        $key = "errors.codes.{$this->value}.description";
+        $translated = __($key, [], $loc);
+
+        if ($translated !== $key && is_string($translated)) {
+            return $translated;
+        }
+
+        return "Application error code: {$this->value}.";
+    }
+
+    /**
+     * Build an RFC 7807 compliant problem details payload for documentation.
+     *
+     * @return array<string, mixed>
+     */
+    public function examplePayload(?string $locale = null): array
+    {
+        return [
+            'type' => url("/docs/errors#{$this->value}"),
+            'title' => $this->title($locale),
+            'status' => $this->httpStatus(),
+            'detail' => $this->description($locale),
+            'instance' => '/api/v1/...',
+            'code' => $this->httpStatus(),
+            'success' => false,
+            'error' => [
+                'code' => $this->value,
+                'message' => $this->description($locale),
+            ],
+            'message' => $this->description($locale),
+            'errors' => null,
+            'data' => null,
+        ];
+    }
 }

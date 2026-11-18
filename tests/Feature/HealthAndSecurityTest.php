@@ -37,6 +37,12 @@ it('health endpoint is publicly accessible without authentication', function ():
     $this->getJson('/api/v1/health')->assertOk();
 });
 
+it('liveness probe returns 200 when operational', function (): void {
+    $this->getJson('/api/v1/health/live')
+        ->assertOk()
+        ->assertJsonPath('data.status', 'alive');
+});
+
 // ─── Security Middleware ──────────────────────────────────────────────────────
 
 it('legitimate text is not rejected by keyword matching', function (): void {

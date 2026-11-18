@@ -20,7 +20,16 @@ php artisan api:install --preset=standard --modules=webhooks --no-interaction
 php artisan serve
 ```
 
-Santé : `/api/v1/health`. Interface Scalar : `/docs/api`. Spécification Scramble : `/docs/api.json`, exportable avec `php artisan scramble:export`. Hors environnement local, les docs sont fermées tant qu’une `DOCS_ACCESS_KEY` non vide n’est pas configurée et présentée dans le cookie `docs_access_key`. Le gate peut être adapté à votre authentification.
+Santé : `/api/v1/health` (sonde liveness : `/api/v1/health/live`). Interface Scalar : `/docs/api`. Catalogue d'erreurs RFC 7807 : `/docs/errors`. Spécification Scramble : `/docs/api.json`, exportable avec `php artisan scramble:export`. Hors environnement local, les docs sont fermées tant qu’une `DOCS_ACCESS_KEY` non vide n’est pas configurée et présentée dans le cookie `docs_access_key`. Le gate peut être adapté à votre authentification.
+
+Commandes développeur rapides (`make help`) :
+```sh
+make setup        # Installation interactive complète
+make up           # Démarrer PostgreSQL, Redis, Mailpit et l'App via Docker Compose
+make test         # Analyse statique et tests (Pint, PHPStan, Pest)
+make seed         # Réinitialisation de la base et seed (admin par défaut inclus)
+make modules      # Lister les modules disponibles
+```
 
 | Preset | Modules |
 | --- | --- |

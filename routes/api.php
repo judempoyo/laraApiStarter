@@ -47,7 +47,8 @@ Route::prefix(strtolower(config('api.version', 'v1')))->group(function () use ($
 
     // ─── Public Utility ────────────────────────────────────────────────────
     Route::get('enums/{enum}', [EnumController::class, 'show']);
-    Route::get('health', HealthController::class);
+    Route::get('health', [HealthController::class, 'index']);
+    Route::get('health/live', [HealthController::class, 'live']);
 
     foreach (glob(__DIR__.'/api/modules/*.php') ?: [] as $moduleRoutes) {
         require $moduleRoutes;

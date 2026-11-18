@@ -8,7 +8,12 @@ use App\Contracts\Auth\TokenServiceInterface;
 use App\Services\Auth\SanctumTokenService;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
+use Dedoc\Scramble\Support\Generator\Schema;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
+use Dedoc\Scramble\Support\Generator\Types\BooleanType;
+use Dedoc\Scramble\Support\Generator\Types\IntegerType;
+use Dedoc\Scramble\Support\Generator\Types\ObjectType;
+use Dedoc\Scramble\Support\Generator\Types\StringType;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -64,13 +69,24 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Configure Scramble OpenAPI security scheme.
+     * Configure Scramble OpenAPI security scheme and component schemas.
      */
     protected function configureApiDocs(): void
     {
         Scramble::configure()
             ->withDocumentTransformers(function (OpenApi $openApi): void {
                 $openApi->components->securitySchemes['bearerAuth'] = SecurityScheme::http('bearer');
+
+                $problemDetails = (new ObjectType)
+                    ->addProperty('type', (new StringType)->setDescription('URI reference identifying the problem type.'))
+                    ->addProperty('title', (new StringType)->setDescription('Short, human-readable summary of the problem type.'))
+                    ->addProperty('status', (new IntegerType)->setDescription('The HTTP status code.'))
+                    ->addProperty('detail', (new StringType)->setDescription('Human-readable explanation specific to this occurrence.'))
+                    ->addProperty('instance', (new StringType)->setDescription('URI reference identifying the specific occurrence.'))
+                    ->addProperty('code', (new IntegerType))
+                    ->addProperty('success', (new BooleanType));
+
+                $openApi->components->schemas['ProblemDetails'] = Schema::fromType($problemDetails);
             });
     }
 
