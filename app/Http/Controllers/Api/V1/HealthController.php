@@ -15,9 +15,7 @@ use Illuminate\Support\Facades\Storage;
 class HealthController extends Controller
 {
     /**
-     * API health check endpoint.
-     *
-     * Returns status of core services: database, cache, queue, and storage.
+     * API health check endpoint (comprehensive check).
      */
     public function __invoke(): JsonResponse
     {
@@ -26,6 +24,7 @@ class HealthController extends Controller
             'cache' => $this->checkCache(),
             'queue' => $this->checkQueue(),
             'storage' => $this->checkStorage(),
+            'disk' => $this->checkDisk(),
         ];
 
         $isHealthy = collect($services)->every(fn (array $s): bool => $s['status'] === 'up');
@@ -51,7 +50,26 @@ class HealthController extends Controller
     }
 
     /**
-     * Check database connectivity.
+     * Alias for invokable health check.
+     */
+    public function index(): JsonResponse
+    {
+        return $this->__invoke();
+    }
+
+    /**
+     * Liveness probe: returns 200 OK if PHP runtime is responsive.
+     */
+    public function live(): JsonResponse
+    {
+        return ApiResponse::success([
+            'status' => 'alive',
+            'timestamp' => now()->toIso8601String(),
+        ], 'Application is running.', 200);
+    }
+
+    /**
+     * Check database connectivity and query latency.
      */
     protected function checkDatabase(): array
     {
@@ -95,7 +113,6 @@ class HealthController extends Controller
                 return ['status' => 'up', 'driver' => 'sync'];
             }
 
-            // Attempt to connect to the queue driver
             Queue::size();
 
             return ['status' => 'up', 'driver' => $connection];
@@ -116,6 +133,29 @@ class HealthController extends Controller
             $disk->delete('.health');
 
             return ['status' => $exists ? 'up' : 'down'];
+        } catch (\Throwable $e) {
+            return ['status' => 'down', 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Check free disk space.
+     */
+    protected function checkDisk(): array
+    {
+        try {
+            $freeBytes = @disk_free_space(base_path());
+            if ($freeBytes === false) {
+                return ['status' => 'up', 'note' => 'unable to read disk space'];
+            }
+
+            $freeMb = round($freeBytes / 1024 / 1024, 2);
+            $hasEnough = $freeMb > 50;
+
+            return [
+                'status' => $hasEnough ? 'up' : 'down',
+                'free_mb' => $freeMb,
+            ];
         } catch (\Throwable $e) {
             return ['status' => 'down', 'error' => $e->getMessage()];
         }
