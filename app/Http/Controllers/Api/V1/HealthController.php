@@ -22,6 +22,7 @@ class HealthController extends Controller
         $services = [
             'database' => $this->checkDatabase(),
             'cache' => $this->checkCache(),
+            'encryption' => $this->checkEncryption(),
             'queue' => $this->checkQueue(),
             'storage' => $this->checkStorage(),
             'disk' => $this->checkDisk(),
@@ -66,6 +67,29 @@ class HealthController extends Controller
             'status' => 'alive',
             'timestamp' => now()->toIso8601String(),
         ], 'Application is running.', 200);
+    }
+
+    /**
+     * Check application encryption key and cipher integrity.
+     */
+    protected function checkEncryption(): array
+    {
+        try {
+            $encrypter = app('encrypter');
+            $payload = 'health_check';
+            $encrypted = $encrypter->encrypt($payload);
+            $decrypted = $encrypter->decrypt($encrypted);
+
+            return [
+                'status' => $decrypted === $payload ? 'up' : 'down',
+                'cipher' => config('app.cipher'),
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'status' => 'down',
+                'error' => $e->getMessage(),
+            ];
+        }
     }
 
     /**

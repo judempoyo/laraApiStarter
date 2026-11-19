@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 use Database\Seeders\DatabaseSeeder;
 
@@ -21,9 +21,9 @@ it('health endpoint returns 200 when all services are operational', function ():
                 'environment',
                 'services' => [
                     'database' => ['status'],
-                    'cache' => ['status'],
-                    'queue' => ['status'],
-                    'storage' => ['status'],
+                    'cache'    => ['status'],
+                    'queue'    => ['status'],
+                    'storage'  => ['status'],
                 ],
             ],
         ]);
@@ -84,5 +84,12 @@ it('method not allowed returns standard 405 error format', function (): void {
     // health only accepts GET
     $this->postJson('/api/v1/health')
         ->assertStatus(405)
-        ->assertJsonFragment(['success' => false]);
+        ->assertJsonFragment(['success' => false])
+        ->assertJsonPath('error.code', 'METHOD_NOT_ALLOWED');
+
+    // login only accepts POST — GET returns 405 Method Not Allowed
+    $this->get('/api/v1/auth/login')
+        ->assertStatus(405)
+        ->assertJsonFragment(['success' => false])
+        ->assertJsonPath('error.code', 'METHOD_NOT_ALLOWED');
 });
