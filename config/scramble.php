@@ -91,9 +91,7 @@ return [
      * ],
      * ```
      */
-    'servers' => [
-        'current' => config('app.url').'/api',
-    ],
+    'servers' => null,
 
     /**
      * Determines how Scramble stores the descriptions of enum cases.

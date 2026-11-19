@@ -186,8 +186,8 @@ return [
          */
         'servers' => [
             [
-                'url' => config('app.url').'/api',
-                'description' => 'Production server',
+                'url' => ($prefix = env('API_PREFIX', 'api')) ? '/'.trim($prefix, '/') : '/',
+                'description' => 'Current API server',
             ],
         ],
 
