@@ -20,7 +20,7 @@ php artisan api:install --preset=standard --modules=webhooks --no-interaction
 php artisan serve
 ```
 
-Health: `/api/v1/health` (live probe: `/api/v1/health/live`). Scalar: `/docs/api`. RFC 7807 Error Catalogue: `/docs/errors`. Scramble specification: `/docs/api.json`; export with `php artisan scramble:export`. Documentation is accessible locally; elsewhere it is denied unless a nonempty `DOCS_ACCESS_KEY` is configured and presented in the `docs_access_key` cookie. Replace the gate with your organization's authentication policy when appropriate.
+Health: `/api/v1/health` (live probe: `/api/v1/health/live`). Routes are available under both `/api/v1/...` and direct `/v1/...` (subdomain-ready via `API_PREFIX`). Scalar: `/docs/api`. RFC 7807 Error Catalogue: `/docs/errors`. Scramble specification: `/docs/api.json`; export with `php artisan scramble:export`. Documentation is accessible locally; elsewhere it is denied unless a nonempty `DOCS_ACCESS_KEY` is configured and presented in the `docs_access_key` cookie. Replace the gate with your organization's authentication policy when appropriate.
 
 Quick developer commands (`make help`):
 ```sh

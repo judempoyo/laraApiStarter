@@ -1,8 +1,10 @@
 # Changelog
 
-## [2.0.1] - 2026-11-18
+## [2.0.1] - 2026-11-19
 
 ### Added
+- Dual routing architecture: out-of-the-box support for direct `/v1/...` routes (ideal for subdomain deployments like `api.example.com/v1/...`) alongside standard `/api/v1/...` routes, configurable via `API_PREFIX`.
+- Dedicated `encryption` health check probe in `/api/v1/health` that actively validates `APP_KEY` cipher and length integrity, returning HTTP 503 Service Unavailable when the encryption key is invalid or degraded.
 - Interactive RFC 7807 Error Catalogue at `/docs/errors` with live search, filters by HTTP status and category, one-click copy (code, anchor, JSON payload), and dark/light mode toggle.
 - Bilingual localization (English / French) for all error titles, descriptions, and catalogue UI with dynamic switcher via query parameter (`?lang=fr`) and `Accept-Language` header.
 - Automatic redirection of unknown web requests to `/docs/errors`, eliminating default Laravel 404 HTML pages.
@@ -15,8 +17,14 @@
 - Miabi Marketplace deployment template (`.miabi/template.yml`) adhering to `miabi.io/v1` specification.
 - Enhanced Docker publication workflow supporting manual `workflow_dispatch` without required tag (defaulting to version `2.0.1` and `latest`), git tag triggers, and Docker Hub metadata auto-sync.
 
+### Fixed
+- Fixed HTTP 405 `MethodNotAllowedHttpException` by removing the greedy `Route::fallback()` in `routes/web.php` which was intercepting bad HTTP verbs and masking them into 404 errors or redirects.
+- Standardized all exception rendering in `bootstrap/app.php` to return structured RFC 7807 JSON responses for 500, 401, 403, 405, 422, and 429 instead of default Laravel HTML error pages.
+- Fixed Scalar API reference fetch failures by setting the API server to relative `/api`, eliminating CORS and mismatched localhost/port issues.
+- Fixed Miabi template Go template error (`executing "web.env.APP_URL" at <.domains.primary>: map has no entry for key "domains"`) by introducing configurable `app_url` input.
+
 ### Changed
-- Streamlined health check probes to `/api/v1/health` (full diagnostic) and `/api/v1/health/live` (lightweight orchestrator probe), removing redundant `/api/v1/health/ready`.
+- Streamlined health check probes to `/api/v1/health` (full diagnostic including database, cache, encryption, queue, storage, and disk) and `/api/v1/health/live` (lightweight runtime probe).
 - Exhaustive mapping on `ErrorCode` enum (`httpStatus()`, `category()`, `title()`, `description()`, and `examplePayload()`) backed by Pest tests.
 
 ## [2.0.0] - 2026-11-17
