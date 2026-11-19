@@ -7,16 +7,38 @@ use App\Http\Controllers\Api\Auth\ProfileController;
 use App\Http\Controllers\Api\Auth\SessionController;
 use App\Http\Controllers\Api\EnumController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Responses\ApiResponse;
 use Illuminate\Support\Facades\Route;
 
 $guard = config('api.auth_guard', 'sanctum');
 
 Route::prefix(strtolower(config('api.version', 'v1')))->group(function () use ($guard): void {
 
+    Route::get('/', function () {
+        $encryptionOk = true;
+        try {
+            app('encrypter');
+        } catch (\Throwable) {
+            $encryptionOk = false;
+        }
+
+        return ApiResponse::success([
+            'name' => config('app.name', 'LaraApiStarter'),
+            'version' => config('api.version', 'v1'),
+            'status' => $encryptionOk ? 'operational' : 'degraded',
+            'documentation' => [
+                'api_reference' => url('/docs/api'),
+                'error_catalogue' => url('/docs/errors'),
+                'openapi_spec' => url('/docs/api.json'),
+                'health' => url('/api/v1/health'),
+            ],
+        ], $encryptionOk ? 'LaraApiStarter REST API' : 'LaraApiStarter REST API (Degraded: Invalid APP_KEY)');
+    });
+
     // ─── Public Auth ───────────────────────────────────────────────────────
     Route::prefix('auth')->middleware('throttle:auth')->group(function () use ($guard): void {
         Route::post('register', [AuthController::class, 'register'])->middleware('throttle:register');
-        Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');
+        Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login')->name('login');
         Route::post('password/email', [AuthController::class, 'forgotPassword'])->middleware('throttle:password-reset');
         Route::post('password/reset', [AuthController::class, 'resetPassword'])->name('password.reset');
         Route::get('email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');

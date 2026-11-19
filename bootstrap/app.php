@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 use App\Enums\ErrorCode;
 use App\Exceptions\ApiException;
@@ -16,7 +16,6 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -24,11 +23,11 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
-        
+        apiPrefix: env('API_PREFIX', 'api'),
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
@@ -42,7 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $shouldRenderJson = fn (Request $request): bool => true;
+        $shouldRenderJson = fn(Request $request): bool => true;
 
         $exceptions->render(function (ApiException $e, Request $request) {
             return ApiResponse::error(
@@ -58,7 +57,7 @@ return Application::configure(basePath: dirname(__DIR__))
             return ApiResponse::error(ErrorCode::UNAUTHENTICATED, 'Unauthenticated.', 401, 'You are not authenticated.');
         });
 
-        $exceptions->render(function (AccessDeniedHttpException|AuthorizationException $e, Request $request) {
+        $exceptions->render(function (AccessDeniedHttpException | AuthorizationException $e, Request $request) {
             return ApiResponse::error(ErrorCode::FORBIDDEN, 'Access denied.', 403, 'You do not have permission to perform this action.');
         });
 
@@ -75,7 +74,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (ValidationException $e, Request $request) {
-            $formattedErrors = collect($e->errors())->map(fn ($messages) => implode(', ', $messages))->toArray();
+            $formattedErrors = collect($e->errors())->map(fn($messages) => implode(', ', $messages))->toArray();
 
             return ApiResponse::error(
                 ErrorCode::VALIDATION_FAILED,
@@ -104,9 +103,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (Throwable $e, Request $request) {
             $metadata = config('app.debug') ? [
                 'exception' => get_class($e),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => array_slice($e->getTrace(), 0, 10),
+                'file'      => $e->getFile(),
+                'line'      => $e->getLine(),
+                'trace'     => array_slice($e->getTrace(), 0, 10),
             ] : [];
 
             return ApiResponse::error(
