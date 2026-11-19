@@ -1,6 +1,6 @@
 # LaraApiStarter
 
-Laravel 12 API starter with Sanctum, Actions, typed DTOs, Resources, English/French translations and optional modules. [Français](README.fr.md).
+Laravel  API starter with Sanctum, Actions, typed DTOs, Resources, English/French translations and optional modules. [Français](README.fr.md).
 
 ```sh
 composer create-project jump/lara-api-starter my-api
